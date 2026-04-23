@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#34d399">
+<meta name="description" content="Gamify your fitness journey to marathon">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<title>Road to 42.2km</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #34d399; --blue: #60a5fa; --amber: #fbbf24;
+    --purple: #a78bfa; --orange: #f97316; --pink: #f472b6;
+    --bg: #0a0a0f; --surface: #0f1420; --border: #1e293b;
+    --text: #e2e8f0; --muted: #64748b; --sub: #94a3b8;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    height: 100%; overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  #app {
+    display: flex; flex-direction: column;
+    height: 100vh; height: 100dvh;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    position: relative; overflow: hidden;
+  }
+
+  /* Grid background */
+  #app::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(52,211,153,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,211,153,.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    flex-shrink: 0; text-align: center;
+    padding: 14px 20px 10px;
+    background: linear-gradient(to bottom, #0a0a0f, transparent);
+    position: relative; z-index: 10;
+  }
+  header .eyebrow { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 5px; color: var(--green); text-transform: uppercase; margin-bottom: 2px; }
+  header h1 { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+
+  /* ── LEVEL CARD ── */
+  #level-card {
+    flex-shrink: 0; margin: 0 12px 10px;
+    background: linear-gradient(135deg, #0f1a2e, #0a1a0f);
+    border: 1px solid var(--level-color, #34d399);
+    border-radius: 16px; padding: 14px 16px;
+    box-shadow: 0 0 40px color-mix(in srgb, var(--level-color, #34d399) 15%, transparent);
+    position: relative; z-index: 5;
+    transition: border-color 0.5s, box-shadow 0.5s;
+  }
+  .lc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .lc-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
+  .lc-title { font-family: 'Cinzel', serif; font-size: 17px; color: var(--level-color, #34d399); font-weight: 700; transition: color 0.5s; }
+  .lc-xp-num { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900; color: var(--text); }
+  .lc-xp-label { font-size: 10px; color: var(--muted); text-align: right; }
+  .xp-bar-bg { background: var(--border); border-radius: 99px; height: 7px; overflow: hidden; margin-bottom: 5px; }
+  .xp-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--level-color, #34d399), var(--next-color, #60a5fa));
+    box-shadow: 0 0 10px var(--level-color, #34d399);
+    transition: width 0.9s cubic-bezier(.4,0,.2,1), background 0.5s;
+    width: 0%;
+  }
+  .xp-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+  .stats-row { display: flex; gap: 8px; margin-top: 12px; }
+  .stat-box {
+    flex: 1; background: rgba(0,0,0,.4); border-radius: 10px;
+    padding: 8px 6px; text-align: center; border: 1px solid var(--border);
+  }
+  .stat-val { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; }
+  .stat-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── TABS ── */
+  nav {
+    flex-shrink: 0; display: flex; gap: 4px;
+    margin: 0 12px 8px;
+    background: var(--surface); border-radius: 12px; padding: 4px;
+    position: relative; z-index: 5;
+  }
+  nav button {
+    flex: 1; padding: 9px 4px; border: none; border-radius: 9px;
+    cursor: pointer; font-size: 12px; font-family: 'Cinzel', serif; font-weight: 700;
+    background: transparent; color: var(--muted);
+    transition: all 0.2s;
+  }
+  nav button.active { background: #1e3a5f; color: var(--blue); }
+
+  /* ── SCROLL CONTENT ── */
+  #content {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    padding: 0 12px 20px; position: relative; z-index: 5;
+    -webkit-overflow-scrolling: touch;
+  }
+  #content::-webkit-scrollbar { display: none; }
+
+  /* ── QUEST CARDS ── */
+  .cat-label {
+    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px;
+    text-transform: uppercase; margin: 12px 0 6px 4px;
+  }
+  .quest-btn {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; width: 100%;
+    cursor: pointer; text-align: left;
+    transition: all 0.25s; margin-bottom: 6px;
+  }
+  .quest-btn.done {
+    opacity: 0.6;
+    border-color: color-mix(in srgb, var(--cat-color) 40%, transparent);
+    background: color-mix(in srgb, var(--cat-color) 5%, var(--surface));
+  }
+  .quest-btn:active:not(.done) { transform: scale(0.98); }
+  .quest-icon { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
+  .quest-label { flex: 1; font-size: 14px; color: var(--text); font-family: 'Crimson Pro', serif; }
+  .quest-btn.done .quest-label { color: var(--muted); }
+  .quest-xp { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; }
+
+  /* ── JOURNEY ── */
+  .stage-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  .stage-card.active { border-color: rgba(96,165,250,.4); background: #0f1a2e; }
+  .stage-card.locked { opacity: 0.45; }
+  .stage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .stage-num {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700;
+    background: var(--border); color: var(--muted);
+  }
+  .stage-num.unlocked { background: var(--green); color: #000; }
+  .stage-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--text); }
+  .stage-card.active .stage-title { color: var(--blue); }
+  .stage-badge {
+    margin-left: auto; font-size: 9px; background: #1e3a5f;
+    color: var(--blue); padding: 3px 8px; border-radius: 99px;
+    font-family: 'Cinzel', serif; letter-spacing: 1px;
+  }
+  .stage-desc { font-size: 13px; color: var(--sub); line-height: 1.7; margin-bottom: 6px; padding-left: 38px; }
+  .stage-target { font-size: 12px; color: var(--amber); padding-left: 38px; display: flex; align-items: center; gap: 6px; }
+  .stage-unlock { font-size: 10px; color: var(--muted); padding-left: 38px; margin-top: 2px; }
+
+  .knee-card {
+    background: #0f1420; border: 1px solid rgba(167,139,250,.3);
+    border-radius: 14px; padding: 14px; margin-top: 4px;
+  }
+  .knee-title { font-family: 'Cinzel', serif; font-size: 13px; color: var(--purple); margin-bottom: 8px; }
+  .knee-item { font-size: 13px; color: var(--sub); line-height: 1.9; }
+
+  /* ── TRACK ── */
+  .track-card {
+    background: var(--surface); border-radius: 14px; padding: 16px; margin-bottom: 12px;
+  }
+  .track-title { font-family: 'Cinzel', serif; font-size: 13px; margin-bottom: 4px; }
+  .track-sub { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .weight-input-row { display: flex; gap: 8px; }
+  .weight-input-row input {
+    flex: 1; background: #0a0f1a; border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 14px; color: var(--text);
+    font-size: 16px; font-family: 'Crimson Pro', serif; outline: none;
+    -webkit-appearance: none;
+  }
+  .weight-input-row input:focus { border-color: var(--orange); }
+  .btn-log {
+    background: var(--orange); color: #000; border: none;
+    border-radius: 10px; padding: 11px 18px;
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px;
+    cursor: pointer;
+  }
+  .weight-entry { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .weight-date { font-size: 13px; color: var(--sub); }
+  .weight-val { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; }
+  .log-entry { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .log-left { color: var(--sub); }
+  .log-right { display: flex; gap: 10px; align-items: center; }
+  .log-xp { font-family: 'Cinzel', serif; font-size: 12px; color: var(--green); font-weight: 700; }
+  .log-date { font-size: 10px; color: var(--muted); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; top: calc(var(--safe-top) + 16px); left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    padding: 11px 22px; border-radius: 10px;
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px;
+    color: #000; z-index: 9999; white-space: nowrap;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.35s;
+    opacity: 0; pointer-events: none;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── MODAL ── */
+  #modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.85);
+    z-index: 500; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  #modal-box {
+    background: #0f1420; border: 1px solid rgba(52,211,153,.3);
+    border-radius: 20px; padding: 28px; max-width: 440px; width: 100%;
+    max-height: 85vh; overflow-y: auto;
+  }
+  #modal-box h2 { font-family: 'Cinzel', serif; color: var(--green); font-size: 20px; margin-bottom: 10px; }
+  #modal-box p { font-size: 14px; color: var(--sub); line-height: 1.75; margin-bottom: 10px; }
+  #modal-box .btn-begin {
+    background: var(--green); color: #000; border: none; border-radius: 10px;
+    padding: 13px; width: 100%; font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: 14px; cursor: pointer; margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* ── INSTALL PROMPT ── */
+  #install-bar {
+    position: fixed; bottom: calc(var(--safe-bottom) + 8px); left: 12px; right: 12px;
+    background: #1e3a5f; border: 1px solid var(--blue);
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 200; display: none;
+  }
+  #install-bar p { flex: 1; font-size: 13px; color: var(--text); }
+  #install-bar button { background: var(--blue); color: #000; border: none; border-radius: 8px; padding: 8px 14px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  #install-bar .dismiss { background: transparent; color: var(--muted); font-size: 18px; padding: 4px 8px; }
+
+  /* Fold 7 inner display - use wider layout */
+  @media (min-width: 700px) {
+    #level-card { margin: 0 20px 12px; }
+    nav { margin: 0 20px 10px; }
+    #content { padding: 0 20px 20px; max-width: 700px; margin: 0 auto; }
+    .stats-row .stat-val { font-size: 18px; }
+    header h1 { font-size: 24px; }
+    .quest-btn { padding: 14px 18px; }
+    .quest-label { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="eyebrow">Life RPG</div>
+    <h1>Road to 42.2km</h1>
+  </header>
+
+  <div id="level-card">
+    <div class="lc-top">
+      <div>
+        <div class="lc-label">Level <span id="lc-level">1</span></div>
+        <div class="lc-title" id="lc-title">Returning Hero</div>
+      </div>
+      <div>
+        <div class="lc-xp-num" id="lc-xp">0</div>
+        <div class="lc-xp-label">Total XP</div>
+      </div>
+    </div>
+    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill"></div></div>
+    <div class="xp-bar-labels">
+      <span id="xp-into">0 XP into level</span>
+      <span id="xp-next"></span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="stat-streak" style="color:var(--orange)">0 🔥</div>
+        <div class="stat-lbl">Streak</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-quests" style="color:var(--blue)">0/13</div>
+        <div class="stat-lbl">Today</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-stage" style="color:var(--purple)">1/5</div>
+        <div class="stat-lbl">Stage</div>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <button class="active" onclick="setTab('quests')">⚔️ Quests</button>
+    <button onclick="setTab('journey')">🗺️ Journey</button>
+    <button onclick="setTab('track')">📊 Track</button>
+    <button onclick="setTab('install')">📲 Install</button>
+  </nav>
+
+  <div id="content"></div>
+</div>
+
+<div id="toast"></div>
+
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div style="font-size:36px;margin-bottom:8px">⚔️</div>
+    <h2>Welcome back, Hero.</h2>
+    <p>You've been here before — and that's not failure, that's data. Every comeback teaches your body something new.</p>
+    <p>Your goal is a marathon. Your first step is <strong style="color:var(--text)">today's quests</strong>. Complete daily actions, earn XP, level up, and unlock the next chapter of your journey — one day at a time.</p>
+    <p style="color:var(--blue);font-style:italic">Starting weight: 125kg. That's your origin story, not your destiny.</p>
+    <p style="color:var(--muted);font-size:12px">📲 After closing this, tap the <strong style="color:var(--text)">Install</strong> tab to add this app to your home screen.</p>
+    <button class="btn-begin" onclick="closeModal()">Begin My Journey →</button>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const QUESTS = [
+  { id:'walk_10', label:'Walk 10 minutes', xp:20, cat:'move', icon:'🚶' },
+  { id:'walk_30', label:'Walk 30 minutes', xp:50, cat:'move', icon:'🚶' },
+  { id:'walk_60', label:'Walk 60 minutes', xp:100, cat:'move', icon:'🏃' },
+  { id:'stretch', label:'Morning stretch / mobility', xp:30, cat:'move', icon:'🧘' },
+  { id:'strength', label:'Strength session (any)', xp:80, cat:'move', icon:'💪' },
+  { id:'run_5', label:'Run 5 mins (or run/walk)', xp:60, cat:'run', icon:'👟' },
+  { id:'run_15', label:'Run 15 mins continuous', xp:120, cat:'run', icon:'🏅' },
+  { id:'water', label:'Drink 2L water today', xp:25, cat:'fuel', icon:'💧' },
+  { id:'cook', label:'Cook a meal at home', xp:40, cat:'fuel', icon:'🍳' },
+  { id:'notakeout', label:'No takeaway today', xp:50, cat:'fuel', icon:'🥗' },
+  { id:'sleep', label:'7+ hours sleep last night', xp:40, cat:'rest', icon:'😴' },
+  { id:'weight', label:'Log weight (no judgment)', xp:15, cat:'track', icon:'📊' },
+  { id:'journal', label:'Write one line about today', xp:20, cat:'mind', icon:'📝' },
+];
+const CATS = { move:'#34d399', run:'#60a5fa', fuel:'#fbbf24', rest:'#a78bfa', track:'#f97316', mind:'#f472b6' };
+const LEVELS = [
+  { xp:0, level:1, title:'Returning Hero', color:'#94a3b8', next:'#60a5fa' },
+  { xp:200, level:2, title:'Rising Adventurer', color:'#60a5fa', next:'#34d399' },
+  { xp:600, level:3, title:'Trail Seeker', color:'#34d399', next:'#fbbf24' },
+  { xp:1200, level:4, title:'Distance Runner', color:'#fbbf24', next:'#f97316' },
+  { xp:2200, level:5, title:'Marathon Aspirant', color:'#f97316', next:'#a78bfa' },
+  { xp:4000, level:6, title:'Elite Contender', color:'#a78bfa', next:'#ec4899' },
+  { xp:7000, level:7, title:'Marathon Finisher', color:'#ec4899', next:null },
+];
+const STAGES = [
+  { id:1, title:'The Foundation', desc:'Walk daily. Move without pain. Build the habit.', target:'Walk 30 min/day for 2 weeks', xpNeeded:0 },
+  { id:2, title:'The Awakening', desc:'Introduce run/walk intervals. Let your body remember.', target:'5 min run + 25 min walk, 3×/week', xpNeeded:600 },
+  { id:3, title:'The Builder', desc:'Extend runs. Build aerobic base. Focus on knee health.', target:'20 min continuous run, 3×/week', xpNeeded:1200 },
+  { id:4, title:'The Grinder', desc:'Long runs emerge. Weekly mileage matters now.', target:'Complete a half marathon (21km)', xpNeeded:2200 },
+  { id:5, title:'The Marathon Plan', desc:'16-week structured marathon training. You\'re ready.', target:'42.2km — Cross the finish line', xpNeeded:4000 },
+];
+
+// ── STATE ──
+const S = {
+  get xp() { return +localStorage.getItem('lrpg_xp')||0; },
+  set xp(v) { localStorage.setItem('lrpg_xp', v); },
+  get log() { try { return JSON.parse(localStorage.getItem('lrpg_log')||'[]'); } catch { return []; } },
+  set log(v) { localStorage.setItem('lrpg_log', JSON.stringify(v)); },
+  get done() { try { return JSON.parse(localStorage.getItem('lrpg_done')||'{}'); } catch { return {}; } },
+  set done(v) { localStorage.setItem('lrpg_done', JSON.stringify(v)); },
+  get weights() { try { return JSON.parse(localStorage.getItem('lrpg_weights')||'[]'); } catch { return []; } },
+  set weights(v) { localStorage.setItem('lrpg_weights', JSON.stringify(v)); },
+  get welcomed() { return !!localStorage.getItem('lrpg_welcomed'); },
+  set welcomed(v) { localStorage.setItem('lrpg_welcomed', '1'); },
+};
+
+// Daily reset
+const today = new Date().toDateString();
+if (localStorage.getItem('lrpg_reset') !== today) {
+  S.done = {};
+  localStorage.setItem('lrpg_reset', today);
+}
+
+let currentTab = 'quests';
+let deferredInstall = null;
+
+// ── HELPERS ──
+function getLvl(xp) {
+  let cur = LEVELS[0], nxt = LEVELS[1];
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (xp >= LEVELS[i].xp) { cur = LEVELS[i]; nxt = LEVELS[i+1]||null; }
+  }
+  return { cur, nxt };
+}
+
+function getStreak(log) {
+  if (!log.length) return 0;
+  const dates = [...new Set(log.map(e => e.date))].sort((a,b) => new Date(b)-new Date(a));
+  const todayStr = new Date().toDateString();
+  const yday = new Date(Date.now()-86400000).toDateString();
+  if (dates[0] !== todayStr && dates[0] !== yday) return 0;
+  let s = 1;
+  for (let i = 1; i < dates.length; i++) {
+    if ((new Date(dates[i-1]) - new Date(dates[i])) / 86400000 === 1) s++;
+    else break;
+  }
+  return s;
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.background = color;
+  t.style.boxShadow = `0 0 24px ${color}88`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── RENDER HEADER ──
+function renderHeader() {
+  const xp = S.xp, log = S.log, done = S.done;
+  const { cur, nxt } = getLvl(xp);
+  const into = xp - cur.xp;
+  const toNext = nxt ? nxt.xp - cur.xp : 1;
+  const pct = nxt ? Math.min((into/toNext)*100, 100) : 100;
+  const streak = getStreak(log);
+  const doneCount = Object.keys(done).length;
+  const stageNum = [...STAGES].reverse().find(s => xp >= s.xpNeeded)?.id || 1;
+
+  document.getElementById('lc-level').textContent = cur.level;
+  document.getElementById('lc-title').textContent = cur.title;
+  document.getElementById('lc-xp').textContent = xp.toLocaleString();
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('xp-into').textContent = `${into.toLocaleString()} XP into level`;
+  document.getElementById('xp-next').textContent = nxt ? `${(toNext-into).toLocaleString()} to "${nxt.title}"` : 'MAX LEVEL';
+  document.getElementById('stat-streak').textContent = streak + ' 🔥';
+  document.getElementById('stat-quests').textContent = `${doneCount}/${QUESTS.length}`;
+  document.getElementById('stat-stage').textContent = `${stageNum}/5`;
+
+  // Update CSS vars for level color
+  const card = document.getElementById('level-card');
+  card.style.setProperty('--level-color', cur.color);
+  card.style.setProperty('--next-color', nxt?.color || cur.color);
+  card.style.borderColor = cur.color + '66';
+  card.style.boxShadow = `0 0 40px ${cur.color}22`;
+  document.getElementById('lc-title').style.color = cur.color;
+  document.getElementById('xp-fill').style.background = `linear-gradient(90deg, ${cur.color}, ${nxt?.color||cur.color})`;
+  document.getElementById('xp-fill').style.boxShadow = `0 0 10px ${cur.color}`;
+}
+
+// ── TABS ──
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('nav button').forEach((b,i) => {
+    b.classList.toggle('active', ['quests','journey','track','install'][i] === tab);
+  });
+  renderContent();
+}
+
+function renderContent() {
+  const c = document.getElementById('content');
+  if (currentTab === 'quests') renderQuests(c);
+  else if (currentTab === 'journey') renderJourney(c);
+  else if (currentTab === 'track') renderTrack(c);
+  else if (currentTab === 'install') renderInstall(c);
+}
+
+// ── QUESTS ──
+function renderQuests(c) {
+  const done = S.done;
+  const groups = {};
+  QUESTS.forEach(q => { (groups[q.cat] = groups[q.cat]||[]).push(q); });
+  let html = '';
+  for (const [cat, qs] of Object.entries(groups)) {
+    html += `<div class="cat-label" style="color:${CATS[cat]}">${cat}</div>`;
+    qs.forEach(q => {
+      const isDone = !!done[q.id];
+      html += `<button class="quest-btn${isDone?' done':''}" style="--cat-color:${CATS[cat]}"
+        onclick="completeQuest('${q.id}')">
+        <span class="quest-icon">${isDone ? '✅' : q.icon}</span>
+        <span class="quest-label">${q.label}</span>
+        <span class="quest-xp" style="color:${isDone?CATS[cat]:CATS[cat]}">+${q.xp} XP</span>
+      </button>`;
+    });
+  }
+  c.innerHTML = html;
+}
+
+function completeQuest(id) {
+  const done = S.done;
+  if (done[id]) return;
+  const q = QUESTS.find(x => x.id === id);
+  done[id] = true; S.done = done;
+  S.xp = S.xp + q.xp;
+  const log = S.log;
+  log.unshift({ questId: id, xp: q.xp, date: new Date().toDateString(), ts: Date.now() });
+  S.log = log;
+  showToast(`+${q.xp} XP — ${q.label}!`, CATS[q.cat]);
+  renderHeader();
+  renderContent();
+}
+
+// ── JOURNEY ──
+function renderJourney(c) {
+  const xp = S.xp;
+  const activeId = [...STAGES].reverse().find(s => xp >= s.xpNeeded)?.id || 1;
+  let html = '';
+  STAGES.forEach(s => {
+    const unlocked = xp >= s.xpNeeded;
+    const isActive = s.id === activeId;
+    html += `<div class="stage-card${isActive?' active':''}${!unlocked?' locked':''}">
+      <div class="stage-header">
+        <div class="stage-num${unlocked?' unlocked':''}">${unlocked?'✓':s.id}</div>
+        <div class="stage-title">Stage ${s.id}: ${s.title}</div>
+        ${isActive ? '<span class="stage-badge">ACTIVE</span>' : ''}
+      </div>
+      <div class="stage-desc">${s.desc}</div>
+      <div class="stage-target">🎯 ${s.target}</div>
+      ${!unlocked ? `<div class="stage-unlock">Unlocks at ${s.xpNeeded.toLocaleString()} XP (${(s.xpNeeded-xp).toLocaleString()} to go)</div>` : ''}
+    </div>`;
+  });
+  html += `<div class="knee-card">
+    <div class="knee-title">⚠️ Knee & Shin Protection Protocol</div>
+    <div class="knee-item">
+      • Never increase weekly run distance by more than 10%<br>
+      • Run/walk intervals are smart, not cheating<br>
+      • Rest days are XP days — sleep & stretch quests still count<br>
+      • Pain = stop. Soreness = continue with care<br>
+      • Get gait-analysed at a running shop before buying shoes<br>
+      • Consider a sports physio assessment before Stage 2
+    </div>
+  </div>`;
+  c.innerHTML = html;
+}
+
+// ── TRACK ──
+function renderTrack(c) {
+  const weights = S.weights;
+  const log = S.log;
+  let weightRows = '';
+  weights.slice(0,8).forEach((w,i) => {
+    const prev = weights[i+1];
+    const color = prev ? (w.kg < prev.kg ? '#34d399' : w.kg > prev.kg ? '#f87171' : 'var(--text)') : 'var(--text)';
+    weightRows += `<div class="weight-entry">
+      <span class="weight-date">${w.date}</span>
+      <span class="weight-val" style="color:${color}">${w.kg}kg</span>
+    </div>`;
+  });
+  const delta = weights.length >= 2
+    ? `<div style="margin-top:10px;font-size:13px;color:${weights[0].kg<weights[weights.length-1].kg?'#34d399':'#f87171'}">
+        Total change: ${(weights[0].kg - weights[weights.length-1].kg).toFixed(1)}kg from first entry
+       </div>` : '';
+
+  let logRows = '';
+  log.slice(0,12).forEach(e => {
+    const q = QUESTS.find(x => x.id === e.questId);
+    if (!q) return;
+    logRows += `<div class="log-entry">
+      <span class="log-left">${q.icon} ${q.label}</span>
+      <div class="log-right">
+        <span class="log-xp">+${e.xp}</span>
+        <span class="log-date">${e.date}</span>
+      </div>
+    </div>`;
+  });
+
+  c.innerHTML = `
+    <div class="track-card" style="border:1px solid rgba(249,115,22,.3)">
+      <div class="track-title" style="color:var(--orange)">📊 Weight Log</div>
+      <div class="track-sub">Track without judgment. You started at 125kg. Every entry is data, not a verdict.</div>
+      <div class="weight-input-row">
+        <input type="number" id="weight-in" inputmode="decimal" placeholder="Enter kg e.g. 125" step="0.1" min="30" max="300">
+        <button class="btn-log" onclick="logWeight()">Log</button>
+      </div>
+      ${weightRows ? `<div style="margin-top:12px">${weightRows}${delta}</div>` : ''}
+    </div>
+    <div class="track-card" style="border:1px solid var(--border)">
+      <div class="track-title" style="color:var(--sub)">Recent Quest Log</div>
+      <div style="margin-top:8px">
+        ${logRows || '<div style="color:var(--muted);font-size:13px">No quests yet — go earn your first XP! ⚔️</div>'}
+      </div>
+    </div>`;
+}
+
+function logWeight() {
+  const inp = document.getElementById('weight-in');
+  const val = parseFloat(inp.value);
+  if (!val || val < 30 || val > 300) { showToast('Enter a valid weight in kg', '#f87171'); return; }
+  const weights = S.weights;
+  weights.unshift({ kg: val, date: new Date().toLocaleDateString('en-GB'), ts: Date.now() });
+  S.weights = weights.slice(0, 60);
+  inp.value = '';
+  showToast(`Logged ${val}kg 📊`, '#f97316');
+  renderContent();
+}
+
+// ── INSTALL ──
+function renderInstall(c) {
+  c.innerHTML = `
+    <div class="track-card" style="border:1px solid rgba(96,165,250,.3);margin-top:4px">
+      <div class="track-title" style="color:var(--blue);font-size:16px;margin-bottom:12px">📲 Install on Your Galaxy Z Fold 7</div>
+      <p style="font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:16px">
+        To install this as a proper app on your home screen (works on both the cover screen and the big inner display):
+      </p>
+      <div style="background:#0a0f1a;border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:10px">USING SAMSUNG INTERNET</div>
+        <div style="font-size:13px;color:var(--sub);line-height:2">
+          1. Tap the <strong style="color:var(--text)">⋮ menu</strong> (three dots) in the bottom bar<br>
+          2. Tap <strong style="color:var(--text)">"Add page to"</strong><br>
+          3. Tap <strong style="color:var(--text)">"Home screen"</strong><br>
+          4. Confirm — app icon appears on your home screen ✓
+        </div>
+      </div>
+      <div style="background:#0a0f1a;border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--blue);letter-spacing:2px;margin-bottom:10px">USING CHROME</div>
+        <div style="font-size:13px;color:var(--sub);line-height:2">
+          1. Tap the <strong style="color:var(--text)">⋮ menu</strong> (three dots, top right)<br>
+          2. Tap <strong style="color:var(--text)">"Add to Home screen"</strong><br>
+          3. Tap <strong style="color:var(--text)">"Add"</strong> to confirm ✓
+        </div>
+      </div>
+      <div id="install-btn-wrap"></div>
+      <div style="background:#0a0f1a;border-radius:12px;padding:14px;margin-top:10px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--purple);letter-spacing:2px;margin-bottom:8px">WORKS OFFLINE ✓</div>
+        <div style="font-size:13px;color:var(--sub);line-height:1.7">
+          Once installed, your data and quests are stored on your phone. You don't need internet to log quests — everything saves locally.
+        </div>
+      </div>
+    </div>`;
+
+  if (deferredInstall) {
+    document.getElementById('install-btn-wrap').innerHTML = `
+      <button onclick="triggerInstall()" style="background:var(--blue);color:#000;border:none;border-radius:10px;padding:13px;width:100%;font-family:'Cinzel',serif;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:1px">
+        ⚡ Install Now (Chrome detected)
+      </button>`;
+  }
+}
+
+function triggerInstall() {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(r => {
+    if (r.outcome === 'accepted') showToast('App installed! 🎉', '#34d399');
+    deferredInstall = null;
+  });
+}
+
+// ── MODAL ──
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  S.welcomed = true;
+}
+
+// ── INIT ──
+if (S.welcomed) document.getElementById('modal-overlay').style.display = 'none';
+
+// PWA / SW
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+});
+
+renderHeader();
+renderContent();
+</script>
+</body>
+</html>
