@@ -6,7 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#34d399">
-<meta name="description" content="Gamify your fitness journey to marathon">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
 <title>Road to 42.2km</title>
@@ -14,244 +13,147 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #34d399; --blue: #60a5fa; --amber: #fbbf24;
-    --purple: #a78bfa; --orange: #f97316; --pink: #f472b6;
-    --bg: #0a0a0f; --surface: #0f1420; --border: #1e293b;
-    --text: #e2e8f0; --muted: #64748b; --sub: #94a3b8;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --green:#34d399; --blue:#60a5fa; --amber:#fbbf24;
+    --purple:#a78bfa; --orange:#f97316; --pink:#f472b6; --red:#f87171;
+    --bg:#0a0a0f; --surface:#0f1420; --surface2:#0a0f1a; --border:#1e293b;
+    --text:#e2e8f0; --muted:#64748b; --sub:#94a3b8;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
   }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;height:100%;overflow:hidden;overscroll-behavior:none}
+  #app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);position:relative;overflow:hidden}
+  #app::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(52,211,153,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(52,211,153,.04) 1px,transparent 1px);background-size:44px 44px}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  header{flex-shrink:0;text-align:center;padding:12px 20px 8px;background:linear-gradient(to bottom,#0a0a0f,transparent);position:relative;z-index:10}
+  header .eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:5px;color:var(--green);text-transform:uppercase;margin-bottom:2px}
+  header h1{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px}
 
-  html, body {
-    background: var(--bg); color: var(--text);
-    font-family: 'Crimson Pro', Georgia, serif;
-    height: 100%; overflow: hidden;
-    overscroll-behavior: none;
-  }
+  nav{flex-shrink:0;display:flex;gap:3px;margin:6px 12px 8px;background:var(--surface);border-radius:12px;padding:4px;position:relative;z-index:5}
+  nav button{flex:1;padding:9px 2px;border:none;border-radius:9px;cursor:pointer;font-size:11px;font-family:'Cinzel',serif;font-weight:700;background:transparent;color:var(--muted);transition:all .2s;letter-spacing:.5px}
+  nav button.active{background:#1e3a5f;color:var(--blue)}
 
-  #app {
-    display: flex; flex-direction: column;
-    height: 100vh; height: 100dvh;
-    padding-top: var(--safe-top);
-    padding-bottom: var(--safe-bottom);
-    position: relative; overflow: hidden;
-  }
+  #content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 12px 24px;position:relative;z-index:5;-webkit-overflow-scrolling:touch}
+  #content::-webkit-scrollbar{display:none}
 
-  /* Grid background */
-  #app::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none;
-    background-image:
-      linear-gradient(rgba(52,211,153,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(52,211,153,.04) 1px, transparent 1px);
-    background-size: 44px 44px;
-  }
+  .stat-strip{display:flex;gap:6px;margin-bottom:12px}
+  .stat-pill{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center}
+  .stat-pill-val{font-family:'Cinzel',serif;font-size:14px;font-weight:700}
+  .stat-pill-lbl{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
 
-  /* ── HEADER ── */
-  header {
-    flex-shrink: 0; text-align: center;
-    padding: 14px 20px 10px;
-    background: linear-gradient(to bottom, #0a0a0f, transparent);
-    position: relative; z-index: 10;
-  }
-  header .eyebrow { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 5px; color: var(--green); text-transform: uppercase; margin-bottom: 2px; }
-  header h1 { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+  .hero-workout{background:linear-gradient(135deg,#0f1a2e,#0a1a0f);border:1px solid var(--green);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 0 40px rgba(52,211,153,.18);position:relative;overflow:hidden}
+  .hero-eyebrow{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:4px}
+  .hero-title{font-family:'Cinzel',serif;font-size:22px;color:var(--text);margin-bottom:6px;line-height:1.2}
+  .hero-meta{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:14px}
+  .hero-meta strong{color:var(--text)}
+  .hero-btn{background:var(--green);color:#000;border:none;border-radius:12px;padding:14px;width:100%;font-family:'Cinzel',serif;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:1.5px;transition:all .2s}
+  .hero-btn:active{transform:scale(.98)}
+  .hero-btn.rest{background:var(--purple);color:#000}
+  .hero-btn.done{background:var(--surface);color:var(--green);border:1px solid var(--green)}
 
-  /* ── LEVEL CARD ── */
-  #level-card {
-    flex-shrink: 0; margin: 0 12px 10px;
-    background: linear-gradient(135deg, #0f1a2e, #0a1a0f);
-    border: 1px solid var(--level-color, #34d399);
-    border-radius: 16px; padding: 14px 16px;
-    box-shadow: 0 0 40px color-mix(in srgb, var(--level-color, #34d399) 15%, transparent);
-    position: relative; z-index: 5;
-    transition: border-color 0.5s, box-shadow 0.5s;
-  }
-  .lc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .lc-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
-  .lc-title { font-family: 'Cinzel', serif; font-size: 17px; color: var(--level-color, #34d399); font-weight: 700; transition: color 0.5s; }
-  .lc-xp-num { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900; color: var(--text); }
-  .lc-xp-label { font-size: 10px; color: var(--muted); text-align: right; }
-  .xp-bar-bg { background: var(--border); border-radius: 99px; height: 7px; overflow: hidden; margin-bottom: 5px; }
-  .xp-bar-fill {
-    height: 100%; border-radius: 99px;
-    background: linear-gradient(90deg, var(--level-color, #34d399), var(--next-color, #60a5fa));
-    box-shadow: 0 0 10px var(--level-color, #34d399);
-    transition: width 0.9s cubic-bezier(.4,0,.2,1), background 0.5s;
-    width: 0%;
-  }
-  .xp-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
-  .stats-row { display: flex; gap: 8px; margin-top: 12px; }
-  .stat-box {
-    flex: 1; background: rgba(0,0,0,.4); border-radius: 10px;
-    padding: 8px 6px; text-align: center; border: 1px solid var(--border);
-  }
-  .stat-val { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; }
-  .stat-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
+  .prog-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+  .prog-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .prog-label{font-family:'Cinzel',serif;font-size:11px;color:var(--sub);letter-spacing:1px;text-transform:uppercase}
+  .prog-val{font-family:'Cinzel',serif;font-size:14px;font-weight:700}
+  .bar-bg{background:var(--surface2);border-radius:99px;height:7px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+  .prog-sub{font-size:11px;color:var(--muted);margin-top:6px}
 
-  /* ── TABS ── */
-  nav {
-    flex-shrink: 0; display: flex; gap: 4px;
-    margin: 0 12px 8px;
-    background: var(--surface); border-radius: 12px; padding: 4px;
-    position: relative; z-index: 5;
-  }
-  nav button {
-    flex: 1; padding: 9px 4px; border: none; border-radius: 9px;
-    cursor: pointer; font-size: 12px; font-family: 'Cinzel', serif; font-weight: 700;
-    background: transparent; color: var(--muted);
-    transition: all 0.2s;
-  }
-  nav button.active { background: #1e3a5f; color: var(--blue); }
+  .bonus-section{margin-top:14px}
+  .bonus-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:8px;padding-left:4px}
+  .bonus-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .bonus-btn{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:left;transition:all .2s}
+  .bonus-btn.done{opacity:.55;border-color:var(--green)}
+  .bonus-btn:active:not(.done){transform:scale(.97)}
+  .bonus-icon{font-size:16px;flex-shrink:0}
+  .bonus-text{flex:1;font-size:12px;color:var(--text);line-height:1.2}
+  .bonus-xp{font-family:'Cinzel',serif;font-size:10px;color:var(--amber);font-weight:700}
 
-  /* ── SCROLL CONTENT ── */
-  #content {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding: 0 12px 20px; position: relative; z-index: 5;
-    -webkit-overflow-scrolling: touch;
-  }
-  #content::-webkit-scrollbar { display: none; }
+  .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
+  .day-card.today{border-color:var(--green);background:#0f1a2e}
+  .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .day-info{flex:1;min-width:0}
+  .day-name{font-family:'Cinzel',serif;font-size:13px;color:var(--text);margin-bottom:2px}
+  .day-detail{font-size:12px;color:var(--sub)}
+  .day-badge{font-family:'Cinzel',serif;font-size:9px;background:var(--green);color:#000;padding:3px 8px;border-radius:99px;letter-spacing:1px;font-weight:700}
 
-  /* ── QUEST CARDS ── */
-  .cat-label {
-    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px;
-    text-transform: uppercase; margin: 12px 0 6px 4px;
-  }
-  .quest-btn {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px 14px; width: 100%;
-    cursor: pointer; text-align: left;
-    transition: all 0.25s; margin-bottom: 6px;
-  }
-  .quest-btn.done {
-    opacity: 0.6;
-    border-color: color-mix(in srgb, var(--cat-color) 40%, transparent);
-    background: color-mix(in srgb, var(--cat-color) 5%, var(--surface));
-  }
-  .quest-btn:active:not(.done) { transform: scale(0.98); }
-  .quest-icon { font-size: 22px; flex-shrink: 0; width: 28px; text-align: center; }
-  .quest-label { flex: 1; font-size: 14px; color: var(--text); font-family: 'Crimson Pro', serif; }
-  .quest-btn.done .quest-label { color: var(--muted); }
-  .quest-xp { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; }
+  #workout-view{position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);display:none}
+  #workout-view.show{display:block}
+  .wv-header{position:sticky;top:0;background:rgba(10,10,15,.95);backdrop-filter:blur(10px);padding:14px 16px;border-bottom:1px solid var(--border);z-index:10;display:flex;align-items:center;gap:12px}
+  .wv-back{background:var(--surface);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .wv-titles{flex:1;min-width:0}
+  .wv-title{font-family:'Cinzel',serif;font-size:15px;color:var(--text);line-height:1.2}
+  .wv-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .wv-prog{padding:14px 16px}
+  .wv-prog-bar{background:var(--surface);border-radius:99px;height:6px;overflow:hidden}
+  .wv-prog-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s}
+  .wv-prog-text{font-size:11px;color:var(--muted);margin-top:6px;text-align:center;font-family:'Cinzel',serif;letter-spacing:1px}
 
-  /* ── JOURNEY ── */
-  .stage-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px; margin-bottom: 10px;
-    transition: all 0.3s;
-  }
-  .stage-card.active { border-color: rgba(96,165,250,.4); background: #0f1a2e; }
-  .stage-card.locked { opacity: 0.45; }
-  .stage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .stage-num {
-    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700;
-    background: var(--border); color: var(--muted);
-  }
-  .stage-num.unlocked { background: var(--green); color: #000; }
-  .stage-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--text); }
-  .stage-card.active .stage-title { color: var(--blue); }
-  .stage-badge {
-    margin-left: auto; font-size: 9px; background: #1e3a5f;
-    color: var(--blue); padding: 3px 8px; border-radius: 99px;
-    font-family: 'Cinzel', serif; letter-spacing: 1px;
-  }
-  .stage-desc { font-size: 13px; color: var(--sub); line-height: 1.7; margin-bottom: 6px; padding-left: 38px; }
-  .stage-target { font-size: 12px; color: var(--amber); padding-left: 38px; display: flex; align-items: center; gap: 6px; }
-  .stage-unlock { font-size: 10px; color: var(--muted); padding-left: 38px; margin-top: 2px; }
+  .ex-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin:0 16px 10px;overflow:hidden}
+  .ex-card.completed{border-color:rgba(52,211,153,.4);background:#0a1a10}
+  .ex-head{padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .ex-num{width:28px;height:28px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0}
+  .ex-card.completed .ex-num{background:var(--green);color:#000}
+  .ex-name-wrap{flex:1;min-width:0}
+  .ex-name{font-family:'Cinzel',serif;font-size:14px;color:var(--text);line-height:1.3}
+  .ex-target{font-size:12px;color:var(--sub);margin-top:2px}
+  .ex-chev{color:var(--muted);font-size:14px;transition:transform .2s}
+  .ex-card.expanded .ex-chev{transform:rotate(180deg)}
+  .ex-body{padding:0 14px 14px;display:none;border-top:1px solid var(--border);padding-top:14px}
+  .ex-card.expanded .ex-body{display:block}
+  .ex-notes{font-size:13px;color:var(--sub);line-height:1.7;margin-bottom:12px;padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--blue)}
+  .ex-alt{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+  .ex-alt strong{color:var(--amber)}
+  .sets-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .set-btn{flex:1;min-width:60px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 4px;font-family:'Cinzel',serif;font-size:11px;cursor:pointer;font-weight:700;letter-spacing:.5px}
+  .set-btn.done{background:var(--green);color:#000;border-color:var(--green)}
 
-  .knee-card {
-    background: #0f1420; border: 1px solid rgba(167,139,250,.3);
-    border-radius: 14px; padding: 14px; margin-top: 4px;
-  }
-  .knee-title { font-family: 'Cinzel', serif; font-size: 13px; color: var(--purple); margin-bottom: 8px; }
-  .knee-item { font-size: 13px; color: var(--sub); line-height: 1.9; }
+  .wv-finish{padding:16px;margin-top:8px}
+  .wv-finish button{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:16px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;letter-spacing:1.5px;cursor:pointer}
+  .wv-finish button:disabled{background:var(--surface);color:var(--muted);cursor:not-allowed}
 
-  /* ── TRACK ── */
-  .track-card {
-    background: var(--surface); border-radius: 14px; padding: 16px; margin-bottom: 12px;
-  }
-  .track-title { font-family: 'Cinzel', serif; font-size: 13px; margin-bottom: 4px; }
-  .track-sub { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
-  .weight-input-row { display: flex; gap: 8px; }
-  .weight-input-row input {
-    flex: 1; background: #0a0f1a; border: 1px solid var(--border);
-    border-radius: 10px; padding: 11px 14px; color: var(--text);
-    font-size: 16px; font-family: 'Crimson Pro', serif; outline: none;
-    -webkit-appearance: none;
-  }
-  .weight-input-row input:focus { border-color: var(--orange); }
-  .btn-log {
-    background: var(--orange); color: #000; border: none;
-    border-radius: 10px; padding: 11px 18px;
-    font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px;
-    cursor: pointer;
-  }
-  .weight-entry { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
-  .weight-date { font-size: 13px; color: var(--sub); }
-  .weight-val { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; }
-  .log-entry { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .log-left { color: var(--sub); }
-  .log-right { display: flex; gap: 10px; align-items: center; }
-  .log-xp { font-family: 'Cinzel', serif; font-size: 12px; color: var(--green); font-weight: 700; }
-  .log-date { font-size: 10px; color: var(--muted); }
+  .phase-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;transition:all .3s}
+  .phase-card.active{border-color:var(--green);background:#0f1a2e;box-shadow:0 0 24px rgba(52,211,153,.1)}
+  .phase-card.locked{opacity:.45}
+  .phase-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .phase-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;font-weight:700;background:var(--border);color:var(--muted);flex-shrink:0}
+  .phase-num.unlocked{background:var(--green);color:#000}
+  .phase-title-block{flex:1}
+  .phase-name{font-family:'Cinzel',serif;font-size:14px;color:var(--text)}
+  .phase-card.active .phase-name{color:var(--green)}
+  .phase-weeks{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+  .phase-badge{margin-left:auto;font-size:9px;background:var(--green);color:#000;padding:3px 8px;border-radius:99px;font-family:'Cinzel',serif;letter-spacing:1px;font-weight:700}
+  .phase-desc{font-size:13px;color:var(--sub);line-height:1.7;padding-left:42px;margin-bottom:6px}
+  .phase-target{font-size:12px;color:var(--amber);padding-left:42px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+  .phase-prog{padding-left:42px;margin-top:8px}
 
-  /* ── TOAST ── */
-  #toast {
-    position: fixed; top: calc(var(--safe-top) + 16px); left: 50%;
-    transform: translateX(-50%) translateY(-80px);
-    padding: 11px 22px; border-radius: 10px;
-    font-family: 'Cinzel', serif; font-weight: 700; font-size: 13px;
-    color: #000; z-index: 9999; white-space: nowrap;
-    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.35s;
-    opacity: 0; pointer-events: none;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .info-card{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:10px;border-left:3px solid var(--purple)}
+  .info-title{font-family:'Cinzel',serif;font-size:13px;margin-bottom:8px;color:var(--purple)}
+  .info-body{font-size:13px;color:var(--sub);line-height:1.85}
 
-  /* ── MODAL ── */
-  #modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.85);
-    z-index: 500; display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  #modal-box {
-    background: #0f1420; border: 1px solid rgba(52,211,153,.3);
-    border-radius: 20px; padding: 28px; max-width: 440px; width: 100%;
-    max-height: 85vh; overflow-y: auto;
-  }
-  #modal-box h2 { font-family: 'Cinzel', serif; color: var(--green); font-size: 20px; margin-bottom: 10px; }
-  #modal-box p { font-size: 14px; color: var(--sub); line-height: 1.75; margin-bottom: 10px; }
-  #modal-box .btn-begin {
-    background: var(--green); color: #000; border: none; border-radius: 10px;
-    padding: 13px; width: 100%; font-family: 'Cinzel', serif; font-weight: 700;
-    font-size: 14px; cursor: pointer; margin-top: 10px;
-    letter-spacing: 1px;
-  }
+  .track-card{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--border)}
+  .track-title{font-family:'Cinzel',serif;font-size:13px;margin-bottom:4px}
+  .track-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+  .weight-input-row{display:flex;gap:8px}
+  .weight-input-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:16px;font-family:'Crimson Pro',serif;outline:none;-webkit-appearance:none}
+  .weight-input-row input:focus{border-color:var(--orange)}
+  .btn-log{background:var(--orange);color:#000;border:none;border-radius:10px;padding:11px 18px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer}
+  .row-entry{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .row-entry:last-child{border-bottom:none}
 
-  /* ── INSTALL PROMPT ── */
-  #install-bar {
-    position: fixed; bottom: calc(var(--safe-bottom) + 8px); left: 12px; right: 12px;
-    background: #1e3a5f; border: 1px solid var(--blue);
-    border-radius: 14px; padding: 12px 16px;
-    display: flex; align-items: center; gap: 12px;
-    z-index: 200; display: none;
-  }
-  #install-bar p { flex: 1; font-size: 13px; color: var(--text); }
-  #install-bar button { background: var(--blue); color: #000; border: none; border-radius: 8px; padding: 8px 14px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap; }
-  #install-bar .dismiss { background: transparent; color: var(--muted); font-size: 18px; padding: 4px 8px; }
+  #toast{position:fixed;top:calc(var(--safe-top) + 16px);left:50%;transform:translateX(-50%) translateY(-80px);padding:11px 22px;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:#000;z-index:9999;white-space:nowrap;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;opacity:0;pointer-events:none}
+  #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-  /* Fold 7 inner display - use wider layout */
-  @media (min-width: 700px) {
-    #level-card { margin: 0 20px 12px; }
-    nav { margin: 0 20px 10px; }
-    #content { padding: 0 20px 20px; max-width: 700px; margin: 0 auto; }
-    .stats-row .stat-val { font-size: 18px; }
-    header h1 { font-size: 24px; }
-    .quest-btn { padding: 14px 18px; }
-    .quest-label { font-size: 15px; }
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal-box{background:#0f1420;border:1px solid rgba(52,211,153,.3);border-radius:20px;padding:24px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto}
+  .modal-box h2{font-family:'Cinzel',serif;color:var(--green);font-size:18px;margin-bottom:10px}
+  .modal-box p{font-size:14px;color:var(--sub);line-height:1.75;margin-bottom:10px}
+  .modal-box .btn{background:var(--green);color:#000;border:none;border-radius:10px;padding:13px;width:100%;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer;margin-top:8px;letter-spacing:1px}
+  .modal-box .btn.alt{background:transparent;color:var(--muted);border:1px solid var(--border)}
+
+  @media (min-width:700px){
+    #content,nav,header{max-width:720px;margin-left:auto;margin-right:auto}
+    .bonus-grid{grid-template-columns:1fr 1fr 1fr}
   }
 </style>
 </head>
@@ -261,403 +163,699 @@
     <div class="eyebrow">Life RPG</div>
     <h1>Road to 42.2km</h1>
   </header>
-
-  <div id="level-card">
-    <div class="lc-top">
-      <div>
-        <div class="lc-label">Level <span id="lc-level">1</span></div>
-        <div class="lc-title" id="lc-title">Returning Hero</div>
-      </div>
-      <div>
-        <div class="lc-xp-num" id="lc-xp">0</div>
-        <div class="lc-xp-label">Total XP</div>
-      </div>
-    </div>
-    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill"></div></div>
-    <div class="xp-bar-labels">
-      <span id="xp-into">0 XP into level</span>
-      <span id="xp-next"></span>
-    </div>
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-val" id="stat-streak" style="color:var(--orange)">0 🔥</div>
-        <div class="stat-lbl">Streak</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val" id="stat-quests" style="color:var(--blue)">0/13</div>
-        <div class="stat-lbl">Today</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-val" id="stat-stage" style="color:var(--purple)">1/5</div>
-        <div class="stat-lbl">Stage</div>
-      </div>
-    </div>
-  </div>
-
   <nav>
-    <button class="active" onclick="setTab('quests')">⚔️ Quests</button>
-    <button onclick="setTab('journey')">🗺️ Journey</button>
-    <button onclick="setTab('track')">📊 Track</button>
-    <button onclick="setTab('install')">📲 Install</button>
+    <button class="active" data-tab="today">⚔️ Today</button>
+    <button data-tab="plan">📅 Plan</button>
+    <button data-tab="journey">🗺️ Journey</button>
+    <button data-tab="track">📊 Track</button>
+    <button data-tab="settings">⚙️</button>
   </nav>
-
   <div id="content"></div>
 </div>
-
 <div id="toast"></div>
+<div id="workout-view"></div>
 
-<div id="modal-overlay">
-  <div id="modal-box">
+<div class="modal-overlay" id="welcome-modal">
+  <div class="modal-box">
     <div style="font-size:36px;margin-bottom:8px">⚔️</div>
-    <h2>Welcome back, Hero.</h2>
-    <p>You've been here before — and that's not failure, that's data. Every comeback teaches your body something new.</p>
-    <p>Your goal is a marathon. Your first step is <strong style="color:var(--text)">today's quests</strong>. Complete daily actions, earn XP, level up, and unlock the next chapter of your journey — one day at a time.</p>
-    <p style="color:var(--blue);font-style:italic">Starting weight: 125kg. That's your origin story, not your destiny.</p>
-    <p style="color:var(--muted);font-size:12px">📲 After closing this, tap the <strong style="color:var(--text)">Install</strong> tab to add this app to your home screen.</p>
-    <button class="btn-begin" onclick="closeModal()">Begin My Journey →</button>
+    <h2>Your Journey, Restructured.</h2>
+    <p>This isn't another habit tracker — it's a <strong style="color:var(--text)">phased training program</strong> built for your stats: 6ft, 28, 125kg, returning runner, knee-conscious, marathon + Hyrox bound.</p>
+    <p>Each day has a real workout. Phases unlock based on workouts completed (not days passed — life happens). Strength comes first, running gets layered in safely.</p>
+    <p style="color:var(--blue);font-style:italic">The goal isn't perfection. It's progression. Show up most days, and the system carries you forward.</p>
+    <button class="btn" onclick="dismissWelcome()">Begin →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="complete-modal" style="display:none">
+  <div class="modal-box">
+    <div style="font-size:48px;margin-bottom:8px;text-align:center">🏆</div>
+    <h2 style="text-align:center" id="complete-title">Workout Complete</h2>
+    <p style="text-align:center;color:var(--text);font-size:16px" id="complete-xp">+0 XP earned</p>
+    <p id="complete-msg" style="text-align:center"></p>
+    <button class="btn" onclick="closeComplete()">Continue</button>
   </div>
 </div>
 
 <script>
-// ── DATA ──
-const QUESTS = [
-  { id:'walk_10', label:'Walk 10 minutes', xp:20, cat:'move', icon:'🚶' },
-  { id:'walk_30', label:'Walk 30 minutes', xp:50, cat:'move', icon:'🚶' },
-  { id:'walk_60', label:'Walk 60 minutes', xp:100, cat:'move', icon:'🏃' },
-  { id:'stretch', label:'Morning stretch / mobility', xp:30, cat:'move', icon:'🧘' },
-  { id:'strength', label:'Strength session (any)', xp:80, cat:'move', icon:'💪' },
-  { id:'run_5', label:'Run 5 mins (or run/walk)', xp:60, cat:'run', icon:'👟' },
-  { id:'run_15', label:'Run 15 mins continuous', xp:120, cat:'run', icon:'🏅' },
-  { id:'water', label:'Drink 2L water today', xp:25, cat:'fuel', icon:'💧' },
-  { id:'cook', label:'Cook a meal at home', xp:40, cat:'fuel', icon:'🍳' },
-  { id:'notakeout', label:'No takeaway today', xp:50, cat:'fuel', icon:'🥗' },
-  { id:'sleep', label:'7+ hours sleep last night', xp:40, cat:'rest', icon:'😴' },
-  { id:'weight', label:'Log weight (no judgment)', xp:15, cat:'track', icon:'📊' },
-  { id:'journal', label:'Write one line about today', xp:20, cat:'mind', icon:'📝' },
-];
-const CATS = { move:'#34d399', run:'#60a5fa', fuel:'#fbbf24', rest:'#a78bfa', track:'#f97316', mind:'#f472b6' };
-const LEVELS = [
-  { xp:0, level:1, title:'Returning Hero', color:'#94a3b8', next:'#60a5fa' },
-  { xp:200, level:2, title:'Rising Adventurer', color:'#60a5fa', next:'#34d399' },
-  { xp:600, level:3, title:'Trail Seeker', color:'#34d399', next:'#fbbf24' },
-  { xp:1200, level:4, title:'Distance Runner', color:'#fbbf24', next:'#f97316' },
-  { xp:2200, level:5, title:'Marathon Aspirant', color:'#f97316', next:'#a78bfa' },
-  { xp:4000, level:6, title:'Elite Contender', color:'#a78bfa', next:'#ec4899' },
-  { xp:7000, level:7, title:'Marathon Finisher', color:'#ec4899', next:null },
-];
-const STAGES = [
-  { id:1, title:'The Foundation', desc:'Walk daily. Move without pain. Build the habit.', target:'Walk 30 min/day for 2 weeks', xpNeeded:0 },
-  { id:2, title:'The Awakening', desc:'Introduce run/walk intervals. Let your body remember.', target:'5 min run + 25 min walk, 3×/week', xpNeeded:600 },
-  { id:3, title:'The Builder', desc:'Extend runs. Build aerobic base. Focus on knee health.', target:'20 min continuous run, 3×/week', xpNeeded:1200 },
-  { id:4, title:'The Grinder', desc:'Long runs emerge. Weekly mileage matters now.', target:'Complete a half marathon (21km)', xpNeeded:2200 },
-  { id:5, title:'The Marathon Plan', desc:'16-week structured marathon training. You\'re ready.', target:'42.2km — Cross the finish line', xpNeeded:4000 },
-];
-
-// ── STATE ──
-const S = {
-  get xp() { return +localStorage.getItem('lrpg_xp')||0; },
-  set xp(v) { localStorage.setItem('lrpg_xp', v); },
-  get log() { try { return JSON.parse(localStorage.getItem('lrpg_log')||'[]'); } catch { return []; } },
-  set log(v) { localStorage.setItem('lrpg_log', JSON.stringify(v)); },
-  get done() { try { return JSON.parse(localStorage.getItem('lrpg_done')||'{}'); } catch { return {}; } },
-  set done(v) { localStorage.setItem('lrpg_done', JSON.stringify(v)); },
-  get weights() { try { return JSON.parse(localStorage.getItem('lrpg_weights')||'[]'); } catch { return []; } },
-  set weights(v) { localStorage.setItem('lrpg_weights', JSON.stringify(v)); },
-  get welcomed() { return !!localStorage.getItem('lrpg_welcomed'); },
-  set welcomed(v) { localStorage.setItem('lrpg_welcomed', '1'); },
+const EX = {
+  goblet_squat:{name:'Goblet Squat',notes:'Hold a dumbbell vertically at chest. Sit back as if into a chair, knees tracking over toes (not collapsing in). Aim to break parallel if hip mobility allows. Pause briefly at the bottom.',alt:'No DB? Use a kettlebell, water jug, or do bodyweight box squats to a chair.'},
+  box_squat:{name:'Box Squat',notes:'Sit fully onto a low box/bench, pause, drive up. Removes momentum, perfect for learning depth and protecting knees.',alt:'Use any sturdy chair or bench at knee height.'},
+  rdl:{name:'Dumbbell Romanian Deadlift',notes:'Hold dumbbells in front of thighs. Push hips back (not down), let DBs slide down legs. Stop when you feel hamstrings stretch — usually mid-shin. Drive hips forward to stand.',alt:'Use a barbell, kettlebell, or backpack loaded with books.'},
+  hip_thrust:{name:'Hip Thrust',notes:'Upper back on bench, feet flat, weight on hips. Drive through heels to lift hips until body is a straight line. Squeeze glutes hard at the top.',alt:'Glute bridge on the floor (no bench needed).'},
+  glute_bridge:{name:'Glute Bridge',notes:'Lie on back, knees bent, feet flat. Drive heels into floor, squeeze glutes to lift hips. Hold 2 seconds at top.',alt:'Add a dumbbell on hips for resistance.'},
+  walking_lunge:{name:'Walking Lunge',notes:'Step forward into lunge, back knee hovers above floor. Drive through front heel to step into next lunge. Keep torso upright.',alt:'Reverse lunges if forward lunges hurt knees — much easier on the joint.'},
+  reverse_lunge:{name:'Reverse Lunge',notes:'Step BACKWARD into a lunge, lower back knee toward floor, drive through front heel to return. Much knee-friendlier than forward lunges.',alt:'Hold dumbbells at sides for added resistance.'},
+  step_up:{name:'Box Step-Up',notes:'Box about knee height. Drive through the WHOLE foot of the standing leg — don\'t push off the back foot. Slow control on the way down.',alt:'Use any stable platform — a low bench or sturdy step.'},
+  leg_press:{name:'Leg Press',notes:'Feet shoulder-width on platform. Lower under control until knees ~90°. Don\'t lock out at the top. Knee-friendly way to load heavy.',alt:'Goblet squats if no machine.'},
+  single_leg_rdl:{name:'Single Leg RDL',notes:'Stand on one leg, hinge at hip while extending other leg behind for balance. Touch DB toward floor, return. Builds hamstring + balance.',alt:'Hold a wall lightly for balance if needed.'},
+  db_bench:{name:'Dumbbell Bench Press',notes:'Lie on bench, DBs at chest level. Press up and slightly together at the top. Lower under control until you feel a stretch.',alt:'Floor press if no bench. Push-ups if no DBs.'},
+  incline_db:{name:'Incline DB Press',notes:'Bench at 30-45°. Press dumbbells up. Hits upper chest and shoulders.',alt:'Flat DB press if no incline available.'},
+  push_up:{name:'Push-Up',notes:'Hands slightly wider than shoulders. Body in straight line. Lower chest to within an inch of floor. Drop to knees if needed — still effective.',alt:'Incline push-ups (hands on bench) make it easier. Decline (feet elevated) makes it harder.'},
+  ohp:{name:'Overhead Press (DB)',notes:'Standing or seated. Press DBs from shoulder height to overhead. Don\'t arch lower back — brace core hard.',alt:'Seated version is easier on the spine.'},
+  lat_pulldown:{name:'Lat Pulldown',notes:'Wide overhand grip. Pull bar to upper chest, drive elbows down and back. Lean back ~10°. Squeeze lats at the bottom.',alt:'Banded pulldown anchored to a high point.'},
+  seated_row:{name:'Seated Cable Row',notes:'Sit tall, neutral grip. Pull handle to lower ribs, squeeze shoulder blades. Don\'t use momentum — slow control.',alt:'Bent-over DB rows or band rows.'},
+  db_row:{name:'Single-Arm DB Row',notes:'One knee on bench, other foot on floor. Pull DB to hip (not chest). Squeeze shoulder blade. Slow lower.',alt:'Standing bent-over row with both DBs.'},
+  inverted_row:{name:'Inverted Row',notes:'Hang under a bar (Smith machine, TRX, sturdy table). Pull chest to bar. The more horizontal your body, the harder.',alt:'Bend knees and put feet on floor to make easier.'},
+  face_pull:{name:'Face Pull',notes:'High cable with rope. Pull rope toward face, elbows high and wide. Vital for shoulder health when bench-pressing.',alt:'Band face pull anchored at head height.'},
+  plank:{name:'Plank',notes:'Forearms and toes. Body in straight line — no sagging hips, no piked butt. Brace abs HARD as if about to be punched.',alt:'Drop to knees if needed — still effective.'},
+  side_plank:{name:'Side Plank',notes:'On forearm, body straight, hips lifted. Hold without sagging. Both sides.',alt:'Knees down for easier version.'},
+  dead_bug:{name:'Dead Bug',notes:'On back, arms up, knees over hips. Lower opposite arm + leg slowly while keeping lower back PRESSED into floor.',alt:'Just move legs only if arms+legs is too much.'},
+  ab_wheel:{name:'Ab Wheel Rollout',notes:'On knees, roll wheel out as far as you can without lower back arching. Pull back with abs.',alt:'Use a barbell with plates or do plank-to-pike on a slider.'},
+  hanging_knee:{name:'Hanging Knee Raise',notes:'Hang from bar. Pull knees to chest using abs (not momentum). Slow lower.',alt:'Lying leg raise on the floor.'},
+  farmer_carry:{name:'Farmer\'s Carry',notes:'Heavy DB or KB in each hand. Walk with chest up, shoulders back. Hyrox staple.',alt:'Use one DB held at chest if you only have one heavy weight.'},
+  sled_push:{name:'Sled Push',notes:'Low body angle, drive through legs. Short steps, hard push. Direct Hyrox prep.',alt:'No sled? Push a heavy box across grass, or do heavy walking lunges.'},
+  sled_pull:{name:'Sled Pull',notes:'Backwards drag. Engage lats and legs. Brutal but builds posterior chain.',alt:'Heavy band rows for similar pulling pattern.'},
+  wall_ball:{name:'Wall Ball',notes:'Squat with med ball at chest, explode up and throw to target ~10ft high. Catch on the way down into next squat.',alt:'Goblet squat to overhead press with DB if no med ball.'},
+  sandbag_lunge:{name:'Sandbag Lunge',notes:'Bag on shoulders or front-rack. Walking lunges. Crushes legs and core.',alt:'Hold dumbbells or wear a weighted backpack.'},
+  burpee_broad:{name:'Burpee Broad Jump',notes:'Burpee, then jump forward as far as you can. Repeat. Hyrox event in pure form.',alt:'Step back/up instead of jumping if joints aren\'t ready.'},
+  ski_erg:{name:'Ski Erg',notes:'Reach up, drive down using lats and abs. Full body cardio. Hyrox event.',alt:'Rower or assault bike for similar conditioning.'},
+  row_erg:{name:'Rowing Machine',notes:'Drive with legs first, then lean back, then pull arms. Reverse on return. 80% legs.',alt:'Bike or ski erg.'},
+  walk:{name:'Walk',notes:'Brisk pace — talk but not sing. No incline initially. Land midfoot, not slamming heels.',alt:'Treadmill if weather is bad.'},
+  walk_long:{name:'Long Walk',notes:'Aim for the duration, not the pace. Bring water. Listen to a podcast or music. Time on feet is the goal.',alt:'Split into two shorter walks if needed.'},
+  run_walk:{name:'Run/Walk Intervals',notes:'Alternate running and walking. Run easy enough to hold a conversation. Walk to recover fully.',alt:'All walking is fine if knees feel sore.'},
+  easy_run:{name:'Easy Continuous Run',notes:'Conversational pace. If you can\'t speak in full sentences, slow down. Easy = build aerobic base.',alt:'Drop to run/walk intervals if needed.'},
+  long_run:{name:'Long Run',notes:'Slowest run of the week. Focus on time on feet. Walk breaks are 100% fine.',alt:'Long walk if knees are flaring up.'},
+  cardio_choice:{name:'Cardio (Your Choice)',notes:'Pick what you enjoy: bike, row, ski erg, swim. Steady moderate effort.',alt:'Walking always works.'},
 };
 
-// Daily reset
-const today = new Date().toDateString();
-if (localStorage.getItem('lrpg_reset') !== today) {
-  S.done = {};
-  localStorage.setItem('lrpg_reset', today);
+const PHASES = [
+  {id:1,name:'Foundation',weeks:'Weeks 1–4',workoutsToUnlock:0,nextAt:12,
+    desc:'Build the habit. Move daily. Establish baseline strength without pain. No running yet — joints need a few weeks of strength work first.',
+    focus:'3 strength sessions + walking. Body learns to move again.',
+    week:[
+      {day:0,name:'Rest Day',type:'rest',xp:30,note:'Genuine rest. Stretch if you want bonus XP.'},
+      {day:1,name:'Strength A — Full Body',type:'strength',xp:150,ex:[
+        {id:'goblet_squat',sets:3,reps:'8-10',rest:90},
+        {id:'db_bench',sets:3,reps:'8-10',rest:90},
+        {id:'db_row',sets:3,reps:'10 each side',rest:60},
+        {id:'glute_bridge',sets:3,reps:'12',rest:45},
+        {id:'plank',sets:3,reps:'20-30 sec',rest:45}]},
+      {day:2,name:'Walk 30 minutes',type:'cardio',xp:80,ex:[{id:'walk',sets:1,reps:'30 minutes',rest:0}]},
+      {day:3,name:'Strength B — Full Body',type:'strength',xp:150,ex:[
+        {id:'rdl',sets:3,reps:'8-10',rest:90},
+        {id:'lat_pulldown',sets:3,reps:'10',rest:60},
+        {id:'push_up',sets:3,reps:'AMRAP (knees ok)',rest:60},
+        {id:'dead_bug',sets:3,reps:'8 each side',rest:45},
+        {id:'hip_thrust',sets:3,reps:'10',rest:60}]},
+      {day:4,name:'Walk 30 minutes',type:'cardio',xp:80,ex:[{id:'walk',sets:1,reps:'30 minutes',rest:0}]},
+      {day:5,name:'Strength C — Full Body',type:'strength',xp:150,ex:[
+        {id:'step_up',sets:3,reps:'8 each leg',rest:60},
+        {id:'incline_db',sets:3,reps:'8-10',rest:90},
+        {id:'seated_row',sets:3,reps:'10',rest:60},
+        {id:'side_plank',sets:2,reps:'20 sec each side',rest:30},
+        {id:'farmer_carry',sets:3,reps:'30 seconds',rest:60}]},
+      {day:6,name:'Long Walk 45–60 min',type:'cardio',xp:120,ex:[{id:'walk_long',sets:1,reps:'45-60 minutes',rest:0}]}]},
+  {id:2,name:'Build',weeks:'Weeks 5–12',workoutsToUnlock:12,nextAt:32,
+    desc:'Running enters the program. Run/walk intervals only — running continuously isn\'t the goal yet. Strength volume increases. Carries appear.',
+    focus:'4 strength sessions + 2 cardio. Patterns split into upper/lower.',
+    week:[
+      {day:0,name:'Rest Day',type:'rest',xp:30},
+      {day:1,name:'Lower Body Strength',type:'strength',xp:180,ex:[
+        {id:'goblet_squat',sets:4,reps:'8',rest:90},
+        {id:'rdl',sets:4,reps:'8',rest:90},
+        {id:'reverse_lunge',sets:3,reps:'8 each leg',rest:75},
+        {id:'hip_thrust',sets:3,reps:'12',rest:60},
+        {id:'plank',sets:3,reps:'45 sec',rest:30}]},
+      {day:2,name:'Run/Walk Intervals',type:'cardio',xp:140,ex:[{id:'run_walk',sets:1,reps:'5 min walk warmup, then 5×(2 min run + 3 min walk), 5 min walk cooldown',rest:0}]},
+      {day:3,name:'Upper Body Strength',type:'strength',xp:180,ex:[
+        {id:'db_bench',sets:4,reps:'8',rest:90},
+        {id:'lat_pulldown',sets:4,reps:'8',rest:75},
+        {id:'ohp',sets:3,reps:'8-10',rest:75},
+        {id:'db_row',sets:3,reps:'10 each side',rest:60},
+        {id:'face_pull',sets:3,reps:'15',rest:45}]},
+      {day:4,name:'Easy Cardio (Choice)',type:'cardio',xp:100,ex:[{id:'cardio_choice',sets:1,reps:'25-30 minutes',rest:0}]},
+      {day:5,name:'Full Body + Carries',type:'strength',xp:200,ex:[
+        {id:'goblet_squat',sets:3,reps:'10',rest:75},
+        {id:'incline_db',sets:3,reps:'10',rest:75},
+        {id:'seated_row',sets:3,reps:'10',rest:60},
+        {id:'farmer_carry',sets:4,reps:'45 seconds heavy',rest:60},
+        {id:'dead_bug',sets:3,reps:'10 each side',rest:30}]},
+      {day:6,name:'Long Walk/Jog 60–75 min',type:'cardio',xp:160,ex:[{id:'walk_long',sets:1,reps:'60-75 min, jog short bursts if comfortable',rest:0}]}]},
+  {id:3,name:'Develop',weeks:'Weeks 13–24',workoutsToUnlock:32,nextAt:80,
+    desc:'Continuous running emerges. Hyrox-specific work appears: sleds, wall balls, sandbags. You\'re training for both events now.',
+    focus:'5 sessions: 2 strength, 2 runs, 1 Hyrox circuit, 1 long run.',
+    week:[
+      {day:0,name:'Rest Day',type:'rest',xp:30},
+      {day:1,name:'Lower + Power',type:'strength',xp:210,ex:[
+        {id:'box_squat',sets:4,reps:'6-8',rest:120},
+        {id:'rdl',sets:4,reps:'8',rest:90},
+        {id:'walking_lunge',sets:3,reps:'10 each leg',rest:75},
+        {id:'leg_press',sets:3,reps:'12',rest:75},
+        {id:'hanging_knee',sets:3,reps:'8-10',rest:45}]},
+      {day:2,name:'Easy Continuous Run',type:'cardio',xp:160,ex:[{id:'easy_run',sets:1,reps:'25-30 min continuous, conversational pace',rest:0}]},
+      {day:3,name:'Upper Body Strength',type:'strength',xp:200,ex:[
+        {id:'db_bench',sets:4,reps:'6-8',rest:90},
+        {id:'lat_pulldown',sets:4,reps:'8',rest:75},
+        {id:'ohp',sets:4,reps:'8',rest:75},
+        {id:'inverted_row',sets:3,reps:'AMRAP',rest:60},
+        {id:'face_pull',sets:3,reps:'15',rest:45}]},
+      {day:4,name:'Hyrox Circuit',type:'hyrox',xp:240,ex:[
+        {id:'sled_push',sets:4,reps:'25m heavy',rest:90},
+        {id:'wall_ball',sets:4,reps:'15',rest:60},
+        {id:'farmer_carry',sets:4,reps:'40m heavy',rest:75},
+        {id:'burpee_broad',sets:3,reps:'8 reps',rest:75},
+        {id:'sandbag_lunge',sets:3,reps:'20m',rest:75}]},
+      {day:5,name:'Tempo Run + Core',type:'cardio',xp:180,ex:[
+        {id:'easy_run',sets:1,reps:'10 min easy + 15 min moderate + 5 min easy',rest:0},
+        {id:'plank',sets:3,reps:'60 sec',rest:30},
+        {id:'side_plank',sets:2,reps:'30 sec each side',rest:30}]},
+      {day:6,name:'Long Run 45–60 min',type:'cardio',xp:220,ex:[{id:'long_run',sets:1,reps:'45-60 min easy, walk breaks fine',rest:0}]}]},
+  {id:4,name:'Specialize',weeks:'Weeks 25+',workoutsToUnlock:80,nextAt:null,
+    desc:'You\'ve built the engine and the strength. Choose: enter a structured 16-week marathon plan, or focus on Hyrox event prep with race simulations. Both paths stay open.',
+    focus:'Periodised training. Real race goals. You\'re no longer a beginner.',
+    week:[
+      {day:0,name:'Rest Day',type:'rest',xp:30},
+      {day:1,name:'Heavy Lower',type:'strength',xp:240,ex:[
+        {id:'box_squat',sets:5,reps:'5',rest:150},
+        {id:'rdl',sets:4,reps:'6',rest:120},
+        {id:'single_leg_rdl',sets:3,reps:'8 each',rest:60},
+        {id:'ab_wheel',sets:4,reps:'8-12',rest:60}]},
+      {day:2,name:'Interval Run',type:'cardio',xp:220,ex:[{id:'easy_run',sets:1,reps:'10 min warmup + 6×(3 min hard, 2 min easy) + 5 min cooldown',rest:0}]},
+      {day:3,name:'Heavy Upper',type:'strength',xp:230,ex:[
+        {id:'db_bench',sets:5,reps:'5',rest:120},
+        {id:'lat_pulldown',sets:5,reps:'6',rest:90},
+        {id:'ohp',sets:4,reps:'6',rest:90},
+        {id:'db_row',sets:4,reps:'8 each',rest:75}]},
+      {day:4,name:'Hyrox Simulation',type:'hyrox',xp:280,ex:[
+        {id:'ski_erg',sets:1,reps:'500m',rest:60},
+        {id:'sled_push',sets:1,reps:'50m heavy',rest:60},
+        {id:'sled_pull',sets:1,reps:'50m',rest:60},
+        {id:'burpee_broad',sets:1,reps:'40m worth',rest:60},
+        {id:'row_erg',sets:1,reps:'500m',rest:60},
+        {id:'farmer_carry',sets:1,reps:'100m',rest:60},
+        {id:'sandbag_lunge',sets:1,reps:'50m',rest:60},
+        {id:'wall_ball',sets:1,reps:'50 reps',rest:0}]},
+      {day:5,name:'Easy Recovery Run',type:'cardio',xp:160,ex:[{id:'easy_run',sets:1,reps:'30-40 min very easy',rest:0}]},
+      {day:6,name:'Long Run',type:'cardio',xp:300,ex:[{id:'long_run',sets:1,reps:'75-120 min — build toward marathon distance',rest:0}]}]},
+];
+
+const BONUS = [
+  {id:'water',label:'2L water',xp:15,icon:'💧'},
+  {id:'protein',label:'Hit protein (~180g)',xp:25,icon:'🥩'},
+  {id:'sleep',label:'7+ hours sleep',xp:25,icon:'😴'},
+  {id:'stretch',label:'10 min stretch',xp:15,icon:'🧘'},
+  {id:'no_takeout',label:'No takeaway',xp:30,icon:'🥗'},
+  {id:'journal',label:'Note today',xp:10,icon:'📝'},
+];
+
+const LEVELS = [
+  {xp:0,level:1,title:'Returning Hero',color:'#94a3b8'},
+  {xp:300,level:2,title:'Rising Adventurer',color:'#60a5fa'},
+  {xp:900,level:3,title:'Trail Seeker',color:'#34d399'},
+  {xp:2000,level:4,title:'Distance Runner',color:'#fbbf24'},
+  {xp:4000,level:5,title:'Hyrox Contender',color:'#f97316'},
+  {xp:7000,level:6,title:'Marathon Aspirant',color:'#a78bfa'},
+  {xp:12000,level:7,title:'Dual-Discipline Athlete',color:'#ec4899'},
+];
+
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+const S = {
+  get xp(){return +localStorage.getItem('lrpg_xp')||0},
+  set xp(v){localStorage.setItem('lrpg_xp',v)},
+  get welcomed(){return !!localStorage.getItem('lrpg_welcomed_v2')},
+  set welcomed(v){localStorage.setItem('lrpg_welcomed_v2','1')},
+  get weights(){try{return JSON.parse(localStorage.getItem('lrpg_weights')||'[]')}catch{return[]}},
+  set weights(v){localStorage.setItem('lrpg_weights',JSON.stringify(v))},
+  get workouts(){try{return JSON.parse(localStorage.getItem('lrpg_workouts')||'[]')}catch{return[]}},
+  set workouts(v){localStorage.setItem('lrpg_workouts',JSON.stringify(v))},
+  get bonusToday(){
+    const today=new Date().toDateString();
+    const d=JSON.parse(localStorage.getItem('lrpg_bonus_day')||'{}');
+    return d.date===today?(d.done||{}):{};
+  },
+  set bonusToday(done){
+    localStorage.setItem('lrpg_bonus_day',JSON.stringify({date:new Date().toDateString(),done}));
+  },
+  get activeWorkout(){try{return JSON.parse(localStorage.getItem('lrpg_active')||'null')}catch{return null}},
+  set activeWorkout(v){v?localStorage.setItem('lrpg_active',JSON.stringify(v)):localStorage.removeItem('lrpg_active')},
+};
+
+function getCurrentPhase(){
+  const completed=S.workouts.length;
+  let phase=PHASES[0];
+  for(const p of PHASES){if(completed>=p.workoutsToUnlock)phase=p}
+  return {phase,completed};
 }
-
-let currentTab = 'quests';
-let deferredInstall = null;
-
-// ── HELPERS ──
-function getLvl(xp) {
-  let cur = LEVELS[0], nxt = LEVELS[1];
-  for (let i = 0; i < LEVELS.length; i++) {
-    if (xp >= LEVELS[i].xp) { cur = LEVELS[i]; nxt = LEVELS[i+1]||null; }
-  }
-  return { cur, nxt };
+function getTodayWorkout(){
+  const {phase}=getCurrentPhase();
+  const dow=new Date().getDay();
+  return phase.week.find(w=>w.day===dow);
 }
-
-function getStreak(log) {
-  if (!log.length) return 0;
-  const dates = [...new Set(log.map(e => e.date))].sort((a,b) => new Date(b)-new Date(a));
-  const todayStr = new Date().toDateString();
-  const yday = new Date(Date.now()-86400000).toDateString();
-  if (dates[0] !== todayStr && dates[0] !== yday) return 0;
-  let s = 1;
-  for (let i = 1; i < dates.length; i++) {
-    if ((new Date(dates[i-1]) - new Date(dates[i])) / 86400000 === 1) s++;
-    else break;
+function getLvl(xp){
+  let cur=LEVELS[0],nxt=LEVELS[1];
+  for(let i=0;i<LEVELS.length;i++){if(xp>=LEVELS[i].xp){cur=LEVELS[i];nxt=LEVELS[i+1]||null}}
+  return {cur,nxt};
+}
+function getStreak(){
+  const dates=[...new Set(S.workouts.map(w=>w.date))].sort((a,b)=>new Date(b)-new Date(a));
+  if(!dates.length)return 0;
+  const today=new Date().toDateString();
+  const yday=new Date(Date.now()-86400000).toDateString();
+  if(dates[0]!==today&&dates[0]!==yday)return 0;
+  let s=1;
+  for(let i=1;i<dates.length;i++){
+    if((new Date(dates[i-1])-new Date(dates[i]))/86400000===1)s++;else break;
   }
   return s;
 }
-
-function showToast(msg, color) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.background = color;
-  t.style.boxShadow = `0 0 24px ${color}88`;
+function todayCompleted(){
+  const today=new Date().toDateString();
+  const w=getTodayWorkout();
+  const {phase}=getCurrentPhase();
+  return S.workouts.some(x=>x.date===today&&x.workoutKey===`${phase.id}-${w.day}`);
+}
+function showToast(msg,color='#34d399'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=color;t.style.boxShadow=`0 0 24px ${color}88`;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  setTimeout(()=>t.classList.remove('show'),2600);
 }
 
-// ── RENDER HEADER ──
-function renderHeader() {
-  const xp = S.xp, log = S.log, done = S.done;
-  const { cur, nxt } = getLvl(xp);
-  const into = xp - cur.xp;
-  const toNext = nxt ? nxt.xp - cur.xp : 1;
-  const pct = nxt ? Math.min((into/toNext)*100, 100) : 100;
-  const streak = getStreak(log);
-  const doneCount = Object.keys(done).length;
-  const stageNum = [...STAGES].reverse().find(s => xp >= s.xpNeeded)?.id || 1;
+let currentTab='today';
+function setTab(t){
+  currentTab=t;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  render();
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 
-  document.getElementById('lc-level').textContent = cur.level;
-  document.getElementById('lc-title').textContent = cur.title;
-  document.getElementById('lc-xp').textContent = xp.toLocaleString();
-  document.getElementById('xp-fill').style.width = pct + '%';
-  document.getElementById('xp-into').textContent = `${into.toLocaleString()} XP into level`;
-  document.getElementById('xp-next').textContent = nxt ? `${(toNext-into).toLocaleString()} to "${nxt.title}"` : 'MAX LEVEL';
-  document.getElementById('stat-streak').textContent = streak + ' 🔥';
-  document.getElementById('stat-quests').textContent = `${doneCount}/${QUESTS.length}`;
-  document.getElementById('stat-stage').textContent = `${stageNum}/5`;
-
-  // Update CSS vars for level color
-  const card = document.getElementById('level-card');
-  card.style.setProperty('--level-color', cur.color);
-  card.style.setProperty('--next-color', nxt?.color || cur.color);
-  card.style.borderColor = cur.color + '66';
-  card.style.boxShadow = `0 0 40px ${cur.color}22`;
-  document.getElementById('lc-title').style.color = cur.color;
-  document.getElementById('xp-fill').style.background = `linear-gradient(90deg, ${cur.color}, ${nxt?.color||cur.color})`;
-  document.getElementById('xp-fill').style.boxShadow = `0 0 10px ${cur.color}`;
+function render(){
+  const c=document.getElementById('content');
+  if(currentTab==='today')c.innerHTML=renderToday();
+  else if(currentTab==='plan')c.innerHTML=renderPlan();
+  else if(currentTab==='journey')c.innerHTML=renderJourney();
+  else if(currentTab==='track')c.innerHTML=renderTrack();
+  else if(currentTab==='settings')c.innerHTML=renderSettings();
 }
 
-// ── TABS ──
-function setTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('nav button').forEach((b,i) => {
-    b.classList.toggle('active', ['quests','journey','track','install'][i] === tab);
-  });
-  renderContent();
-}
+function renderToday(){
+  const {phase,completed}=getCurrentPhase();
+  const {cur,nxt}=getLvl(S.xp);
+  const w=getTodayWorkout();
+  const done=todayCompleted();
+  const streak=getStreak();
+  const into=S.xp-cur.xp;
+  const toNext=nxt?nxt.xp-cur.xp:1;
+  const xpPct=nxt?Math.min((into/toNext)*100,100):100;
+  const phaseTotal=phase.nextAt;
+  const phasePct=phaseTotal?Math.min((completed/phaseTotal)*100,100):100;
 
-function renderContent() {
-  const c = document.getElementById('content');
-  if (currentTab === 'quests') renderQuests(c);
-  else if (currentTab === 'journey') renderJourney(c);
-  else if (currentTab === 'track') renderTrack(c);
-  else if (currentTab === 'install') renderInstall(c);
-}
-
-// ── QUESTS ──
-function renderQuests(c) {
-  const done = S.done;
-  const groups = {};
-  QUESTS.forEach(q => { (groups[q.cat] = groups[q.cat]||[]).push(q); });
-  let html = '';
-  for (const [cat, qs] of Object.entries(groups)) {
-    html += `<div class="cat-label" style="color:${CATS[cat]}">${cat}</div>`;
-    qs.forEach(q => {
-      const isDone = !!done[q.id];
-      html += `<button class="quest-btn${isDone?' done':''}" style="--cat-color:${CATS[cat]}"
-        onclick="completeQuest('${q.id}')">
-        <span class="quest-icon">${isDone ? '✅' : q.icon}</span>
-        <span class="quest-label">${q.label}</span>
-        <span class="quest-xp" style="color:${isDone?CATS[cat]:CATS[cat]}">+${q.xp} XP</span>
-      </button>`;
-    });
-  }
-  c.innerHTML = html;
-}
-
-function completeQuest(id) {
-  const done = S.done;
-  if (done[id]) return;
-  const q = QUESTS.find(x => x.id === id);
-  done[id] = true; S.done = done;
-  S.xp = S.xp + q.xp;
-  const log = S.log;
-  log.unshift({ questId: id, xp: q.xp, date: new Date().toDateString(), ts: Date.now() });
-  S.log = log;
-  showToast(`+${q.xp} XP — ${q.label}!`, CATS[q.cat]);
-  renderHeader();
-  renderContent();
-}
-
-// ── JOURNEY ──
-function renderJourney(c) {
-  const xp = S.xp;
-  const activeId = [...STAGES].reverse().find(s => xp >= s.xpNeeded)?.id || 1;
-  let html = '';
-  STAGES.forEach(s => {
-    const unlocked = xp >= s.xpNeeded;
-    const isActive = s.id === activeId;
-    html += `<div class="stage-card${isActive?' active':''}${!unlocked?' locked':''}">
-      <div class="stage-header">
-        <div class="stage-num${unlocked?' unlocked':''}">${unlocked?'✓':s.id}</div>
-        <div class="stage-title">Stage ${s.id}: ${s.title}</div>
-        ${isActive ? '<span class="stage-badge">ACTIVE</span>' : ''}
-      </div>
-      <div class="stage-desc">${s.desc}</div>
-      <div class="stage-target">🎯 ${s.target}</div>
-      ${!unlocked ? `<div class="stage-unlock">Unlocks at ${s.xpNeeded.toLocaleString()} XP (${(s.xpNeeded-xp).toLocaleString()} to go)</div>` : ''}
+  let heroHtml;
+  if(w.type==='rest'){
+    heroHtml=`<div class="hero-workout" style="border-color:var(--purple);box-shadow:0 0 40px rgba(167,139,250,.18)">
+      <div class="hero-eyebrow" style="color:var(--purple)">Today · ${DAY_NAMES[w.day]}</div>
+      <div class="hero-title">${w.name} 😴</div>
+      <div class="hero-meta">${w.note||'Rest is when adaptation happens. Let your body absorb the work.'} <strong>+${w.xp} XP for showing up.</strong></div>
+      <button class="hero-btn rest" onclick="completeRest()" ${done?'disabled style=opacity:.5':''}>${done?'✓ ACKNOWLEDGED':'CLAIM REST DAY +'+w.xp+' XP'}</button>
     </div>`;
-  });
-  html += `<div class="knee-card">
-    <div class="knee-title">⚠️ Knee & Shin Protection Protocol</div>
-    <div class="knee-item">
-      • Never increase weekly run distance by more than 10%<br>
-      • Run/walk intervals are smart, not cheating<br>
-      • Rest days are XP days — sleep & stretch quests still count<br>
-      • Pain = stop. Soreness = continue with care<br>
-      • Get gait-analysed at a running shop before buying shoes<br>
-      • Consider a sports physio assessment before Stage 2
+  } else {
+    const exCount=w.ex?.length||0;
+    const typeIcon=w.type==='strength'?'💪':w.type==='cardio'?'🏃':w.type==='hyrox'?'⚡':'⚔️';
+    const typeLabel=w.type==='hyrox'?'Hyrox Circuit':w.type.charAt(0).toUpperCase()+w.type.slice(1);
+    heroHtml=`<div class="hero-workout">
+      <div class="hero-eyebrow">Today · ${DAY_NAMES[w.day]} · ${typeLabel}</div>
+      <div class="hero-title">${typeIcon} ${w.name}</div>
+      <div class="hero-meta">${exCount} exercise${exCount!==1?'s':''} · Earn <strong>+${w.xp} XP</strong> on completion · Phase ${phase.id}: ${phase.name}</div>
+      <button class="hero-btn ${done?'done':''}" onclick="${done?'':'startWorkout()'}">${done?'✓ COMPLETED TODAY':'START WORKOUT →'}</button>
+    </div>`;
+  }
+
+  const bonusDone=S.bonusToday;
+  const bonusHtml=`<div class="bonus-section">
+    <div class="bonus-title">Daily Bonus Quests · +Small XP</div>
+    <div class="bonus-grid">
+      ${BONUS.map(b=>`<button class="bonus-btn ${bonusDone[b.id]?'done':''}" onclick="completeBonus('${b.id}')">
+        <span class="bonus-icon">${bonusDone[b.id]?'✅':b.icon}</span>
+        <span class="bonus-text">${b.label}</span>
+        <span class="bonus-xp">+${b.xp}</span>
+      </button>`).join('')}
     </div>
   </div>`;
-  c.innerHTML = html;
+
+  return `
+    <div class="stat-strip">
+      <div class="stat-pill"><div class="stat-pill-val" style="color:${cur.color}">L${cur.level}</div><div class="stat-pill-lbl">${cur.title.split(' ')[0]}</div></div>
+      <div class="stat-pill"><div class="stat-pill-val" style="color:var(--orange)">${streak}🔥</div><div class="stat-pill-lbl">Streak</div></div>
+      <div class="stat-pill"><div class="stat-pill-val" style="color:var(--blue)">${S.xp.toLocaleString()}</div><div class="stat-pill-lbl">Total XP</div></div>
+      <div class="stat-pill"><div class="stat-pill-val" style="color:var(--purple)">P${phase.id}</div><div class="stat-pill-lbl">Phase</div></div>
+    </div>
+    ${heroHtml}
+    <div class="prog-card">
+      <div class="prog-row"><span class="prog-label">Level Progress</span><span class="prog-val" style="color:${cur.color}">${cur.title}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${xpPct}%;background:linear-gradient(90deg,${cur.color},${nxt?.color||cur.color});box-shadow:0 0 10px ${cur.color}"></div></div>
+      <div class="prog-sub">${nxt?`${(toNext-into).toLocaleString()} XP to "${nxt.title}"`:'MAX LEVEL'}</div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-row"><span class="prog-label">Phase ${phase.id}: ${phase.name}</span><span class="prog-val" style="color:var(--green)">${completed}/${phaseTotal||'∞'}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${phasePct}%;background:linear-gradient(90deg,var(--green),var(--blue));box-shadow:0 0 10px var(--green)"></div></div>
+      <div class="prog-sub">${phaseTotal?`${Math.max(0,phaseTotal-completed)} workouts to unlock "${PHASES[phase.id]?.name}"`:'You\'ve unlocked the final phase 🏆'}</div>
+    </div>
+    ${bonusHtml}`;
 }
 
-// ── TRACK ──
-function renderTrack(c) {
-  const weights = S.weights;
-  const log = S.log;
-  let weightRows = '';
-  weights.slice(0,8).forEach((w,i) => {
-    const prev = weights[i+1];
-    const color = prev ? (w.kg < prev.kg ? '#34d399' : w.kg > prev.kg ? '#f87171' : 'var(--text)') : 'var(--text)';
-    weightRows += `<div class="weight-entry">
-      <span class="weight-date">${w.date}</span>
-      <span class="weight-val" style="color:${color}">${w.kg}kg</span>
-    </div>`;
+function renderPlan(){
+  const {phase}=getCurrentPhase();
+  const todayDay=new Date().getDay();
+  const ordered=[...phase.week].sort((a,b)=>{
+    const aD=(a.day-todayDay+7)%7;
+    const bD=(b.day-todayDay+7)%7;
+    return aD-bD;
   });
-  const delta = weights.length >= 2
-    ? `<div style="margin-top:10px;font-size:13px;color:${weights[0].kg<weights[weights.length-1].kg?'#34d399':'#f87171'}">
-        Total change: ${(weights[0].kg - weights[weights.length-1].kg).toFixed(1)}kg from first entry
-       </div>` : '';
+  return `
+    <div style="margin-bottom:14px;text-align:center;padding:10px">
+      <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--green);letter-spacing:3px;text-transform:uppercase">Current Phase</div>
+      <div style="font-family:'Cinzel',serif;font-size:20px;color:var(--text);margin-top:2px">${phase.name}</div>
+      <div style="font-size:13px;color:var(--sub);margin-top:6px;line-height:1.6">${phase.focus}</div>
+    </div>
+    ${ordered.map(w=>{
+      const isToday=w.day===todayDay;
+      const icon=w.type==='strength'?'💪':w.type==='cardio'?'🏃':w.type==='hyrox'?'⚡':'😴';
+      const detail=w.type==='rest'?'Recovery & adaptation':`${w.ex?.length||0} exercises · +${w.xp} XP`;
+      return `<div class="day-card ${isToday?'today':''}" onclick="${w.type!=='rest'?`previewWorkout(${w.day})`:'showToast(\\'Rest day — no preview needed!\\',\\'#a78bfa\\')'}">
+        <div class="day-icon">${icon}</div>
+        <div class="day-info">
+          <div class="day-name">${DAY_NAMES[w.day]} · ${w.name}</div>
+          <div class="day-detail">${detail}</div>
+        </div>
+        ${isToday?'<div class="day-badge">TODAY</div>':''}
+      </div>`;
+    }).join('')}
+    <div class="info-card" style="margin-top:14px">
+      <div class="info-title">📌 How phase progression works</div>
+      <div class="info-body">Complete workouts to unlock the next phase. Missed days don't reset progress — they delay it. <strong style="color:var(--text)">Consistency &gt; perfection.</strong> The plan adapts as you advance.</div>
+    </div>`;
+}
 
-  let logRows = '';
-  log.slice(0,12).forEach(e => {
-    const q = QUESTS.find(x => x.id === e.questId);
-    if (!q) return;
-    logRows += `<div class="log-entry">
-      <span class="log-left">${q.icon} ${q.label}</span>
-      <div class="log-right">
-        <span class="log-xp">+${e.xp}</span>
-        <span class="log-date">${e.date}</span>
+function previewWorkout(day){
+  const {phase}=getCurrentPhase();
+  const w=phase.week.find(x=>x.day===day);
+  if(!w||!w.ex)return;
+  const exList=w.ex.map(e=>`<li style="margin:6px 0;color:var(--sub);font-size:13px">${EX[e.id].name} — <span style="color:var(--text)">${e.sets}×${e.reps}</span></li>`).join('');
+  document.body.insertAdjacentHTML('beforeend',`
+    <div class="modal-overlay" id="preview-modal">
+      <div class="modal-box">
+        <h2 style="color:var(--blue)">${w.name}</h2>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:12px">${DAY_NAMES[w.day]} · +${w.xp} XP</p>
+        <ul style="list-style:none;margin-bottom:16px">${exList}</ul>
+        <button class="btn alt" onclick="document.getElementById('preview-modal').remove()">Close</button>
       </div>
-    </div>`;
-  });
+    </div>`);
+}
 
-  c.innerHTML = `
-    <div class="track-card" style="border:1px solid rgba(249,115,22,.3)">
+function renderJourney(){
+  const {phase,completed}=getCurrentPhase();
+  return `
+    ${PHASES.map(p=>{
+      const unlocked=completed>=p.workoutsToUnlock;
+      const isActive=p.id===phase.id;
+      const inPhase=isActive?completed-p.workoutsToUnlock:0;
+      const phaseSpan=p.nextAt?p.nextAt-p.workoutsToUnlock:50;
+      const phaseProg=isActive?Math.min((inPhase/phaseSpan)*100,100):(unlocked?100:0);
+      return `<div class="phase-card ${isActive?'active':''} ${!unlocked?'locked':''}">
+        <div class="phase-head">
+          <div class="phase-num ${unlocked?'unlocked':''}">${unlocked?(isActive?p.id:'✓'):p.id}</div>
+          <div class="phase-title-block">
+            <div class="phase-name">Phase ${p.id}: ${p.name}</div>
+            <div class="phase-weeks">${p.weeks}</div>
+          </div>
+          ${isActive?'<span class="phase-badge">ACTIVE</span>':''}
+        </div>
+        <div class="phase-desc">${p.desc}</div>
+        <div class="phase-target">🎯 ${p.focus}</div>
+        ${isActive?`<div class="phase-prog"><div class="bar-bg" style="margin-top:10px"><div class="bar-fill" style="width:${phaseProg}%;background:var(--green)"></div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">${inPhase} workouts in this phase</div></div>`:!unlocked?`<div class="phase-prog"><div style="font-size:11px;color:var(--muted);margin-top:8px">Unlocks at ${p.workoutsToUnlock} total workouts (${p.workoutsToUnlock-completed} more)</div></div>`:''}
+      </div>`;
+    }).join('')}
+    <div class="info-card">
+      <div class="info-title">⚠️ Knee & Shin Protection Protocol</div>
+      <div class="info-body">
+        • Strength FIRST, running second — joints need to handle bodyweight before pavement<br>
+        • Run/walk intervals through Phase 2 — not "cheating", scientifically optimal<br>
+        • Never increase weekly run volume by more than 10%<br>
+        • Pain ≠ soreness — pain means stop, soreness means continue with care<br>
+        • Get gait-analysed at a running shop before buying shoes<br>
+        • Foam roll calves and quads after every run
+      </div>
+    </div>
+    <div class="info-card" style="border-left-color:var(--amber)">
+      <div class="info-title" style="color:var(--amber)">🥩 Nutrition Anchors (the missing third)</div>
+      <div class="info-body">
+        At 125kg with strength training, target: <strong style="color:var(--text)">~180g protein/day, ~2,200-2,500 cal/day</strong> for steady recomposition.<br><br>
+        Three rules that beat any complicated diet:<br>
+        • Protein at every meal (palm-sized portion minimum)<br>
+        • Cook at home 5+ days/week<br>
+        • Track honestly for 2 weeks then trust the system<br><br>
+        Bonus quests in Today reward these habits with XP.
+      </div>
+    </div>
+    <div class="info-card" style="border-left-color:var(--blue)">
+      <div class="info-title" style="color:var(--blue)">🏆 The Endgame</div>
+      <div class="info-body">Phase 4 unlocks two paths — Marathon training (16-week structured plan) or Hyrox event prep (race simulations). Most people pick one, peak, then switch to the other. You don't have to choose now.</div>
+    </div>`;
+}
+
+function renderTrack(){
+  const weights=S.weights;
+  const workouts=S.workouts;
+  const weightRows=weights.slice(0,10).map((w,i)=>{
+    const prev=weights[i+1];
+    const color=prev?(w.kg<prev.kg?'#34d399':w.kg>prev.kg?'#f87171':'var(--text)'):'var(--text)';
+    return `<div class="row-entry"><span style="color:var(--sub)">${w.date}</span><span style="font-family:'Cinzel',serif;color:${color};font-weight:700">${w.kg}kg</span></div>`;
+  }).join('');
+  const delta=weights.length>=2?`<div style="margin-top:10px;font-size:13px;color:${weights[0].kg<weights[weights.length-1].kg?'#34d399':'#f87171'}">Total: ${(weights[0].kg-weights[weights.length-1].kg).toFixed(1)}kg from first entry</div>`:'';
+  const workoutRows=workouts.slice(0,15).map(w=>{
+    const icon=w.type==='strength'?'💪':w.type==='cardio'?'🏃':w.type==='hyrox'?'⚡':'😴';
+    return `<div class="row-entry"><span style="color:var(--sub)">${icon} ${w.name}</span><div style="display:flex;gap:10px;align-items:center"><span style="color:var(--green);font-family:'Cinzel',serif;font-weight:700;font-size:12px">+${w.xp}</span><span style="color:var(--muted);font-size:11px">${w.date.split(' ').slice(0,3).join(' ')}</span></div></div>`;
+  }).join('');
+
+  return `<div class="track-card" style="border-color:rgba(249,115,22,.3)">
       <div class="track-title" style="color:var(--orange)">📊 Weight Log</div>
-      <div class="track-sub">Track without judgment. You started at 125kg. Every entry is data, not a verdict.</div>
+      <div class="track-sub">You started at 125kg. Every entry is data, not a verdict. Weigh weekly — same time, same conditions.</div>
       <div class="weight-input-row">
         <input type="number" id="weight-in" inputmode="decimal" placeholder="Enter kg e.g. 125" step="0.1" min="30" max="300">
         <button class="btn-log" onclick="logWeight()">Log</button>
       </div>
-      ${weightRows ? `<div style="margin-top:12px">${weightRows}${delta}</div>` : ''}
+      ${weightRows?`<div style="margin-top:14px">${weightRows}${delta}</div>`:''}
     </div>
-    <div class="track-card" style="border:1px solid var(--border)">
-      <div class="track-title" style="color:var(--sub)">Recent Quest Log</div>
-      <div style="margin-top:8px">
-        ${logRows || '<div style="color:var(--muted);font-size:13px">No quests yet — go earn your first XP! ⚔️</div>'}
-      </div>
+    <div class="track-card">
+      <div class="track-title" style="color:var(--sub)">Workout History (${workouts.length} total)</div>
+      <div style="margin-top:8px">${workoutRows||'<div style="color:var(--muted);font-size:13px;padding:10px 0">No workouts yet. Hit Today and start your first one!</div>'}</div>
     </div>`;
 }
 
-function logWeight() {
-  const inp = document.getElementById('weight-in');
-  const val = parseFloat(inp.value);
-  if (!val || val < 30 || val > 300) { showToast('Enter a valid weight in kg', '#f87171'); return; }
-  const weights = S.weights;
-  weights.unshift({ kg: val, date: new Date().toLocaleDateString('en-GB'), ts: Date.now() });
-  S.weights = weights.slice(0, 60);
-  inp.value = '';
-  showToast(`Logged ${val}kg 📊`, '#f97316');
-  renderContent();
+function logWeight(){
+  const inp=document.getElementById('weight-in');
+  const v=parseFloat(inp.value);
+  if(!v||v<30||v>300){showToast('Enter a valid weight','#f87171');return}
+  const w=S.weights;
+  w.unshift({kg:v,date:new Date().toLocaleDateString('en-GB'),ts:Date.now()});
+  S.weights=w.slice(0,80);
+  inp.value='';
+  S.xp=S.xp+15;
+  showToast(`Logged ${v}kg · +15 XP`,'#f97316');
+  render();
 }
 
-// ── INSTALL ──
-function renderInstall(c) {
-  c.innerHTML = `
-    <div class="track-card" style="border:1px solid rgba(96,165,250,.3);margin-top:4px">
-      <div class="track-title" style="color:var(--blue);font-size:16px;margin-bottom:12px">📲 Install on Your Galaxy Z Fold 7</div>
-      <p style="font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:16px">
-        To install this as a proper app on your home screen (works on both the cover screen and the big inner display):
-      </p>
-      <div style="background:#0a0f1a;border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:10px">USING SAMSUNG INTERNET</div>
-        <div style="font-size:13px;color:var(--sub);line-height:2">
-          1. Tap the <strong style="color:var(--text)">⋮ menu</strong> (three dots) in the bottom bar<br>
-          2. Tap <strong style="color:var(--text)">"Add page to"</strong><br>
-          3. Tap <strong style="color:var(--text)">"Home screen"</strong><br>
-          4. Confirm — app icon appears on your home screen ✓
-        </div>
+function renderSettings(){
+  return `<div class="track-card" style="border-color:rgba(96,165,250,.3)">
+      <div class="track-title" style="color:var(--blue);font-size:15px;margin-bottom:12px">📲 Install on Galaxy Z Fold 7</div>
+      <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:10px">SAMSUNG INTERNET</div>
+        <div style="font-size:13px;color:var(--sub);line-height:2">1. Tap ⋮ menu (three dots, bottom)<br>2. Tap "Add page to" → "Home screen"<br>3. Confirm ✓</div>
       </div>
-      <div style="background:#0a0f1a;border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--blue);letter-spacing:2px;margin-bottom:10px">USING CHROME</div>
-        <div style="font-size:13px;color:var(--sub);line-height:2">
-          1. Tap the <strong style="color:var(--text)">⋮ menu</strong> (three dots, top right)<br>
-          2. Tap <strong style="color:var(--text)">"Add to Home screen"</strong><br>
-          3. Tap <strong style="color:var(--text)">"Add"</strong> to confirm ✓
-        </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:14px">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--blue);letter-spacing:2px;margin-bottom:10px">CHROME</div>
+        <div style="font-size:13px;color:var(--sub);line-height:2">1. Tap ⋮ menu (top right)<br>2. "Add to Home screen"<br>3. Tap "Add" ✓</div>
       </div>
-      <div id="install-btn-wrap"></div>
-      <div style="background:#0a0f1a;border-radius:12px;padding:14px;margin-top:10px">
-        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--purple);letter-spacing:2px;margin-bottom:8px">WORKS OFFLINE ✓</div>
-        <div style="font-size:13px;color:var(--sub);line-height:1.7">
-          Once installed, your data and quests are stored on your phone. You don't need internet to log quests — everything saves locally.
+    </div>
+    <div class="track-card" style="border-color:rgba(248,113,113,.3)">
+      <div class="track-title" style="color:var(--red)">⚠️ Reset Progress</div>
+      <div class="track-sub">Wipes all XP, workouts, weights. There's no going back.</div>
+      <button class="btn-log" style="background:var(--red);width:100%" onclick="resetAll()">Reset Everything</button>
+    </div>
+    <div class="track-card">
+      <div class="track-title" style="color:var(--muted)">About</div>
+      <div class="track-sub" style="margin-bottom:0">Built as a personalised gamified training program. All data stays on this device — nothing is sent anywhere.</div>
+    </div>`;
+}
+
+function resetAll(){
+  if(!confirm('This will wipe ALL progress. Are you sure?'))return;
+  if(!confirm('Last chance — really reset everything?'))return;
+  Object.keys(localStorage).filter(k=>k.startsWith('lrpg_')).forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+let restTimer=null,restRemaining=0;
+
+function startWorkout(){
+  const w=getTodayWorkout();
+  if(!w||w.type==='rest')return;
+  const {phase}=getCurrentPhase();
+  S.activeWorkout={
+    workoutKey:`${phase.id}-${w.day}`,name:w.name,type:w.type,xp:w.xp,
+    started:Date.now(),
+    sets:w.ex.map(e=>({id:e.id,completed:Array(e.sets).fill(false)})),
+  };
+  showWorkoutView();
+}
+
+function showWorkoutView(){
+  const aw=S.activeWorkout;
+  if(!aw)return;
+  const w=getTodayWorkout();
+  const totalSets=aw.sets.reduce((s,x)=>s+x.completed.length,0);
+  const doneSets=aw.sets.reduce((s,x)=>s+x.completed.filter(Boolean).length,0);
+  const pct=(doneSets/totalSets)*100;
+  const exHtml=w.ex.map((e,exIdx)=>{
+    const meta=EX[e.id];
+    const setData=aw.sets[exIdx];
+    const exDone=setData.completed.every(Boolean);
+    const expanded=!exDone;
+    const setsHtml=setData.completed.map((d,i)=>`<button class="set-btn ${d?'done':''}" onclick="toggleSet(${exIdx},${i},${e.rest})">${d?'✓':'Set '+(i+1)}</button>`).join('');
+    return `<div class="ex-card ${exDone?'completed':''} ${expanded?'expanded':''}" id="ex-${exIdx}">
+      <div class="ex-head" onclick="toggleEx(${exIdx})">
+        <div class="ex-num">${exDone?'✓':exIdx+1}</div>
+        <div class="ex-name-wrap">
+          <div class="ex-name">${meta.name}</div>
+          <div class="ex-target">${e.sets}×${e.reps}${e.rest?` · ${e.rest}s rest`:''}</div>
         </div>
+        <div class="ex-chev">▼</div>
+      </div>
+      <div class="ex-body">
+        <div class="ex-notes">${meta.notes}</div>
+        <div class="ex-alt"><strong>Substitution:</strong> ${meta.alt}</div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:6px">SETS</div>
+        <div class="sets-grid">${setsHtml}</div>
       </div>
     </div>`;
+  }).join('');
+  const allDone=doneSets===totalSets;
+  document.getElementById('workout-view').innerHTML=`
+    <div class="wv-header">
+      <button class="wv-back" onclick="exitWorkout()">←</button>
+      <div class="wv-titles">
+        <div class="wv-title">${w.name}</div>
+        <div class="wv-sub">+${w.xp} XP on completion</div>
+      </div>
+    </div>
+    <div class="wv-prog">
+      <div class="wv-prog-bar"><div class="wv-prog-fill" style="width:${pct}%"></div></div>
+      <div class="wv-prog-text">${doneSets} / ${totalSets} sets complete</div>
+    </div>
+    ${exHtml}
+    <div id="rest-timer-fixed" style="display:none"></div>
+    <div class="wv-finish">
+      <button onclick="finishWorkout()" ${!allDone?'disabled':''}>${allDone?'COMPLETE WORKOUT 🏆':`FINISH (${totalSets-doneSets} SETS LEFT)`}</button>
+    </div>`;
+  document.getElementById('workout-view').classList.add('show');
+}
 
-  if (deferredInstall) {
-    document.getElementById('install-btn-wrap').innerHTML = `
-      <button onclick="triggerInstall()" style="background:var(--blue);color:#000;border:none;border-radius:10px;padding:13px;width:100%;font-family:'Cinzel',serif;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:1px">
-        ⚡ Install Now (Chrome detected)
-      </button>`;
+function toggleEx(idx){document.getElementById('ex-'+idx).classList.toggle('expanded')}
+
+function toggleSet(exIdx,setIdx,restSec){
+  const aw=S.activeWorkout;
+  if(!aw)return;
+  aw.sets[exIdx].completed[setIdx]=!aw.sets[exIdx].completed[setIdx];
+  S.activeWorkout=aw;
+  showWorkoutView();
+  if(aw.sets[exIdx].completed[setIdx]&&restSec>0)startRestTimer(restSec);
+}
+
+function startRestTimer(sec){
+  clearInterval(restTimer);
+  restRemaining=sec;
+  const elem=document.getElementById('rest-timer-fixed');
+  elem.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:var(--surface);border:1px solid var(--orange);border-radius:14px;padding:12px 14px;z-index:50;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.5)';
+  const update=()=>{
+    elem.innerHTML=`<span style="font-family:'Cinzel',serif;font-size:10px;color:var(--orange);letter-spacing:2px">REST</span><span style="flex:1;font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--orange);letter-spacing:2px">${restRemaining}s</span><button onclick="stopRest()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:11px;font-family:'Cinzel',serif;cursor:pointer">SKIP</button>`;
+  };
+  update();
+  restTimer=setInterval(()=>{
+    restRemaining--;
+    if(restRemaining<=0){stopRest();try{navigator.vibrate?.(300)}catch{}showToast('Rest done — next set!','#f97316')}
+    else update();
+  },1000);
+}
+
+function stopRest(){
+  clearInterval(restTimer);
+  const e=document.getElementById('rest-timer-fixed');
+  if(e)e.style.display='none';
+}
+
+function exitWorkout(){
+  if(confirm('Exit workout? Progress is saved — resume from Today.')){
+    document.getElementById('workout-view').classList.remove('show');
+    stopRest();
   }
 }
 
-function triggerInstall() {
-  if (!deferredInstall) return;
-  deferredInstall.prompt();
-  deferredInstall.userChoice.then(r => {
-    if (r.outcome === 'accepted') showToast('App installed! 🎉', '#34d399');
-    deferredInstall = null;
-  });
+function finishWorkout(){
+  const aw=S.activeWorkout;
+  if(!aw)return;
+  const oldLvl=getLvl(S.xp).cur.level;
+  S.xp=S.xp+aw.xp;
+  const newLvl=getLvl(S.xp).cur.level;
+  const wks=S.workouts;
+  wks.unshift({workoutKey:aw.workoutKey,name:aw.name,type:aw.type,xp:aw.xp,date:new Date().toDateString(),ts:Date.now()});
+  S.workouts=wks;
+  S.activeWorkout=null;
+  stopRest();
+  document.getElementById('workout-view').classList.remove('show');
+  document.getElementById('complete-title').textContent=newLvl>oldLvl?`LEVEL UP! → ${getLvl(S.xp).cur.title}`:'Workout Complete';
+  document.getElementById('complete-xp').textContent=`+${aw.xp} XP earned`;
+  const {phase,completed}=getCurrentPhase();
+  document.getElementById('complete-msg').textContent=phase.nextAt?`${phase.nextAt-completed} workouts until "${PHASES[phase.id]?.name}" unlocks.`:`You're in the final phase. Pick a race date.`;
+  document.getElementById('complete-modal').style.display='flex';
 }
 
-// ── MODAL ──
-function closeModal() {
-  document.getElementById('modal-overlay').style.display = 'none';
-  S.welcomed = true;
+function closeComplete(){
+  document.getElementById('complete-modal').style.display='none';
+  setTab('today');
 }
 
-// ── INIT ──
-if (S.welcomed) document.getElementById('modal-overlay').style.display = 'none';
-
-// PWA / SW
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+function completeRest(){
+  if(todayCompleted())return;
+  const w=getTodayWorkout();
+  const {phase}=getCurrentPhase();
+  S.xp=S.xp+w.xp;
+  const wks=S.workouts;
+  wks.unshift({workoutKey:`${phase.id}-${w.day}`,name:w.name,type:'rest',xp:w.xp,date:new Date().toDateString(),ts:Date.now()});
+  S.workouts=wks;
+  showToast(`+${w.xp} XP — rest acknowledged 😴`,'#a78bfa');
+  render();
 }
 
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstall = e;
+function completeBonus(id){
+  const done=S.bonusToday;
+  if(done[id])return;
+  done[id]=true;
+  S.bonusToday=done;
+  const b=BONUS.find(x=>x.id===id);
+  S.xp=S.xp+b.xp;
+  showToast(`+${b.xp} XP — ${b.label}`,'#fbbf24');
+  render();
+}
+
+function dismissWelcome(){
+  document.getElementById('welcome-modal').style.display='none';
+  S.welcomed=true;
+}
+
+if(S.welcomed)document.getElementById('welcome-modal').style.display='none';
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+window.addEventListener('load',()=>{
+  if(S.activeWorkout){
+    setTimeout(()=>{
+      if(confirm('Resume your in-progress workout?'))showWorkoutView();
+      else S.activeWorkout=null;
+    },500);
+  }
 });
 
-renderHeader();
-renderContent();
+render();
 </script>
 </body>
 </html>
