@@ -988,7 +988,7 @@ function getLvl(xp){
   return {cur,nxt};
 }
 function getStreak(){
-  const dates=[...new Set(S.workouts.map(w=>w.date))].sort((a,b)=>new Date(b)-new Date(a));
+  const dates=[...new Set(S.workouts.filter(w=>!w.isMarker).map(w=>w.date))].sort((a,b)=>new Date(b)-new Date(a));
   if(!dates.length)return 0;
   const today=new Date().toDateString();
   const yday=new Date(Date.now()-86400000).toDateString();
@@ -998,6 +998,39 @@ function getStreak(){
     if((new Date(dates[i-1])-new Date(dates[i]))/86400000===1)s++;else break;
   }
   return s;
+}
+
+function daysSinceLastWorkout(){
+  const wks = S.workouts;
+  // Skip marker-only entries (comebacks etc) — we want days since a real workout
+  const real = wks.filter(w => !w.isMarker);
+  if (!real.length) return null;
+  const lastTs = real[0].ts;
+  if (!lastTs) return null;
+  const diffMs = Date.now() - lastTs;
+  return Math.floor(diffMs / 86400000);
+}
+
+// "Comeback mode" can also be muted for the day — once they pick a path, don't show again today
+function isComebackMuted(){
+  const muted = localStorage.getItem('lrpg_comeback_muted_day');
+  return muted === new Date().toDateString();
+}
+function muteComebackToday(){
+  localStorage.setItem('lrpg_comeback_muted_day', new Date().toDateString());
+}
+// Pending intensity for today: 'tender' | 'easy' | 'full' (full = default)
+function getTodayIntensity(){
+  const stored = localStorage.getItem('lrpg_intensity_day');
+  if (!stored) return 'full';
+  try {
+    const p = JSON.parse(stored);
+    if (p.date === new Date().toDateString()) return p.intensity || 'full';
+  } catch {}
+  return 'full';
+}
+function setTodayIntensity(intensity){
+  localStorage.setItem('lrpg_intensity_day', JSON.stringify({date:new Date().toDateString(), intensity}));
 }
 function todayCompleted(){
   const today=new Date().toDateString();
@@ -1041,8 +1074,52 @@ function renderToday(){
   const phaseTotal=phase.nextAt;
   const phasePct=phaseTotal?Math.min((completed/phaseTotal)*100,100):100;
 
+  // ── COMEBACK MODE ──
+  // Trigger if it's been 5+ days since last workout, today's workout isn't done, and user hasn't dismissed it for today
+  const daysAway = daysSinceLastWorkout();
+  const showComeback = daysAway !== null && daysAway >= 5 && !done && !isComebackMuted() && w.type !== 'rest';
+  const intensity = getTodayIntensity();
+  const intensityBadge = (intensity !== 'full' && !done) ? (
+    intensity === 'tender' ? `<div style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--purple);text-align:center;font-family:'Cinzel',serif;letter-spacing:1px">🪶 TENDER MODE · WALK + MOBILITY ONLY</div>` :
+    intensity === 'easy' ? `<div style="background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--blue);text-align:center;font-family:'Cinzel',serif;letter-spacing:1px">⚖️ STEADY MODE · 60% VOLUME TODAY</div>` :
+    ''
+  ) : '';
+
   let heroHtml;
-  if(w.type==='rest'){
+
+  if (showComeback){
+    // Construct comeback messaging based on duration
+    let timeAway, eyebrow, title, message;
+    if (daysAway < 14){
+      timeAway = `${daysAway} days`;
+      eyebrow = 'Welcome Back';
+      title = `${daysAway} days. So what.`;
+      message = `Life happens. The work you\'ve done is still here — your phase, your level, your XP, all preserved. <strong>What matters is you opened the app today.</strong>`;
+    } else if (daysAway < 30){
+      timeAway = `${daysAway} days`;
+      eyebrow = 'Welcome Back';
+      title = `Welcome back.`;
+      message = `It\'s been ${daysAway} days. You haven\'t lost a thing — your progress is exactly where you left it. The body remembers. <strong>One workout today is enough.</strong>`;
+    } else {
+      const months = Math.floor(daysAway/30);
+      timeAway = months === 1 ? '1 month' : `${months} months`;
+      eyebrow = 'You Came Back';
+      title = `That took courage.`;
+      message = `${timeAway} is a long time. Your phase, level, and XP are all preserved — but your body needs to remember. <strong>Start gentle today. Let the muscle memory wake up.</strong>`;
+    }
+    heroHtml = `<div class="hero-workout" style="border-color:var(--purple);background:linear-gradient(135deg,#1a1530,#0f1a2e);box-shadow:0 0 40px rgba(167,139,250,.25)">
+      <div class="hero-eyebrow" style="color:var(--purple)">${eyebrow} · ${timeAway}</div>
+      <div class="hero-title">${title}</div>
+      <div class="hero-meta">${message}</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        <span style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--green);padding:4px 10px;border-radius:99px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;font-weight:700">PHASE ${phase.id} · ${phase.name.toUpperCase()}</span>
+        <span style="background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:var(--blue);padding:4px 10px;border-radius:99px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;font-weight:700">LEVEL ${cur.level}</span>
+        <span style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:var(--amber);padding:4px 10px;border-radius:99px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;font-weight:700">${S.xp.toLocaleString()} XP</span>
+      </div>
+      <button class="hero-btn" style="background:var(--purple);margin-bottom:6px" onclick="openComebackChoice()">CHOOSE TODAY\'S PATH →</button>
+      <button onclick="dismissComeback()" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;padding:8px;cursor:pointer;width:100%">SHOW NORMAL WORKOUT INSTEAD</button>
+    </div>`;
+  } else if(w.type==='rest'){
     heroHtml=`<div class="hero-workout" style="border-color:var(--purple);box-shadow:0 0 40px rgba(167,139,250,.18)">
       <div class="hero-eyebrow" style="color:var(--purple)">Today · ${DAY_NAMES[w.day]}</div>
       <div class="hero-title">${w.name} 😴</div>
@@ -1105,6 +1182,7 @@ function renderToday(){
       <div class="stat-pill"><div class="stat-pill-val" style="color:var(--purple)">P${phase.id}</div><div class="stat-pill-lbl">Phase</div></div>
     </div>
     <button onclick="showWeeklyReview('rolling')" style="width:100%;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(96,165,250,.06));border:1px solid rgba(167,139,250,.3);color:var(--purple);border-radius:10px;padding:9px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-bottom:12px">📊 WEEKLY REVIEW</button>
+    ${intensityBadge}
     ${heroHtml}
     <div class="prog-card">
       <div class="prog-row"><span class="prog-label">Level Progress</span><span class="prog-val" style="color:${cur.color}">${cur.title}</span></div>
@@ -1661,7 +1739,10 @@ function renderTrack(){
   const lastMeasDays=lastMeas?Math.floor((Date.now()-lastMeas.ts)/86400000):null;
   const measStatus=lastMeasDays===null?'First log sets your baseline — these numbers are more honest than the scale ever will be.':lastMeasDays===0?'Logged today.':lastMeasDays===1?'Logged yesterday.':`Last logged ${lastMeasDays} day${lastMeasDays===1?'':'s'} ago${lastMeasDays>=30?' · time for new ones':' · monthly is ideal'}`;
 
-  const workoutRows=workouts.slice(0,10).map(w=>{
+  const workoutRows=workouts.slice(0,15).map(w=>{
+    if (w.type === 'comeback'){
+      return `<div class="row-entry" style="background:rgba(167,139,250,.06);margin:2px -4px;padding:8px 10px;border-radius:6px"><span style="color:var(--purple);font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px">${w.name}</span><span style="color:var(--muted);font-size:11px">${w.date.split(' ').slice(0,3).join(' ')}</span></div>`;
+    }
     const icon=w.type==='strength'?'💪':w.type==='cardio'?'🏃':w.type==='hyrox'?'⚡':'😴';
     return `<div class="row-entry"><span style="color:var(--sub)">${icon} ${w.name}</span><div style="display:flex;gap:10px;align-items:center"><span style="color:var(--green);font-family:'Cinzel',serif;font-weight:700;font-size:12px">+${w.xp}</span><span style="color:var(--muted);font-size:11px">${w.date.split(' ').slice(0,3).join(' ')}</span></div></div>`;
   }).join('');
@@ -1816,20 +1897,53 @@ let restTimer=null,restRemaining=0;
 function startWorkout(){
   const w=getTodayWorkout();
   if(!w||w.type==='rest')return;
+  const intensity = getTodayIntensity();
+
+  // Tender mode: replace today's workout with a quick walk-only session
+  if (intensity === 'tender'){
+    const tenderEx = [{id:'walk', sets:1, reps:'15 minutes', rest:0}];
+    S.activeWorkout = {
+      workoutKey:`tender-${new Date().toDateString()}`,
+      name:'🪶 Tender Day · Easy Walk',
+      type:'cardio',
+      xp:Math.floor(w.xp * 0.5), // half XP for the reduced session, but still meaningful
+      started:Date.now(),
+      sets:tenderEx.map((e,idx)=>({
+        id:e.id,
+        scheduleId:e.id,
+        completed:Array(e.sets).fill(false),
+        weight:null,
+      })),
+      _intensity:'tender',
+      _scheduleEx:tenderEx,
+    };
+    showWorkoutView();
+    return;
+  }
+
   const {phase}=getCurrentPhase();
   const lastWts=S.lastWeights;
   S.activeWorkout={
-    workoutKey:`${phase.id}-${w.day}`,name:w.name,type:w.type,xp:w.xp,
+    workoutKey:`${phase.id}-${w.day}`,name:w.name,type:w.type,
+    xp: intensity === 'easy' ? Math.floor(w.xp * 0.7) : w.xp, // 70% XP for easy mode reflects the reduced volume
     started:Date.now(),
     sets:w.ex.map((e,idx)=>{
       const resolved=resolveExercise(e,idx);
+      const lastWt = lastWts[resolved.id];
+      const initialWeight = WEIGHTED.has(resolved.id)
+        ? (intensity === 'easy' && lastWt
+            ? Math.round((parseFloat(lastWt) * 0.8) * 2) / 2 // 80% rounded to nearest 0.5
+            : (lastWt || ''))
+        : null;
+      const scaledSets = applyIntensityScaling(e.sets, intensity);
       return {
         id:resolved.id,
-        scheduleId:e.id, // remember the original for reference
-        completed:Array(e.sets).fill(false),
-        weight:WEIGHTED.has(resolved.id)?(lastWts[resolved.id]||''):null,
+        scheduleId:e.id,
+        completed:Array(scaledSets).fill(false),
+        weight:initialWeight,
       };
     }),
+    _intensity:intensity,
   };
   showWorkoutView();
 }
@@ -1838,10 +1952,12 @@ function showWorkoutView(){
   const aw=S.activeWorkout;
   if(!aw)return;
   const w=getTodayWorkout();
+  // Use the activeWorkout's own schedule if it overrides (e.g. tender mode), else today's scheduled exercises
+  const scheduleEx = aw._scheduleEx || w.ex;
   const totalSets=aw.sets.reduce((s,x)=>s+x.completed.length,0);
   const doneSets=aw.sets.reduce((s,x)=>s+x.completed.filter(Boolean).length,0);
   const pct=(doneSets/totalSets)*100;
-  const exHtml=w.ex.map((e,exIdx)=>{
+  const exHtml=scheduleEx.map((e,exIdx)=>{
     const setData=aw.sets[exIdx];
     const actualId = setData.id; // respects swap
     const meta=EX[actualId];
@@ -1934,8 +2050,8 @@ function showWorkoutView(){
     <div class="wv-header">
       <button class="wv-back" onclick="exitWorkout()">←</button>
       <div class="wv-titles">
-        <div class="wv-title">${w.name}</div>
-        <div class="wv-sub">+${w.xp} XP on completion</div>
+        <div class="wv-title">${aw.name}</div>
+        <div class="wv-sub">+${aw.xp} XP on completion${aw._intensity==='easy'?' · ⚖️ steady mode':aw._intensity==='tender'?' · 🪶 tender':''}</div>
       </div>
     </div>
     <div class="wv-prog">
@@ -2478,6 +2594,95 @@ function resetSwap(){
     previewWorkout(swapState.day);
     render();
   }
+}
+
+// ════════════════════════════════════════════════
+// COMEBACK FLOW
+// ════════════════════════════════════════════════
+function dismissComeback(){
+  muteComebackToday();
+  showToast('Showing today\'s scheduled workout', '#94a3b8');
+  render();
+}
+
+function openComebackChoice(){
+  const days = daysSinceLastWorkout() || 0;
+  const html = `<div class="modal-overlay" id="comeback-choice" onclick="if(event.target.id==='comeback-choice')this.remove()">
+    <div class="modal-box" style="max-width:420px;border-color:rgba(167,139,250,.4)">
+      <div style="font-size:34px;text-align:center;margin-bottom:6px">🔄</div>
+      <h2 style="color:var(--purple);text-align:center;font-size:17px">What kind of day is today?</h2>
+      <p style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:18px;line-height:1.5">Pick what you can give. Whatever you choose, today counts.</p>
+
+      <button onclick="chooseComeback('tender')" style="width:100%;background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(167,139,250,.04));border:1px solid var(--purple);color:var(--text);border-radius:12px;padding:14px;margin-bottom:8px;text-align:left;cursor:pointer;display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:26px;flex-shrink:0">🪶</span>
+        <span style="flex:1">
+          <span style="font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--purple);letter-spacing:1px;display:block">TENDER</span>
+          <span style="font-size:12px;color:var(--sub);line-height:1.5;display:block;margin-top:3px">A 15-min walk + the daily mobility flow. That's it. Counts as a full workout day.</span>
+        </span>
+      </button>
+
+      <button onclick="chooseComeback('easy')" style="width:100%;background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(96,165,250,.04));border:1px solid var(--blue);color:var(--text);border-radius:12px;padding:14px;margin-bottom:8px;text-align:left;cursor:pointer;display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:26px;flex-shrink:0">⚖️</span>
+        <span style="flex:1">
+          <span style="font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--blue);letter-spacing:1px;display:block">STEADY · EASE BACK IN</span>
+          <span style="font-size:12px;color:var(--sub);line-height:1.5;display:block;margin-top:3px">Today's workout at 60% — fewer sets, suggested weights drop 20%. Wake the body up gently.</span>
+        </span>
+      </button>
+
+      <button onclick="chooseComeback('full')" style="width:100%;background:linear-gradient(135deg,rgba(52,211,153,.15),rgba(52,211,153,.04));border:1px solid var(--green);color:var(--text);border-radius:12px;padding:14px;margin-bottom:8px;text-align:left;cursor:pointer;display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:26px;flex-shrink:0">🔥</span>
+        <span style="flex:1">
+          <span style="font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--green);letter-spacing:1px;display:block">FULL · I'M READY</span>
+          <span style="font-size:12px;color:var(--sub);line-height:1.5;display:block;margin-top:3px">Today's workout as scheduled. ${days >= 14 ? 'Brave choice after this long away — listen to your body.' : 'Best foot forward.'}</span>
+        </span>
+      </button>
+
+      <button onclick="document.getElementById('comeback-choice').remove()" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;padding:10px;cursor:pointer;width:100%;margin-top:6px">CANCEL</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function chooseComeback(intensity){
+  setTodayIntensity(intensity);
+  muteComebackToday();
+  document.getElementById('comeback-choice')?.remove();
+
+  // Log the comeback in workout history as a marker entry (helps with future "your resilience pattern" displays)
+  const days = daysSinceLastWorkout() || 0;
+  const wks = S.workouts;
+  const today = new Date().toDateString();
+  // Don't double-log if a comeback marker already exists for today
+  if (!wks.some(w => w.date === today && w.workoutKey === 'comeback-marker')){
+    wks.unshift({
+      workoutKey: 'comeback-marker',
+      name: `🔄 Comeback Day (${days} days away)`,
+      type: 'comeback',
+      xp: 0, // marker only — actual XP comes from the workout itself
+      date: today,
+      ts: Date.now(),
+      isMarker: true,
+    });
+    S.workouts = wks;
+  }
+
+  if (intensity === 'tender'){
+    showToast('🪶 Tender day · walk + mobility = win', '#a78bfa');
+  } else if (intensity === 'easy'){
+    showToast('⚖️ Steady mode · 60% volume today', '#60a5fa');
+  } else {
+    showToast('🔥 Full workout today · welcome back', '#34d399');
+  }
+  render();
+}
+
+// Use intensity to scale the sets when starting a workout
+function applyIntensityScaling(scheduleSets, intensity){
+  if (intensity === 'easy'){
+    // Reduce sets to floor(sets * 0.6) but minimum 1 set
+    return Math.max(1, Math.floor(scheduleSets * 0.6));
+  }
+  return scheduleSets; // 'full' and 'tender' don't change here ('tender' is handled differently)
 }
 
 function dismissWelcome(){
