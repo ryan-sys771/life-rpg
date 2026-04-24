@@ -107,6 +107,8 @@
   .sets-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
   .set-btn{flex:1;min-width:60px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 4px;font-family:'Cinzel',serif;font-size:11px;cursor:pointer;font-weight:700;letter-spacing:.5px}
   .set-btn.done{background:var(--green);color:#000;border-color:var(--green)}
+  .set-btn.timed{background:linear-gradient(135deg,#1e3a5f,#0f1a2e);color:var(--blue);border-color:var(--blue);font-size:12px}
+  .set-btn.timed:active{transform:scale(.97)}
 
   .wv-finish{padding:16px;margin-top:8px}
   .wv-finish button{width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:16px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;letter-spacing:1.5px;cursor:pointer}
@@ -208,6 +210,10 @@ const EX = {
   step_up:{name:'Box Step-Up',notes:'Box about knee height. Drive through the WHOLE foot of the standing leg — don\'t push off the back foot. Slow control on the way down.',alt:'Use any stable platform — a low bench or sturdy step.'},
   leg_press:{name:'Leg Press',notes:'Feet shoulder-width on platform. Lower under control until knees ~90°. Don\'t lock out at the top. Knee-friendly way to load heavy.',alt:'Goblet squats if no machine.'},
   single_leg_rdl:{name:'Single Leg RDL',notes:'Stand on one leg, hinge at hip while extending other leg behind for balance. Touch DB toward floor, return. Builds hamstring + balance.',alt:'Hold a wall lightly for balance if needed.'},
+  db_floor_press:{name:'DB Floor Press',notes:'Lie flat on floor, DBs at chest level. Press up, lock out at top. On the way down let your upper arms touch the floor gently — that\'s your stop point. Works bench-press muscles without a bench, and the floor limit actually protects your shoulders.',alt:'Push-ups (on knees if needed) if DBs aren\'t heavy enough to challenge you.'},
+  db_bentover_row:{name:'DB Bent-Over Row',notes:'DB in each hand, feet hip-width. Hinge at hips — push hips BACK, slight knee bend, torso at ~45°. Back flat like a tabletop, head neutral (don\'t crane up). Pull DBs to lower ribs, squeeze shoulder blades together. Slow lower. If lower back rounds, hinge less.',alt:'Support yourself: one hand on a chair/wall, row one DB at a time.'},
+  bb_bentover_row:{name:'Barbell Bent-Over Row',notes:'Overhand grip, shoulder-width. Hinge at hips until torso is ~45°, back flat, bar hangs below shoulders. Pull bar to lower chest/upper abs. Squeeze lats hard at top. Control the lower. CRITICAL: never let your lower back round — if it does, reduce the weight.',alt:'DB bent-over row if the barbell feels awkward, or Pendlay row (bar resets on floor between reps).'},
+  bb_glute_bridge:{name:'Barbell Glute Bridge',notes:'Sit on floor, roll barbell over hips — USE A PAD or folded towel or it\'ll dig in badly. Plant feet flat, knees bent. Drive heels into floor to lift hips until body is a straight line from knees to shoulders. Squeeze glutes HARD at the top for 2 seconds. Lower under control.',alt:'Bodyweight glute bridge (no weight), or dumbbells on hips instead of barbell.'},
   db_bench:{name:'Dumbbell Bench Press',notes:'Lie on bench, DBs at chest level. Press up and slightly together at the top. Lower under control until you feel a stretch.',alt:'Floor press if no bench. Push-ups if no DBs.'},
   incline_db:{name:'Incline DB Press',notes:'Bench at 30-45°. Press dumbbells up. Hits upper chest and shoulders.',alt:'Flat DB press if no incline available.'},
   push_up:{name:'Push-Up',notes:'Hands slightly wider than shoulders. Body in straight line. Lower chest to within an inch of floor. Drop to knees if needed — still effective.',alt:'Incline push-ups (hands on bench) make it easier. Decline (feet elevated) makes it harder.'},
@@ -238,6 +244,71 @@ const EX = {
   cardio_choice:{name:'Cardio (Your Choice)',notes:'Pick what you enjoy: bike, row, ski erg, swim. Steady moderate effort.',alt:'Walking always works.'},
 };
 
+const WEIGHTED = new Set([
+  'goblet_squat','box_squat','rdl','hip_thrust','reverse_lunge','walking_lunge',
+  'step_up','leg_press','single_leg_rdl',
+  'db_bench','incline_db','ohp','lat_pulldown','seated_row','db_row','face_pull',
+  'farmer_carry','sled_push','sled_pull','wall_ball','sandbag_lunge','ab_wheel',
+  'db_floor_press','db_bentover_row','bb_bentover_row','bb_glute_bridge'
+]);
+
+function parseDuration(reps){
+  const s = reps.toLowerCase().replace(/,/g,' ');
+  // Compound patterns with + or multipliers
+  if (s.includes('+') || /\d+\s*[×x]\s*\(/.test(s)){
+    let total = 0;
+    let reduced = s;
+    const multMatches = [...s.matchAll(/(\d+)\s*[×x]\s*\(([^)]+)\)/g)];
+    for (const m of multMatches){
+      const mult = parseInt(m[1]);
+      let inner = 0;
+      for (const mm of m[2].matchAll(/(\d+)\s*min/g)) inner += parseInt(mm[1]) * 60;
+      for (const mm of m[2].matchAll(/(\d+)\s*sec/g)) inner += parseInt(mm[1]);
+      total += inner * mult;
+      reduced = reduced.replace(m[0],' ');
+    }
+    for (const mm of reduced.matchAll(/(\d+)\s*min/g)) total += parseInt(mm[1]) * 60;
+    for (const mm of reduced.matchAll(/(\d+)\s*sec/g)) total += parseInt(mm[1]);
+    return total > 0 ? total : null;
+  }
+  // Simple / range patterns — use upper bound
+  const minMatch = s.match(/(\d+)(?:\s*[-–]\s*(\d+))?\s*min/);
+  if (minMatch) return parseInt(minMatch[2]||minMatch[1]) * 60;
+  const secMatch = s.match(/(\d+)(?:\s*[-–]\s*(\d+))?\s*sec/);
+  if (secMatch) return parseInt(secMatch[2]||secMatch[1]);
+  return null;
+}
+
+function formatTime(sec){
+  if (sec < 60) return `${sec}s`;
+  const m = Math.floor(sec/60);
+  const s = sec % 60;
+  return s === 0 ? `${m}m` : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function getLastPerformance(exId){
+  const wks = S.workouts;
+  for (const w of wks){
+    const hasEx = (w.exercises && w.exercises.includes(exId)) || (w.weights && w.weights[exId]);
+    if (hasEx){
+      const days = Math.floor((Date.now() - w.ts) / 86400000);
+      return {
+        weight: w.weights?.[exId] || null,
+        daysAgo: days
+      };
+    }
+  }
+  return null;
+}
+
+function formatDaysAgo(d){
+  if (d === 0) return 'today';
+  if (d === 1) return 'yesterday';
+  if (d < 7) return `${d} days ago`;
+  if (d < 30) return `${Math.floor(d/7)}w ago`;
+  return `${Math.floor(d/30)}mo ago`;
+}
+
 const PHASES = [
   {id:1,name:'Foundation',weeks:'Weeks 1–4',workoutsToUnlock:0,nextAt:12,
     desc:'Build the habit. Move daily. Establish baseline strength without pain. No running yet — joints need a few weeks of strength work first.',
@@ -246,22 +317,22 @@ const PHASES = [
       {day:0,name:'Rest Day',type:'rest',xp:30,note:'Genuine rest. Stretch if you want bonus XP.'},
       {day:1,name:'Strength A — Full Body',type:'strength',xp:150,ex:[
         {id:'goblet_squat',sets:3,reps:'8-10',rest:90},
-        {id:'db_bench',sets:3,reps:'8-10',rest:90},
-        {id:'db_row',sets:3,reps:'10 each side',rest:60},
+        {id:'db_floor_press',sets:3,reps:'8-10',rest:90},
+        {id:'db_bentover_row',sets:3,reps:'10',rest:60},
         {id:'glute_bridge',sets:3,reps:'12',rest:45},
         {id:'plank',sets:3,reps:'20-30 sec',rest:45}]},
       {day:2,name:'Walk 30 minutes',type:'cardio',xp:80,ex:[{id:'walk',sets:1,reps:'30 minutes',rest:0}]},
       {day:3,name:'Strength B — Full Body',type:'strength',xp:150,ex:[
         {id:'rdl',sets:3,reps:'8-10',rest:90},
-        {id:'lat_pulldown',sets:3,reps:'10',rest:60},
+        {id:'bb_bentover_row',sets:3,reps:'10',rest:75},
         {id:'push_up',sets:3,reps:'AMRAP (knees ok)',rest:60},
         {id:'dead_bug',sets:3,reps:'8 each side',rest:45},
-        {id:'hip_thrust',sets:3,reps:'10',rest:60}]},
+        {id:'bb_glute_bridge',sets:3,reps:'10',rest:60}]},
       {day:4,name:'Walk 30 minutes',type:'cardio',xp:80,ex:[{id:'walk',sets:1,reps:'30 minutes',rest:0}]},
       {day:5,name:'Strength C — Full Body',type:'strength',xp:150,ex:[
-        {id:'step_up',sets:3,reps:'8 each leg',rest:60},
-        {id:'incline_db',sets:3,reps:'8-10',rest:90},
-        {id:'seated_row',sets:3,reps:'10',rest:60},
+        {id:'reverse_lunge',sets:3,reps:'8 each leg',rest:60},
+        {id:'ohp',sets:3,reps:'8-10',rest:75},
+        {id:'db_bentover_row',sets:3,reps:'10',rest:60},
         {id:'side_plank',sets:2,reps:'20 sec each side',rest:30},
         {id:'farmer_carry',sets:3,reps:'30 seconds',rest:60}]},
       {day:6,name:'Long Walk 45–60 min',type:'cardio',xp:120,ex:[{id:'walk_long',sets:1,reps:'45-60 minutes',rest:0}]}]},
@@ -389,6 +460,8 @@ const S = {
   },
   get activeWorkout(){try{return JSON.parse(localStorage.getItem('lrpg_active')||'null')}catch{return null}},
   set activeWorkout(v){v?localStorage.setItem('lrpg_active',JSON.stringify(v)):localStorage.removeItem('lrpg_active')},
+  get lastWeights(){try{return JSON.parse(localStorage.getItem('lrpg_last_weights')||'{}')}catch{return{}}},
+  set lastWeights(v){localStorage.setItem('lrpg_last_weights',JSON.stringify(v))},
 };
 
 function getCurrentPhase(){
@@ -694,10 +767,15 @@ function startWorkout(){
   const w=getTodayWorkout();
   if(!w||w.type==='rest')return;
   const {phase}=getCurrentPhase();
+  const lastWts=S.lastWeights;
   S.activeWorkout={
     workoutKey:`${phase.id}-${w.day}`,name:w.name,type:w.type,xp:w.xp,
     started:Date.now(),
-    sets:w.ex.map(e=>({id:e.id,completed:Array(e.sets).fill(false)})),
+    sets:w.ex.map(e=>({
+      id:e.id,
+      completed:Array(e.sets).fill(false),
+      weight:WEIGHTED.has(e.id)?(lastWts[e.id]||''):null,
+    })),
   };
   showWorkoutView();
 }
@@ -714,7 +792,34 @@ function showWorkoutView(){
     const setData=aw.sets[exIdx];
     const exDone=setData.completed.every(Boolean);
     const expanded=!exDone;
-    const setsHtml=setData.completed.map((d,i)=>`<button class="set-btn ${d?'done':''}" onclick="toggleSet(${exIdx},${i},${e.rest})">${d?'✓':'Set '+(i+1)}</button>`).join('');
+    const isWeighted=WEIGHTED.has(e.id);
+    const timerSec=parseDuration(e.reps);
+    const last=getLastPerformance(e.id);
+    const lastHtml=last?`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(96,165,250,.08);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:12px">
+        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--blue);letter-spacing:2px;font-weight:700">LAST</span>
+        <span style="flex:1;color:var(--text);font-size:13px">${last.weight?`<strong style="font-family:'Cinzel',serif;color:var(--amber)">${last.weight}kg</strong> · `:''}${formatDaysAgo(last.daysAgo)}</span>
+      </div>`:`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(251,191,36,.05);border-left:3px solid var(--amber);border-radius:6px;margin-bottom:12px">
+        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px;font-weight:700">FIRST TIME</span>
+        <span style="flex:1;color:var(--sub);font-size:13px">Set today's baseline</span>
+      </div>`;
+    const weightHtml=isWeighted?`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid rgba(251,191,36,.2)">
+        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px">WEIGHT</span>
+        <input type="number" step="0.5" min="0" max="500" value="${setData.weight||''}" 
+          oninput="updateWeight(${exIdx},this.value)" 
+          placeholder="--" 
+          inputmode="decimal"
+          style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:15px;font-family:'Cinzel',serif;font-weight:700;outline:none;text-align:center">
+        <span style="font-size:11px;color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px">KG</span>
+      </div>`:'';
+    const setsHtml=setData.completed.map((d,i)=>{
+      if(timerSec&&!d){
+        return `<button class="set-btn timed" onclick="startExerciseTimer(${exIdx},${i},${timerSec},${e.rest})">▶ ${formatTime(timerSec)}</button>`;
+      }
+      return `<button class="set-btn ${d?'done':''}" onclick="toggleSet(${exIdx},${i},${e.rest})">${d?'✓':'Set '+(i+1)}</button>`;
+    }).join('');
     return `<div class="ex-card ${exDone?'completed':''} ${expanded?'expanded':''}" id="ex-${exIdx}">
       <div class="ex-head" onclick="toggleEx(${exIdx})">
         <div class="ex-num">${exDone?'✓':exIdx+1}</div>
@@ -725,9 +830,11 @@ function showWorkoutView(){
         <div class="ex-chev">▼</div>
       </div>
       <div class="ex-body">
+        ${lastHtml}
         <div class="ex-notes">${meta.notes}</div>
         <div class="ex-alt"><strong>Substitution:</strong> ${meta.alt}</div>
-        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:6px">SETS</div>
+        ${weightHtml}
+        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:6px">${timerSec?'TIMED SETS':'SETS'}</div>
         <div class="sets-grid">${setsHtml}</div>
       </div>
     </div>`;
@@ -764,6 +871,63 @@ function toggleSet(exIdx,setIdx,restSec){
   if(aw.sets[exIdx].completed[setIdx]&&restSec>0)startRestTimer(restSec);
 }
 
+function updateWeight(exIdx,value){
+  const aw=S.activeWorkout;
+  if(!aw)return;
+  aw.sets[exIdx].weight=value===''?'':parseFloat(value)||'';
+  S.activeWorkout=aw;
+  // No re-render — keep input focus
+}
+
+let exerciseTimer=null,exerciseRemaining=0,exerciseEnd=0;
+
+function startExerciseTimer(exIdx,setIdx,totalSec,restSec){
+  clearInterval(exerciseTimer);
+  stopRest();
+  exerciseRemaining=totalSec;
+  exerciseEnd=Date.now()+totalSec*1000;
+  const elem=document.getElementById('rest-timer-fixed');
+  const exName=EX[S.activeWorkout.sets[exIdx].id].name;
+  const update=()=>{
+    exerciseRemaining=Math.max(0,Math.ceil((exerciseEnd-Date.now())/1000));
+    const m=Math.floor(exerciseRemaining/60);
+    const s=exerciseRemaining%60;
+    const display=m>0?`${m}:${String(s).padStart(2,'0')}`:`${s}s`;
+    elem.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--green);letter-spacing:2px">▶ ACTIVE · ${exName.toUpperCase()}</span>
+      </div>
+      <div style="font-family:'Cinzel',serif;font-size:34px;font-weight:700;color:var(--green);letter-spacing:3px;text-align:center;line-height:1">${display}</div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button onclick="stopExerciseTimer(${exIdx},${setIdx},${restSec},true)" style="flex:2;background:var(--green);color:#000;border:none;border-radius:8px;padding:12px;font-family:'Cinzel',serif;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px">✓ MARK DONE</button>
+        <button onclick="stopExerciseTimer(${exIdx},${setIdx},${restSec},false)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:12px;font-size:11px;font-family:'Cinzel',serif;cursor:pointer">CANCEL</button>
+      </div>`;
+  };
+  elem.style.cssText='position:fixed;bottom:80px;left:16px;right:16px;background:var(--surface);border:2px solid var(--green);border-radius:14px;padding:14px 16px;z-index:50;display:block;box-shadow:0 4px 30px rgba(52,211,153,.35)';
+  update();
+  exerciseTimer=setInterval(()=>{
+    if(exerciseRemaining<=0){
+      stopExerciseTimer(exIdx,setIdx,restSec,true);
+      try{navigator.vibrate?.([300,100,300,100,500])}catch{}
+      showToast('Time complete — set done! 💪','#34d399');
+    } else update();
+  },500);
+}
+
+function stopExerciseTimer(exIdx,setIdx,restSec,markDone){
+  clearInterval(exerciseTimer);
+  const elem=document.getElementById('rest-timer-fixed');
+  if(elem)elem.style.display='none';
+  if(markDone){
+    const aw=S.activeWorkout;
+    if(!aw)return;
+    aw.sets[exIdx].completed[setIdx]=true;
+    S.activeWorkout=aw;
+    showWorkoutView();
+    if(restSec>0)startRestTimer(restSec);
+  }
+}
+
 function startRestTimer(sec){
   clearInterval(restTimer);
   restRemaining=sec;
@@ -790,20 +954,34 @@ function exitWorkout(){
   if(confirm('Exit workout? Progress is saved — resume from Today.')){
     document.getElementById('workout-view').classList.remove('show');
     stopRest();
+    clearInterval(exerciseTimer);
+    const elem=document.getElementById('rest-timer-fixed');
+    if(elem)elem.style.display='none';
   }
 }
 
 function finishWorkout(){
   const aw=S.activeWorkout;
   if(!aw)return;
+  // Save last used weights for next session
+  const lw=S.lastWeights;
+  const usedWeights={};
+  aw.sets.forEach(s=>{
+    if(s.weight&&WEIGHTED.has(s.id)){
+      lw[s.id]=s.weight;
+      usedWeights[s.id]=s.weight;
+    }
+  });
+  S.lastWeights=lw;
   const oldLvl=getLvl(S.xp).cur.level;
   S.xp=S.xp+aw.xp;
   const newLvl=getLvl(S.xp).cur.level;
   const wks=S.workouts;
-  wks.unshift({workoutKey:aw.workoutKey,name:aw.name,type:aw.type,xp:aw.xp,date:new Date().toDateString(),ts:Date.now()});
+  wks.unshift({workoutKey:aw.workoutKey,name:aw.name,type:aw.type,xp:aw.xp,date:new Date().toDateString(),ts:Date.now(),weights:usedWeights,exercises:aw.sets.map(s=>s.id)});
   S.workouts=wks;
   S.activeWorkout=null;
   stopRest();
+  clearInterval(exerciseTimer);
   document.getElementById('workout-view').classList.remove('show');
   document.getElementById('complete-title').textContent=newLvl>oldLvl?`LEVEL UP! → ${getLvl(S.xp).cur.title}`:'Workout Complete';
   document.getElementById('complete-xp').textContent=`+${aw.xp} XP earned`;
