@@ -224,6 +224,33 @@
   /* Story card sized for review */
   .review-section .story-card{margin-top:0;margin-bottom:0}
 
+  /* PIN LOCK */
+  #pin-overlay{position:fixed;inset:0;background:#0a0a0f;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;padding-top:calc(var(--safe-top) + 40px);padding-bottom:calc(var(--safe-bottom) + 24px)}
+  #pin-overlay::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(52,211,153,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(52,211,153,.04) 1px,transparent 1px);background-size:44px 44px;opacity:.5;pointer-events:none}
+  .pin-eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:5px;color:var(--green);text-transform:uppercase;margin-bottom:6px;position:relative;z-index:1}
+  .pin-title{font-family:'Cinzel',serif;font-size:22px;color:var(--text);margin-bottom:6px;letter-spacing:1px;text-align:center;position:relative;z-index:1}
+  .pin-sub{font-size:13px;color:var(--sub);margin-bottom:32px;text-align:center;line-height:1.5;max-width:300px;position:relative;z-index:1}
+  .pin-dots{display:flex;gap:14px;margin-bottom:32px;position:relative;z-index:1}
+  .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:all .15s}
+  .pin-dot.filled{background:var(--green);border-color:var(--green);box-shadow:0 0 12px rgba(52,211,153,.5)}
+  .pin-dot.error{background:var(--red);border-color:var(--red);animation:shakeRow .4s}
+  @keyframes shakeRow{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:280px;position:relative;z-index:1}
+  .pin-key{aspect-ratio:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:50%;font-family:'Cinzel',serif;font-size:24px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all .1s}
+  .pin-key:active{background:var(--green);color:#000;transform:scale(.94)}
+  .pin-key.action{background:transparent;border:none;font-size:14px;color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px}
+  .pin-key.action:active{background:var(--surface);color:var(--text);transform:scale(.94)}
+  .pin-error{color:var(--red);font-size:13px;font-family:'Cinzel',serif;letter-spacing:1px;margin-top:18px;height:18px;position:relative;z-index:1}
+
+  /* DATA TOOLS — Settings cards */
+  .data-tool-btn{display:flex;align-items:center;gap:10px;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;cursor:pointer;color:var(--text);text-align:left;font-weight:700;transition:all .15s}
+  .data-tool-btn:active{transform:scale(.98)}
+  .data-tool-btn.primary{background:var(--blue);color:#000;border-color:var(--blue)}
+  .data-tool-btn.warning{background:rgba(167,139,250,.12);border-color:var(--purple);color:var(--purple)}
+  .data-tool-btn .tool-icon{font-size:18px;flex-shrink:0}
+  .data-tool-btn .tool-text{flex:1}
+  .data-tool-btn .tool-text small{display:block;font-size:10px;opacity:.7;letter-spacing:.5px;margin-top:2px;font-weight:400}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -332,6 +359,7 @@
 <div id="toast"></div>
 <div id="mob-timer" style="display:none"></div>
 <div id="workout-view"></div>
+<div id="pin-overlay" style="display:none"></div>
 
 <div class="modal-overlay" id="welcome-modal">
   <div class="modal-box">
@@ -969,6 +997,9 @@ const S = {
   // Track when user last saw the auto-popup so we don't spam them
   get lastReviewAutoSeen(){return localStorage.getItem('lrpg_review_seen')||''},
   set lastReviewAutoSeen(v){localStorage.setItem('lrpg_review_seen',v)},
+  // PIN lock — stores a simple hash, not the raw PIN. Empty string = no PIN set.
+  get pinHash(){return localStorage.getItem('lrpg_pin_hash')||''},
+  set pinHash(v){v?localStorage.setItem('lrpg_pin_hash',v):localStorage.removeItem('lrpg_pin_hash')},
 };
 
 function getCurrentPhase(){
@@ -1863,8 +1894,46 @@ function saveMeasurements(){
 }
 
 function renderSettings(){
-  return `<div class="track-card" style="border-color:rgba(96,165,250,.3)">
-      <div class="track-title" style="color:var(--blue);font-size:15px;margin-bottom:12px">📲 Install on Galaxy Z Fold 7</div>
+  const pinSet = isPinSet();
+  return `
+    <div class="track-card" style="border-color:rgba(52,211,153,.3)">
+      <div class="track-title" style="color:var(--green);font-size:14px;margin-bottom:8px">🔒 PIN Lock</div>
+      <div class="track-sub">${pinSet ? 'Enabled — required to open the app. Stops anyone picking up your phone from poking around.' : 'Off — anyone with your phone can open the app. Add a 4-digit PIN to gate access.'}</div>
+      ${pinSet ? `
+        <button class="data-tool-btn" onclick="changePin()">
+          <span class="tool-icon">🔄</span>
+          <span class="tool-text">Change PIN<small>Update your 4-digit code</small></span>
+        </button>
+        <div style="height:6px"></div>
+        <button class="data-tool-btn" style="border-color:rgba(248,113,113,.3);color:var(--red)" onclick="removePin()">
+          <span class="tool-icon">🔓</span>
+          <span class="tool-text">Remove PIN Lock<small>App opens without prompt</small></span>
+        </button>
+      ` : `
+        <button class="data-tool-btn primary" onclick="setupNewPin()">
+          <span class="tool-icon">🔒</span>
+          <span class="tool-text">Set Up PIN<small>Choose a 4-digit code</small></span>
+        </button>
+      `}
+    </div>
+
+    <div class="track-card" style="border-color:rgba(96,165,250,.3)">
+      <div class="track-title" style="color:var(--blue);font-size:14px;margin-bottom:8px">💾 Backup & Restore</div>
+      <div class="track-sub">All your data lives only on this phone. Export occasionally — to Drive, email, anywhere — so a broken/lost phone doesn't wipe months of progress.</div>
+      <button class="data-tool-btn primary" onclick="exportData()">
+        <span class="tool-icon">📥</span>
+        <span class="tool-text">Export My Data<small>Download a .json backup file</small></span>
+      </button>
+      <div style="height:6px"></div>
+      <button class="data-tool-btn warning" onclick="importData()">
+        <span class="tool-icon">📤</span>
+        <span class="tool-text">Restore From Backup<small>⚠️ Replaces all current data</small></span>
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;font-style:italic">💡 The exported file contains workouts, weights, measurements, ratings, swaps, and reflections — but NOT your PIN. The PIN stays only on this device.</div>
+    </div>
+
+    <div class="track-card" style="border-color:rgba(96,165,250,.3)">
+      <div class="track-title" style="color:var(--blue);font-size:14px;margin-bottom:12px">📲 Install on Galaxy Z Fold 7</div>
       <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px">
         <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:10px">SAMSUNG INTERNET</div>
         <div style="font-size:13px;color:var(--sub);line-height:2">1. Tap ⋮ menu (three dots, bottom)<br>2. Tap "Add page to" → "Home screen"<br>3. Confirm ✓</div>
@@ -1874,11 +1943,13 @@ function renderSettings(){
         <div style="font-size:13px;color:var(--sub);line-height:2">1. Tap ⋮ menu (top right)<br>2. "Add to Home screen"<br>3. Tap "Add" ✓</div>
       </div>
     </div>
+
     <div class="track-card" style="border-color:rgba(248,113,113,.3)">
       <div class="track-title" style="color:var(--red)">⚠️ Reset Progress</div>
-      <div class="track-sub">Wipes all XP, workouts, weights. There's no going back.</div>
+      <div class="track-sub">Wipes all XP, workouts, weights, measurements, ratings — everything except the PIN. There's no going back. Export a backup first if you might want it later.</div>
       <button class="btn-log" style="background:var(--red);width:100%" onclick="resetAll()">Reset Everything</button>
     </div>
+
     <div class="track-card">
       <div class="track-title" style="color:var(--muted)">About</div>
       <div class="track-sub" style="margin-bottom:0">Built as a personalised gamified training program. All data stays on this device — nothing is sent anywhere.</div>
@@ -2685,6 +2756,273 @@ function applyIntensityScaling(scheduleSets, intensity){
   return scheduleSets; // 'full' and 'tender' don't change here ('tender' is handled differently)
 }
 
+// ════════════════════════════════════════════════
+// PIN LOCK
+// ════════════════════════════════════════════════
+// Simple non-cryptographic hash. Not real security — just prevents casual peeking.
+// (Real security would need a backend; this is the "stop my partner accidentally tapping things" tier.)
+function hashPin(pin){
+  let h = 0x811c9dc5; // FNV-1a 32-bit offset
+  const salt = 'lrpg-v1-' + pin;
+  for (let i = 0; i < salt.length; i++){
+    h ^= salt.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+const pinState = {
+  mode: 'unlock', // 'unlock' | 'set-new' | 'set-confirm' | 'change-old' | 'change-new' | 'change-confirm' | 'remove-confirm'
+  buffer: '',
+  firstEntry: '', // for set/change confirmations
+  attempts: 0,
+};
+
+function isPinSet(){
+  return !!S.pinHash;
+}
+
+function showPinLock(mode){
+  pinState.mode = mode || 'unlock';
+  pinState.buffer = '';
+  pinState.firstEntry = '';
+  pinState.attempts = 0;
+  renderPinScreen();
+  document.getElementById('pin-overlay').style.display = 'flex';
+}
+
+function hidePinLock(){
+  document.getElementById('pin-overlay').style.display = 'none';
+}
+
+function renderPinScreen(errorMsg){
+  const overlay = document.getElementById('pin-overlay');
+  let eyebrow, title, sub;
+  switch(pinState.mode){
+    case 'unlock':
+      eyebrow = 'Life RPG'; title = 'Welcome Back'; sub = 'Enter your 4-digit PIN to unlock'; break;
+    case 'set-new':
+      eyebrow = 'Set PIN'; title = 'Choose 4 Digits'; sub = 'You\'ll enter this each time you open the app'; break;
+    case 'set-confirm':
+      eyebrow = 'Set PIN'; title = 'Confirm PIN'; sub = 'Enter the same 4 digits again'; break;
+    case 'change-old':
+      eyebrow = 'Change PIN'; title = 'Current PIN'; sub = 'Enter your current PIN to continue'; break;
+    case 'change-new':
+      eyebrow = 'Change PIN'; title = 'New PIN'; sub = 'Choose your new 4 digits'; break;
+    case 'change-confirm':
+      eyebrow = 'Change PIN'; title = 'Confirm New PIN'; sub = 'Enter the new PIN again'; break;
+    case 'remove-confirm':
+      eyebrow = 'Remove PIN'; title = 'Confirm Identity'; sub = 'Enter your current PIN to remove the lock'; break;
+  }
+  const dots = [0,1,2,3].map(i => {
+    const filled = i < pinState.buffer.length;
+    return `<div class="pin-dot ${filled?'filled':''} ${errorMsg?'error':''}"></div>`;
+  }).join('');
+  const keypad = ['1','2','3','4','5','6','7','8','9','clear','0','delete'].map(k => {
+    if (k === 'clear') return `<button class="pin-key action" onclick="pinClear()">CLEAR</button>`;
+    if (k === 'delete') return `<button class="pin-key action" onclick="pinDelete()">⌫</button>`;
+    return `<button class="pin-key" onclick="pinPress('${k}')">${k}</button>`;
+  }).join('');
+
+  // Cancel button only available for non-unlock flows
+  const cancelHtml = pinState.mode !== 'unlock' ?
+    `<button onclick="cancelPinFlow()" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;padding:14px;cursor:pointer;margin-top:18px;position:relative;z-index:1">CANCEL</button>` : '';
+
+  overlay.innerHTML = `
+    <div class="pin-eyebrow">${eyebrow}</div>
+    <div class="pin-title">${title}</div>
+    <div class="pin-sub">${sub}</div>
+    <div class="pin-dots">${dots}</div>
+    <div class="pin-keypad">${keypad}</div>
+    <div class="pin-error">${errorMsg||''}</div>
+    ${cancelHtml}
+  `;
+}
+
+function pinPress(digit){
+  if (pinState.buffer.length >= 4) return;
+  pinState.buffer += digit;
+  renderPinScreen();
+  if (pinState.buffer.length === 4){
+    setTimeout(handlePinSubmit, 150);
+  }
+}
+
+function pinDelete(){
+  pinState.buffer = pinState.buffer.slice(0, -1);
+  renderPinScreen();
+}
+
+function pinClear(){
+  pinState.buffer = '';
+  renderPinScreen();
+}
+
+function cancelPinFlow(){
+  hidePinLock();
+  pinState.mode = 'unlock';
+  pinState.buffer = '';
+  pinState.firstEntry = '';
+}
+
+function handlePinSubmit(){
+  const entered = pinState.buffer;
+  const enteredHash = hashPin(entered);
+
+  if (pinState.mode === 'unlock'){
+    if (enteredHash === S.pinHash){
+      hidePinLock();
+      showToast('Welcome back', '#34d399');
+    } else {
+      pinState.attempts++;
+      pinState.buffer = '';
+      try { navigator.vibrate?.([100, 50, 100]); } catch {}
+      const tries = pinState.attempts;
+      const msg = tries >= 5 ? `${tries} wrong attempts. Take a breath.` : 'Wrong PIN — try again';
+      renderPinScreen(msg);
+    }
+  } else if (pinState.mode === 'set-new'){
+    pinState.firstEntry = entered;
+    pinState.buffer = '';
+    pinState.mode = 'set-confirm';
+    renderPinScreen();
+  } else if (pinState.mode === 'set-confirm'){
+    if (entered === pinState.firstEntry){
+      S.pinHash = hashPin(entered);
+      hidePinLock();
+      showToast('🔒 PIN set — app is now locked on open', '#34d399');
+      render();
+    } else {
+      pinState.buffer = '';
+      pinState.firstEntry = '';
+      pinState.mode = 'set-new';
+      try { navigator.vibrate?.([100, 50, 100]); } catch {}
+      renderPinScreen('PINs didn\'t match — try again');
+    }
+  } else if (pinState.mode === 'change-old'){
+    if (enteredHash === S.pinHash){
+      pinState.buffer = '';
+      pinState.mode = 'change-new';
+      renderPinScreen();
+    } else {
+      pinState.buffer = '';
+      try { navigator.vibrate?.([100, 50, 100]); } catch {}
+      renderPinScreen('Wrong current PIN');
+    }
+  } else if (pinState.mode === 'change-new'){
+    pinState.firstEntry = entered;
+    pinState.buffer = '';
+    pinState.mode = 'change-confirm';
+    renderPinScreen();
+  } else if (pinState.mode === 'change-confirm'){
+    if (entered === pinState.firstEntry){
+      S.pinHash = hashPin(entered);
+      hidePinLock();
+      showToast('🔒 PIN updated', '#34d399');
+      render();
+    } else {
+      pinState.buffer = '';
+      pinState.firstEntry = '';
+      pinState.mode = 'change-new';
+      try { navigator.vibrate?.([100, 50, 100]); } catch {}
+      renderPinScreen('PINs didn\'t match — try again');
+    }
+  } else if (pinState.mode === 'remove-confirm'){
+    if (enteredHash === S.pinHash){
+      S.pinHash = '';
+      hidePinLock();
+      showToast('🔓 PIN lock removed', '#a78bfa');
+      render();
+    } else {
+      pinState.buffer = '';
+      try { navigator.vibrate?.([100, 50, 100]); } catch {}
+      renderPinScreen('Wrong PIN');
+    }
+  }
+}
+
+// Settings entry points
+function setupNewPin(){ showPinLock('set-new'); }
+function changePin(){ showPinLock('change-old'); }
+function removePin(){
+  if (!confirm('Remove the PIN lock? Anyone with your phone will be able to open this app.')) return;
+  showPinLock('remove-confirm');
+}
+
+// ════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════════════════════
+const EXPORT_KEYS = [
+  'lrpg_xp', 'lrpg_welcomed_v2', 'lrpg_weights', 'lrpg_workouts',
+  'lrpg_bonus_day', 'lrpg_mobility_day', 'lrpg_active', 'lrpg_last_weights',
+  'lrpg_swaps', 'lrpg_measurements', 'lrpg_ratings', 'lrpg_bonus_prog',
+  'lrpg_reflections', 'lrpg_review_seen',
+  // Note: lrpg_pin_hash deliberately NOT exported — would defeat the purpose if backup leaks
+  // Note: lrpg_intensity_day, lrpg_comeback_muted_day deliberately NOT exported (transient)
+];
+
+function exportData(){
+  const payload = {
+    app: 'life-rpg',
+    version: 4,
+    exportedAt: new Date().toISOString(),
+    data: {}
+  };
+  for (const key of EXPORT_KEYS){
+    const val = localStorage.getItem(key);
+    if (val !== null) payload.data[key] = val;
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const fname = `life-rpg-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`📥 Backup saved: ${fname}`, '#60a5fa');
+}
+
+function importData(){
+  // Trigger file picker
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      if (payload.app !== 'life-rpg'){
+        alert('That doesn\'t look like a Life RPG backup file.');
+        return;
+      }
+      const itemCount = Object.keys(payload.data || {}).length;
+      const confirmMsg = `Import this backup?\n\nFile: ${file.name}\nDate: ${payload.exportedAt?.split('T')[0] || 'unknown'}\nItems: ${itemCount} keys\n\n⚠️ This will REPLACE all your current data. There's no undo.`;
+      if (!confirm(confirmMsg)) return;
+      if (!confirm('Last chance — really overwrite all current data with this backup?')) return;
+
+      // Wipe existing keys first (all lrpg_ keys, except pin_hash which user just authenticated through)
+      const keysToWipe = Object.keys(localStorage).filter(k => k.startsWith('lrpg_') && k !== 'lrpg_pin_hash');
+      keysToWipe.forEach(k => localStorage.removeItem(k));
+      // Apply imported data
+      for (const [key, val] of Object.entries(payload.data)){
+        if (key === 'lrpg_pin_hash') continue; // never restore PIN from backup
+        localStorage.setItem(key, val);
+      }
+      showToast(`✅ Restored ${itemCount} items`, '#34d399');
+      setTimeout(() => location.reload(), 1500); // hard reload to refresh all in-memory state cleanly
+    } catch (err){
+      alert('Couldn\'t read that file. Make sure it\'s a Life RPG backup .json');
+      console.error(err);
+    }
+  };
+  input.click();
+}
+
 function dismissWelcome(){
   document.getElementById('welcome-modal').style.display='none';
   S.welcomed=true;
@@ -2693,15 +3031,34 @@ function dismissWelcome(){
 if(S.welcomed)document.getElementById('welcome-modal').style.display='none';
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 
+// Show PIN lock immediately on app open if one is set
+if (isPinSet()){
+  showPinLock('unlock');
+}
+
 window.addEventListener('load',()=>{
-  if(S.activeWorkout){
-    setTimeout(()=>{
-      if(confirm('Resume your in-progress workout?'))showWorkoutView();
-      else S.activeWorkout=null;
-    },500);
-  } else if (shouldAutoShowReview()){
-    // Sunday evening, gentle auto-popup
-    setTimeout(()=>showWeeklyReview('sunday'), 800);
+  // Defer post-load prompts until PIN is unlocked
+  const runAfterUnlock = () => {
+    if(S.activeWorkout){
+      setTimeout(()=>{
+        if(confirm('Resume your in-progress workout?'))showWorkoutView();
+        else S.activeWorkout=null;
+      },500);
+    } else if (shouldAutoShowReview()){
+      setTimeout(()=>showWeeklyReview('sunday'), 800);
+    }
+  };
+  if (isPinSet()){
+    // Poll for unlock — cheap check every 300ms until overlay is hidden
+    const waitForUnlock = setInterval(() => {
+      const overlay = document.getElementById('pin-overlay');
+      if (!overlay || overlay.style.display === 'none'){
+        clearInterval(waitForUnlock);
+        runAfterUnlock();
+      }
+    }, 300);
+  } else {
+    runAfterUnlock();
   }
 });
 
