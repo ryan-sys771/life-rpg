@@ -122,6 +122,51 @@
   .meas-row .unit{font-size:11px;color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px}
   .meas-tip{font-size:11px;color:var(--muted);margin-top:-4px;margin-bottom:10px;padding-left:12px;line-height:1.4;font-style:italic}
 
+  /* SWAP UI */
+  .swap-btn{background:var(--surface2);border:1px solid var(--border);color:var(--purple);width:32px;height:32px;border-radius:8px;font-size:14px;cursor:pointer;flex-shrink:0;font-family:'Cinzel',serif;font-weight:700;margin-right:6px}
+  .swap-btn:active{transform:scale(.92);background:rgba(167,139,250,.15)}
+
+  #swap-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:flex;align-items:flex-end;justify-content:center}
+  #swap-modal .swap-sheet{background:#0f1420;border-top:2px solid rgba(167,139,250,.4);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;padding-bottom:var(--safe-bottom);animation:slideUp .3s cubic-bezier(.4,0,.2,1)}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .swap-head{padding:16px 18px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#0f1420;border-radius:20px 20px 0 0;z-index:5}
+  .swap-head h3{font-family:'Cinzel',serif;color:var(--purple);font-size:15px;margin-bottom:4px}
+  .swap-head p{font-size:12px;color:var(--muted);line-height:1.5}
+  .swap-head p strong{color:var(--text)}
+  .swap-close{position:absolute;top:14px;right:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer}
+  .swap-search{margin:10px 18px 0;position:relative}
+  .swap-search input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none;-webkit-appearance:none}
+  .swap-search input:focus{border-color:var(--purple)}
+  .swap-filters{padding:10px 18px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid var(--border)}
+  .filter-chip{background:var(--surface2);border:1px solid var(--border);color:var(--sub);border-radius:99px;padding:6px 12px;font-size:11px;font-family:'Cinzel',serif;letter-spacing:.5px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:4px;transition:all .15s}
+  .filter-chip.active{background:var(--purple);color:#000;border-color:var(--purple)}
+  .filter-chip.equip{font-size:10px;padding:5px 10px}
+  .filter-chip.equip.active{background:var(--blue);border-color:var(--blue)}
+  .swap-results{flex:1;overflow-y:auto;padding:0 18px 18px}
+  .swap-section-label{font-family:'Cinzel',serif;font-size:10px;color:var(--purple);letter-spacing:3px;text-transform:uppercase;font-weight:700;padding:14px 0 8px;display:flex;align-items:center;gap:6px}
+  .swap-section-label.alt{color:var(--muted)}
+  .swap-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+  .swap-card.recommended{border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.04)}
+  .swap-card:active{transform:scale(.98)}
+  .swap-card-name{font-family:'Cinzel',serif;font-size:13px;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+  .swap-card-meta{font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+  .swap-card-tag{background:var(--surface2);color:var(--sub);padding:2px 7px;border-radius:99px;font-size:10px}
+  .swap-card-tag.muscle{background:rgba(96,165,250,.12);color:var(--blue)}
+  .swap-card-tag.equip{background:rgba(251,191,36,.1);color:var(--amber)}
+  .swap-card-tag.wrist-warn{background:rgba(248,113,113,.15);color:var(--red)}
+  .swap-empty{text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;line-height:1.6}
+
+  /* CONFIRM SCOPE PROMPT */
+  .swap-confirm{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:700;display:flex;align-items:center;justify-content:center;padding:20px}
+  .swap-confirm-box{background:#0f1420;border:2px solid var(--purple);border-radius:18px;padding:22px;max-width:360px;width:100%}
+  .swap-confirm-box h3{font-family:'Cinzel',serif;color:var(--purple);font-size:15px;margin-bottom:6px;text-align:center}
+  .swap-confirm-box p{font-size:13px;color:var(--sub);text-align:center;margin-bottom:14px;line-height:1.5}
+  .swap-confirm-box p strong{color:var(--text)}
+  .swap-confirm-btn{display:block;width:100%;margin-bottom:6px;padding:12px;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px;border:1px solid;text-align:left}
+  .swap-confirm-btn.primary{background:var(--purple);color:#000;border-color:var(--purple)}
+  .swap-confirm-btn.secondary{background:transparent;color:var(--text);border-color:var(--border)}
+  .swap-confirm-btn small{display:block;font-size:10px;font-weight:400;letter-spacing:.5px;opacity:.75;margin-top:2px}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -254,57 +299,112 @@
 
 <script>
 const EX = {
-  goblet_squat:{name:'Goblet Squat',notes:'Hold a dumbbell vertically at chest. Sit back as if into a chair, knees tracking over toes (not collapsing in). Aim to break parallel if hip mobility allows. Pause briefly at the bottom.',alt:'No DB? Use a kettlebell, water jug, or do bodyweight box squats to a chair.'},
-  box_squat:{name:'Box Squat',notes:'Sit fully onto a low box/bench, pause, drive up. Removes momentum, perfect for learning depth and protecting knees.',alt:'Use any sturdy chair or bench at knee height.'},
-  rdl:{name:'Dumbbell Romanian Deadlift',notes:'Hold dumbbells in front of thighs. Push hips back (not down), let DBs slide down legs. Stop when you feel hamstrings stretch — usually mid-shin. Drive hips forward to stand.',alt:'Use a barbell, kettlebell, or backpack loaded with books.'},
-  hip_thrust:{name:'Hip Thrust',notes:'Upper back on bench, feet flat, weight on hips. Drive through heels to lift hips until body is a straight line. Squeeze glutes hard at the top.',alt:'Glute bridge on the floor (no bench needed).'},
-  glute_bridge:{name:'Glute Bridge',notes:'Lie on back, knees bent, feet flat. Drive heels into floor, squeeze glutes to lift hips. Hold 2 seconds at top.',alt:'Add a dumbbell on hips for resistance.'},
-  walking_lunge:{name:'Walking Lunge',notes:'Step forward into lunge, back knee hovers above floor. Drive through front heel to step into next lunge. Keep torso upright.',alt:'Reverse lunges if forward lunges hurt knees — much easier on the joint.'},
-  reverse_lunge:{name:'Reverse Lunge',notes:'Step BACKWARD into a lunge, lower back knee toward floor, drive through front heel to return. Much knee-friendlier than forward lunges.',alt:'Hold dumbbells at sides for added resistance.'},
-  step_up:{name:'Box Step-Up',notes:'Box about knee height. Drive through the WHOLE foot of the standing leg — don\'t push off the back foot. Slow control on the way down.',alt:'Use any stable platform — a low bench or sturdy step.'},
-  leg_press:{name:'Leg Press',notes:'Feet shoulder-width on platform. Lower under control until knees ~90°. Don\'t lock out at the top. Knee-friendly way to load heavy.',alt:'Goblet squats if no machine.'},
-  single_leg_rdl:{name:'Single Leg RDL',notes:'Stand on one leg, hinge at hip while extending other leg behind for balance. Touch DB toward floor, return. Builds hamstring + balance.',alt:'Hold a wall lightly for balance if needed.'},
-  db_floor_press:{name:'DB Floor Press',notes:'Lie flat on floor, DBs at chest level. Press up, lock out at top. On the way down let your upper arms touch the floor gently — that\'s your stop point. Works bench-press muscles without a bench, and the floor limit actually protects your shoulders.',alt:'Push-ups (on knees if needed) if DBs aren\'t heavy enough to challenge you.'},
-  db_bentover_row:{name:'DB Bent-Over Row',notes:'DB in each hand, feet hip-width. Hinge at hips — push hips BACK, slight knee bend, torso at ~45°. Back flat like a tabletop, head neutral (don\'t crane up). Pull DBs to lower ribs, squeeze shoulder blades together. Slow lower. If lower back rounds, hinge less.',alt:'Support yourself: one hand on a chair/wall, row one DB at a time.'},
-  bb_bentover_row:{name:'Barbell Bent-Over Row',notes:'Overhand grip, shoulder-width. Hinge at hips until torso is ~45°, back flat, bar hangs below shoulders. Pull bar to lower chest/upper abs. Squeeze lats hard at top. Control the lower. CRITICAL: never let your lower back round — if it does, reduce the weight.',alt:'DB bent-over row if the barbell feels awkward, or Pendlay row (bar resets on floor between reps).'},
-  bb_glute_bridge:{name:'Barbell Glute Bridge',notes:'Sit on floor, roll barbell over hips — USE A PAD or folded towel or it\'ll dig in badly. Plant feet flat, knees bent. Drive heels into floor to lift hips until body is a straight line from knees to shoulders. Squeeze glutes HARD at the top for 2 seconds. Lower under control.',alt:'Bodyweight glute bridge (no weight), or dumbbells on hips instead of barbell.'},
-  db_bench:{name:'Dumbbell Bench Press',notes:'Lie on bench, DBs at chest level. Press up and slightly together at the top. Lower under control until you feel a stretch.',alt:'Floor press if no bench. Push-ups if no DBs.'},
-  incline_db:{name:'Incline DB Press',notes:'Bench at 30-45°. Press dumbbells up. Hits upper chest and shoulders.',alt:'Flat DB press if no incline available.'},
-  push_up:{name:'Push-Up',notes:'Hands slightly wider than shoulders. Body in straight line. Lower chest to within an inch of floor. Drop to knees if needed — still effective.',alt:'Incline push-ups (hands on bench/box) make easier. Decline harder. FOR WRIST PAIN: grip two DBs on the floor for a neutral wrist (palm faces in) — this avoids the wrist-extension that hurts loaded wrists.'},
-  ohp:{name:'Overhead Press (DB)',notes:'Standing or seated. Press DBs from shoulder height to overhead. Don\'t arch lower back — brace core hard.',alt:'Seated version is easier on the spine.'},
-  lat_pulldown:{name:'Lat Pulldown',notes:'Wide overhand grip. Pull bar to upper chest, drive elbows down and back. Lean back ~10°. Squeeze lats at the bottom.',alt:'Banded pulldown anchored to a high point.'},
-  seated_row:{name:'Seated Cable Row',notes:'Sit tall, neutral grip. Pull handle to lower ribs, squeeze shoulder blades. Don\'t use momentum — slow control.',alt:'Bent-over DB rows or band rows.'},
-  db_row:{name:'Single-Arm DB Row',notes:'One knee on bench, other foot on floor. Pull DB to hip (not chest). Squeeze shoulder blade. Slow lower.',alt:'Standing bent-over row with both DBs.'},
-  inverted_row:{name:'Inverted Row',notes:'Hang under a bar (Smith machine, TRX, sturdy table). Pull chest to bar. The more horizontal your body, the harder.',alt:'Bend knees and put feet on floor to make easier.'},
-  face_pull:{name:'Face Pull',notes:'High cable with rope. Pull rope toward face, elbows high and wide. Vital for shoulder health when bench-pressing.',alt:'Band face pull anchored at head height.'},
-  plank:{name:'Plank',notes:'Forearms and toes. Body in straight line — no sagging hips, no piked butt. Brace abs HARD as if about to be punched.',alt:'Drop to knees if needed — still effective.'},
-  side_plank:{name:'Side Plank',notes:'On forearm, body straight, hips lifted. Hold without sagging. Both sides.',alt:'Knees down for easier version.'},
-  dead_bug:{name:'Dead Bug',notes:'On back, arms up, knees over hips. Lower opposite arm + leg slowly while keeping lower back PRESSED into floor.',alt:'Just move legs only if arms+legs is too much.'},
-  ab_wheel:{name:'Ab Wheel Rollout',notes:'On knees, roll wheel out as far as you can without lower back arching. Pull back with abs.',alt:'Use a barbell with plates or do plank-to-pike on a slider.'},
-  hanging_knee:{name:'Hanging Knee Raise',notes:'Hang from bar. Pull knees to chest using abs (not momentum). Slow lower.',alt:'Lying leg raise on the floor.'},
-  farmer_carry:{name:'Farmer\'s Carry',notes:'Heavy DB or KB in each hand. Walk with chest up, shoulders back. Hyrox staple.',alt:'Use one DB held at chest if you only have one heavy weight.'},
-  sled_push:{name:'Sled Push',notes:'Low body angle, drive through legs. Short steps, hard push. Direct Hyrox prep.',alt:'No sled? Push a heavy box across grass, or do heavy walking lunges.'},
-  sled_pull:{name:'Sled Pull',notes:'Backwards drag. Engage lats and legs. Brutal but builds posterior chain.',alt:'Heavy band rows for similar pulling pattern.'},
-  wall_ball:{name:'Wall Ball',notes:'Squat with med ball at chest, explode up and throw to target ~10ft high. Catch on the way down into next squat.',alt:'Goblet squat to overhead press with DB if no med ball.'},
-  sandbag_lunge:{name:'Sandbag Lunge',notes:'Bag on shoulders or front-rack. Walking lunges. Crushes legs and core.',alt:'Hold dumbbells or wear a weighted backpack.'},
-  burpee_broad:{name:'Burpee Broad Jump',notes:'Burpee, then jump forward as far as you can. Repeat. Hyrox event in pure form.',alt:'Step back/up instead of jumping if joints aren\'t ready.'},
-  ski_erg:{name:'Ski Erg',notes:'Reach up, drive down using lats and abs. Full body cardio. Hyrox event.',alt:'Rower or assault bike for similar conditioning.'},
-  row_erg:{name:'Rowing Machine',notes:'Drive with legs first, then lean back, then pull arms. Reverse on return. 80% legs.',alt:'Bike or ski erg.'},
-  walk:{name:'Walk',notes:'Brisk pace — talk but not sing. No incline initially. Land midfoot, not slamming heels.',alt:'Treadmill if weather is bad.'},
-  walk_long:{name:'Long Walk',notes:'Aim for the duration, not the pace. Bring water. Listen to a podcast or music. Time on feet is the goal.',alt:'Split into two shorter walks if needed.'},
-  run_walk:{name:'Run/Walk Intervals',notes:'Alternate running and walking. Run easy enough to hold a conversation. Walk to recover fully.',alt:'All walking is fine if knees feel sore.'},
-  easy_run:{name:'Easy Continuous Run',notes:'Conversational pace. If you can\'t speak in full sentences, slow down. Easy = build aerobic base.',alt:'Drop to run/walk intervals if needed.'},
-  long_run:{name:'Long Run',notes:'Slowest run of the week. Focus on time on feet. Walk breaks are 100% fine.',alt:'Long walk if knees are flaring up.'},
-  cardio_choice:{name:'Cardio (Your Choice)',notes:'Pick what you enjoy: bike, row, ski erg, swim. Steady moderate effort.',alt:'Walking always works.'},
+  // ── LEGS · QUAD-DOMINANT ──
+  goblet_squat:{name:'Goblet Squat',group:'legs',pattern:'squat',muscles:['quad','glute'],equip:['dumbbell'],wristSafe:true,notes:'Hold a dumbbell vertically at chest. Sit back as if into a chair, knees tracking over toes (not collapsing in). Aim to break parallel if hip mobility allows. Pause briefly at the bottom.',alt:'No DB? Use a kettlebell, water jug, or do bodyweight box squats to a chair.'},
+  box_squat:{name:'Box Squat',group:'legs',pattern:'squat',muscles:['quad','glute'],equip:['barbell','bench'],wristSafe:true,notes:'Sit fully onto a low box/bench, pause, drive up. Removes momentum, perfect for learning depth and protecting knees.',alt:'Use any sturdy chair or bench at knee height.'},
+  bb_back_squat:{name:'Barbell Back Squat',group:'legs',pattern:'squat',muscles:['quad','glute','core'],equip:['barbell','rack'],wristSafe:true,notes:'Bar on upper traps (high bar) or rear delts (low bar). Brace core, sit back AND down, knees track toes. Drive through whole foot. Demands rack & spotter for heavy work.',alt:'Goblet squat or front squat if no rack available.'},
+  front_squat:{name:'Front Squat',group:'legs',pattern:'squat',muscles:['quad','core'],equip:['barbell','rack'],wristSafe:false,notes:'Bar on front delts, elbows HIGH (parallel to floor), fingertip grip is fine. Stay vertical — let knees travel forward. Brutal on quads and core. Wrist-flexible required.',alt:'Goblet squat — same pattern, no wrist demand.'},
+  bulgarian_split_squat:{name:'Bulgarian Split Squat',group:'legs',pattern:'lunge',muscles:['quad','glute'],equip:['dumbbell','bench'],wristSafe:true,notes:'Back foot elevated on bench/box behind you. Front foot far enough out that knee doesn\'t pass toes. Lower straight down, drive through front heel. One of the best leg builders.',alt:'Reverse lunge — same pattern without the balance demand.'},
+  step_up:{name:'Box Step-Up',group:'legs',pattern:'lunge',muscles:['quad','glute'],equip:['dumbbell','bench'],wristSafe:true,notes:'Box about knee height. Drive through the WHOLE foot of the standing leg — don\'t push off the back foot. Slow control on the way down.',alt:'Use any stable platform — a low bench or sturdy step.'},
+  walking_lunge:{name:'Walking Lunge',group:'legs',pattern:'lunge',muscles:['quad','glute'],equip:['dumbbell'],wristSafe:true,notes:'Step forward into lunge, back knee hovers above floor. Drive through front heel to step into next lunge. Keep torso upright.',alt:'Reverse lunges if forward lunges hurt knees.'},
+  reverse_lunge:{name:'Reverse Lunge',group:'legs',pattern:'lunge',muscles:['quad','glute'],equip:['dumbbell'],wristSafe:true,notes:'Step BACKWARD into a lunge, lower back knee toward floor, drive through front heel to return. Much knee-friendlier than forward lunges.',alt:'Hold dumbbells at sides for added resistance.'},
+  leg_press:{name:'Leg Press',group:'legs',pattern:'squat',muscles:['quad','glute'],equip:['machine'],wristSafe:true,notes:'Feet shoulder-width on platform. Lower under control until knees ~90°. Don\'t lock out at the top. Knee-friendly way to load heavy.',alt:'Goblet squats if no machine.'},
+  leg_extension:{name:'Leg Extension',group:'legs',pattern:'isolation',muscles:['quad'],equip:['machine'],wristSafe:true,notes:'Adjust pad to sit on shins, not feet. Extend slowly, pause briefly at top, lower under control. Pure quad isolation. Don\'t kick — control.',alt:'Wall sit or split squat for similar quad emphasis.'},
+  wall_sit:{name:'Wall Sit',group:'legs',pattern:'isometric',muscles:['quad'],equip:['bodyweight'],wristSafe:true,notes:'Back flat against wall, slide down until thighs parallel to floor. Knees over ankles, not over toes. Hold. Burns more than expected.',alt:'Add a weight in your lap for extra challenge.'},
+  pistol_squat:{name:'Pistol Squat',group:'legs',pattern:'squat',muscles:['quad','glute','core'],equip:['bodyweight'],wristSafe:true,notes:'Single-leg squat — other leg extended forward. Sit back and down on one leg, control all the way. Hold a wall/TRX for assistance. Master before adding weight.',alt:'Assisted (hold a doorframe) or skater squat.'},
+
+  // ── LEGS · POSTERIOR CHAIN ──
+  rdl:{name:'Dumbbell Romanian Deadlift',group:'legs',pattern:'hinge',muscles:['hamstring','glute','back'],equip:['dumbbell'],wristSafe:true,notes:'Hold dumbbells in front of thighs. Push hips back (not down), let DBs slide down legs. Stop when you feel hamstrings stretch — usually mid-shin. Drive hips forward to stand.',alt:'Use a barbell, kettlebell, or backpack loaded with books.'},
+  bb_rdl:{name:'Barbell Romanian Deadlift',group:'legs',pattern:'hinge',muscles:['hamstring','glute','back'],equip:['barbell'],wristSafe:true,notes:'Bar starts at hips. Soft knees, push hips BACK keeping the bar close to legs (it should slide down your thighs). Lower until you feel a strong hamstring stretch. Drive hips forward to stand. Lats engaged throughout.',alt:'DB RDL is the same pattern with less load capacity.'},
+  conventional_deadlift:{name:'Conventional Deadlift',group:'legs',pattern:'hinge',muscles:['hamstring','glute','back','core'],equip:['barbell'],wristSafe:true,notes:'Bar over mid-foot. Hinge down, grip outside knees. Chest proud, lats tight, push the floor away with your legs. Bar stays glued to your body. The king of strength exercises — also unforgiving with bad form, so start light.',alt:'RDL — same pattern, less spinal load, easier to learn.'},
+  trap_bar_deadlift:{name:'Trap Bar Deadlift',group:'legs',pattern:'hinge',muscles:['hamstring','glute','quad','back'],equip:['trap-bar'],wristSafe:true,notes:'Stand inside the hex bar. Neutral grip means easier on shoulders and lower back than conventional. Squat-style or hinge-style both work. Excellent for tall lifters and beginners.',alt:'Conventional deadlift if no trap bar — slightly different stress pattern.'},
+  hip_thrust:{name:'Hip Thrust',group:'legs',pattern:'hinge',muscles:['glute','hamstring'],equip:['barbell','bench'],wristSafe:true,notes:'Upper back on bench, feet flat, weight on hips. Drive through heels to lift hips until body is a straight line. Squeeze glutes hard at the top. USE A PAD on the bar.',alt:'Glute bridge on the floor (no bench needed).'},
+  bb_glute_bridge:{name:'Barbell Glute Bridge',group:'legs',pattern:'hinge',muscles:['glute','hamstring'],equip:['barbell'],wristSafe:true,notes:'Sit on floor, roll barbell over hips — USE A PAD or folded towel or it\'ll dig in badly. Plant feet flat, knees bent. Drive heels into floor to lift hips until body is a straight line from knees to shoulders. Squeeze glutes HARD at the top for 2 seconds.',alt:'Bodyweight glute bridge, or dumbbells on hips.'},
+  glute_bridge:{name:'Glute Bridge',group:'legs',pattern:'hinge',muscles:['glute','hamstring'],equip:['bodyweight'],wristSafe:true,notes:'Lie on back, knees bent, feet flat. Drive heels into floor, squeeze glutes to lift hips. Hold 2 seconds at top.',alt:'Add a dumbbell on hips for resistance.'},
+  single_leg_rdl:{name:'Single Leg RDL',group:'legs',pattern:'hinge',muscles:['hamstring','glute'],equip:['dumbbell'],wristSafe:true,notes:'Stand on one leg, hinge at hip while extending other leg behind for balance. Touch DB toward floor, return. Builds hamstring + balance.',alt:'Hold a wall lightly for balance if needed.'},
+  good_morning:{name:'Good Morning',group:'legs',pattern:'hinge',muscles:['hamstring','back','glute'],equip:['barbell'],wristSafe:true,notes:'Bar on upper back like a back squat. Soft knees, hinge at hips until torso parallel to floor (or as far as flexibility allows). Drive hips forward to stand. Brutal hamstring builder.',alt:'DB RDL if you don\'t have a rack.'},
+  hamstring_curl:{name:'Hamstring Curl (machine)',group:'legs',pattern:'isolation',muscles:['hamstring'],equip:['machine'],wristSafe:true,notes:'Lying or seated. Curl heels toward butt, controlled. Pause at peak contraction. Lower slowly — the negative is where hamstrings grow.',alt:'Nordic curls (extreme difficulty) or single-leg glute bridge.'},
+
+  // ── LEGS · CALF ──
+  calf_raise:{name:'Calf Raise',group:'legs',pattern:'isolation',muscles:['calf'],equip:['dumbbell'],wristSafe:true,notes:'Stand on edge of step, heels hanging. Rise as high as possible on toes, pause, lower until heels drop below step level for a stretch. Hold DBs at sides for load. Important for shin splint prevention.',alt:'Bodyweight version on flat floor still effective.'},
+  seated_calf_raise:{name:'Seated Calf Raise',group:'legs',pattern:'isolation',muscles:['calf'],equip:['machine','dumbbell'],wristSafe:true,notes:'Sit, balls of feet on platform, weight on knees. Raise heels high, pause, slow lower. Targets soleus (deep calf muscle) which standing raises miss.',alt:'DBs on knees while seated on a bench, balls of feet on a book.'},
+
+  // ── PUSH · CHEST ──
+  db_bench:{name:'Dumbbell Bench Press',group:'push',pattern:'press',muscles:['chest','triceps','shoulder'],equip:['dumbbell','bench'],wristSafe:true,notes:'Lie on bench, DBs at chest level. Press up and slightly together at the top. Lower under control until you feel a stretch.',alt:'Floor press if no bench. Push-ups if no DBs.'},
+  db_floor_press:{name:'DB Floor Press',group:'push',pattern:'press',muscles:['chest','triceps'],equip:['dumbbell'],wristSafe:true,notes:'Lie flat on floor, DBs at chest level. Press up, lock out at top. Upper arms touch the floor gently — that\'s your stop point. The floor limit actually protects shoulders.',alt:'Push-ups if DBs aren\'t heavy enough.'},
+  bb_bench:{name:'Barbell Bench Press',group:'push',pattern:'press',muscles:['chest','triceps','shoulder'],equip:['barbell','bench','rack'],wristSafe:true,notes:'Bar over mid-chest. Grip just outside shoulder-width. Squeeze shoulder blades down and back BEFORE unracking. Lower to chest under control, drive through feet (leg drive). REQUIRES A SPOTTER for heavy sets.',alt:'DB bench is safer for solo training.'},
+  incline_db:{name:'Incline DB Press',group:'push',pattern:'press',muscles:['chest','shoulder','triceps'],equip:['dumbbell','bench'],wristSafe:true,notes:'Bench at 30-45°. Press dumbbells up. Hits upper chest and shoulders.',alt:'Flat DB press if no incline available.'},
+  push_up:{name:'Push-Up',group:'push',pattern:'press',muscles:['chest','triceps','core'],equip:['bodyweight'],wristSafe:false,notes:'Hands slightly wider than shoulders. Body in straight line. Lower chest to within an inch of floor. Drop to knees if needed.',alt:'Incline (hands on bench) easier. Decline harder. WRIST WORKAROUND: grip two DBs on the floor for neutral wrist — avoids wrist extension that hurts loaded wrists.'},
+  diamond_pushup:{name:'Diamond Push-Up',group:'push',pattern:'press',muscles:['triceps','chest'],equip:['bodyweight'],wristSafe:false,notes:'Hands form a diamond (thumbs and index fingers touching) directly under chest. Tricep-dominant version. Brutal.',alt:'Close-grip push-up (hands shoulder-width or narrower) is easier and still tricep-focused.'},
+  dip:{name:'Dips',group:'push',pattern:'press',muscles:['chest','triceps','shoulder'],equip:['dip-bar'],wristSafe:true,notes:'Hands on parallel bars, body upright (more triceps) or leaning forward (more chest). Lower until upper arms parallel to floor. Drive up. Add weight via belt when bodyweight is easy.',alt:'Bench dips (feet on floor or elevated) or assisted dip machine.'},
+  dips_assisted:{name:'Assisted Dips',group:'push',pattern:'press',muscles:['chest','triceps'],equip:['dip-bar'],wristSafe:true,notes:'Use assisted dip machine or band. Lower until upper arms parallel to floor. Drive up with control.',alt:'Bench dips with feet on floor (legs straight = harder).'},
+
+  // ── PUSH · SHOULDER ──
+  ohp:{name:'Overhead Press (DB)',group:'push',pattern:'press',muscles:['shoulder','triceps','core'],equip:['dumbbell'],wristSafe:true,notes:'Standing or seated. Press DBs from shoulder height to overhead. Don\'t arch lower back — brace core hard.',alt:'Seated version is easier on the spine.'},
+  bb_ohp:{name:'Barbell Overhead Press',group:'push',pattern:'press',muscles:['shoulder','triceps','core'],equip:['barbell'],wristSafe:true,notes:'Bar on front delts, grip just outside shoulders. Brace core HARD, press straight up. Move head through the bar at lockout (head doesn\'t move backward to clear bar). Don\'t arch lower back.',alt:'DB OHP — same pattern with less spine compression.'},
+  arnold_press:{name:'Arnold Press',group:'push',pattern:'press',muscles:['shoulder','triceps'],equip:['dumbbell'],wristSafe:false,notes:'Start with palms facing you at shoulder. Rotate as you press up so palms face forward at top. Reverse on the way down. Hits all 3 deltoid heads. NOTE: requires wrist supination — modify or substitute if your wrist limits this.',alt:'Standard DB OHP if wrist doesn\'t tolerate the rotation.'},
+  lateral_raise:{name:'Lateral Raise',group:'push',pattern:'isolation',muscles:['shoulder'],equip:['dumbbell'],wristSafe:true,notes:'Light DBs. Slight forward lean. Raise arms out to sides until parallel with floor — pinky higher than thumb (like pouring a jug). Slow control down. LIGHT WEIGHT, high reps.',alt:'Cable lateral raise has constant tension throughout.'},
+  rear_delt_fly:{name:'Rear Delt Fly',group:'push',pattern:'isolation',muscles:['shoulder','back'],equip:['dumbbell'],wristSafe:true,notes:'Hinge at hips, light DBs hanging down. Raise arms out to sides, leading with elbows. Squeeze shoulder blades together. Critical for shoulder health if you bench press a lot.',alt:'Face pulls hit similar muscles with less form sensitivity.'},
+
+  // ── PULL · BACK ──
+  lat_pulldown:{name:'Lat Pulldown',group:'pull',pattern:'pull-vertical',muscles:['back','bicep'],equip:['cable'],wristSafe:true,notes:'Wide overhand grip. Pull bar to upper chest, drive elbows down and back. Lean back ~10°. Squeeze lats at the bottom.',alt:'Banded pulldown anchored to a high point.'},
+  pullup:{name:'Pull-Up',group:'pull',pattern:'pull-vertical',muscles:['back','bicep','core'],equip:['pullup-bar'],wristSafe:true,notes:'Overhand grip, hands slightly wider than shoulders. Hang fully, then pull chest to bar. Lower with control to a full hang. NO kipping. If you can\'t do one yet, that\'s normal — work toward it with assisted versions.',alt:'Assisted pull-up machine, or band-assisted, or negatives only (jump to top, lower slowly).'},
+  chinup:{name:'Chin-Up',group:'pull',pattern:'pull-vertical',muscles:['back','bicep'],equip:['pullup-bar'],wristSafe:false,notes:'Underhand grip, shoulder-width. Easier than pull-ups for most people due to bicep involvement. Pull until chin clears the bar. NOTE: requires full wrist supination — may aggravate left wrist.',alt:'Neutral grip pull-up (palms facing each other) — strong without the wrist demand.'},
+  neutral_pullup:{name:'Neutral Grip Pull-Up',group:'pull',pattern:'pull-vertical',muscles:['back','bicep'],equip:['pullup-bar'],wristSafe:true,notes:'Palms facing each other (need parallel handles or a triangle attachment). Strongest grip position, easiest on shoulders and wrists. Best pull-up variant for your wrist.',alt:'Pull-up if no neutral handles available.'},
+  seated_row:{name:'Seated Cable Row',group:'pull',pattern:'pull-horizontal',muscles:['back','bicep'],equip:['cable'],wristSafe:true,notes:'Sit tall, neutral grip. Pull handle to lower ribs, squeeze shoulder blades. Don\'t use momentum.',alt:'Bent-over DB rows or band rows.'},
+  db_row:{name:'Single-Arm DB Row',group:'pull',pattern:'pull-horizontal',muscles:['back','bicep'],equip:['dumbbell','bench'],wristSafe:true,notes:'One knee on bench, other foot on floor. Pull DB to hip (not chest). Squeeze shoulder blade. Slow lower.',alt:'Standing bent-over row with both DBs.'},
+  db_bentover_row:{name:'DB Bent-Over Row',group:'pull',pattern:'pull-horizontal',muscles:['back','bicep'],equip:['dumbbell'],wristSafe:true,notes:'DB in each hand, feet hip-width. Hinge at hips — push hips BACK, slight knee bend, torso at ~45°. Back flat like a tabletop. Pull DBs to lower ribs, squeeze shoulder blades. If lower back rounds, hinge less.',alt:'Support yourself: one hand on a chair/wall, row one DB at a time.'},
+  bb_bentover_row:{name:'Barbell Bent-Over Row',group:'pull',pattern:'pull-horizontal',muscles:['back','bicep'],equip:['barbell'],wristSafe:true,notes:'Overhand grip, shoulder-width. Hinge at hips until torso ~45°, back flat. Pull bar to lower chest/upper abs. Squeeze lats hard. Never let lower back round.',alt:'DB bent-over row or Pendlay row (bar resets on floor between reps).'},
+  inverted_row:{name:'Inverted Row',group:'pull',pattern:'pull-horizontal',muscles:['back','bicep','core'],equip:['barbell'],wristSafe:true,notes:'Hang under a bar (Smith machine, TRX, sturdy table). Pull chest to bar. The more horizontal your body, the harder.',alt:'Bend knees and put feet on floor to make easier.'},
+  face_pull:{name:'Face Pull',group:'pull',pattern:'isolation',muscles:['back','shoulder'],equip:['cable'],wristSafe:true,notes:'High cable with rope. Pull rope toward face, elbows high and wide. Vital for shoulder health when bench-pressing.',alt:'Band face pull anchored at head height.'},
+
+  // ── PULL · BICEP/ARMS ──
+  bicep_curl:{name:'Bicep Curl (DB)',group:'pull',pattern:'isolation',muscles:['bicep'],equip:['dumbbell'],wristSafe:false,notes:'Standing, DBs at sides. Curl up keeping elbows pinned to ribs. Squeeze at the top. Slow lower. NOTE: requires wrist supination — substitute hammer curl if wrist hurts.',alt:'Hammer curl (neutral grip) avoids wrist supination entirely.'},
+  hammer_curl:{name:'Hammer Curl',group:'pull',pattern:'isolation',muscles:['bicep','forearm'],equip:['dumbbell'],wristSafe:true,notes:'DBs at sides, neutral grip (palms facing in, like holding hammers). Curl up keeping wrists neutral. Hits bicep + brachialis + forearm. Wrist-friendly choice.',alt:'Use one DB at a time if it feels more natural.'},
+  tricep_pushdown:{name:'Tricep Pushdown',group:'push',pattern:'isolation',muscles:['triceps'],equip:['cable'],wristSafe:true,notes:'High cable, rope or straight bar. Elbows pinned to sides. Push down until arms straight, squeeze. Slow up. Don\'t let elbows flare forward.',alt:'Banded pushdowns anchored high.'},
+  tricep_extension:{name:'Overhead Tricep Extension',group:'push',pattern:'isolation',muscles:['triceps'],equip:['dumbbell'],wristSafe:true,notes:'One DB held overhead with both hands. Lower DB behind head by bending at elbows, keeping upper arms vertical. Stretch the long head of the tricep. Drive back up.',alt:'Single DB one-arm version, or dips for compound tricep work.'},
+
+  // ── CORE ──
+  plank:{name:'Plank',group:'core',pattern:'isometric',muscles:['core'],equip:['bodyweight'],wristSafe:true,notes:'Forearms and toes. Body in straight line — no sagging hips, no piked butt. Brace abs HARD as if about to be punched.',alt:'Drop to knees if needed.'},
+  side_plank:{name:'Side Plank',group:'core',pattern:'isometric',muscles:['core-lateral','glute'],equip:['bodyweight'],wristSafe:true,notes:'On forearm, body straight, hips lifted. Hold without sagging. Both sides.',alt:'Knees down for easier version.'},
+  dead_bug:{name:'Dead Bug',group:'core',pattern:'anti-extension',muscles:['core'],equip:['bodyweight'],wristSafe:true,notes:'On back, arms up, knees over hips. Lower opposite arm + leg slowly while keeping lower back PRESSED into floor.',alt:'Just move legs only if arms+legs is too much.'},
+  ab_wheel:{name:'Ab Wheel Rollout',group:'core',pattern:'anti-extension',muscles:['core'],equip:['ab-wheel'],wristSafe:true,notes:'On knees, roll wheel out as far as you can without lower back arching. Pull back with abs.',alt:'Use a barbell with plates or do plank-to-pike on a slider.'},
+  hanging_knee:{name:'Hanging Knee Raise',group:'core',pattern:'flexion',muscles:['core'],equip:['pullup-bar'],wristSafe:true,notes:'Hang from bar. Pull knees to chest using abs (not momentum). Slow lower.',alt:'Lying leg raise on the floor.'},
+  pallof_press:{name:'Pallof Press',group:'core',pattern:'anti-rotation',muscles:['core','core-lateral'],equip:['cable','band'],wristSafe:true,notes:'Cable or band at chest height, perpendicular to your side. Hold handle at chest with both hands. Press straight out — band tries to twist you, you resist. Hold 2 sec, return. Best anti-rotation core exercise.',alt:'Banded version with door anchor works just as well.'},
+  bird_dog:{name:'Bird Dog',group:'core',pattern:'anti-extension',muscles:['core','back'],equip:['bodyweight'],wristSafe:false,notes:'On hands and knees. Extend opposite arm + leg until parallel to floor. Hold 2 sec. Don\'t let hips rotate. Slow control. Easier on wrists than plank but does require palm-down weight bearing.',alt:'Forearms down version reduces wrist load.'},
+  russian_twist:{name:'Russian Twist',group:'core',pattern:'rotation',muscles:['core','core-lateral'],equip:['bodyweight'],wristSafe:true,notes:'Sit, lean back ~45°, feet up or down. Twist torso side to side, touching floor each side. Add a DB or plate for difficulty.',alt:'Keep feet on floor for easier version.'},
+
+  // ── CARRIES + HYROX ──
+  farmer_carry:{name:'Farmer\'s Carry',group:'full',pattern:'carry',muscles:['core','grip','full'],equip:['dumbbell'],wristSafe:true,notes:'Heavy DB or KB in each hand. Walk with chest up, shoulders back. Hyrox staple.',alt:'Use one DB held at chest if you only have one heavy weight.'},
+  suitcase_carry:{name:'Suitcase Carry',group:'full',pattern:'carry',muscles:['core-lateral','grip'],equip:['dumbbell'],wristSafe:true,notes:'ONE heavy DB in one hand, walk. The asymmetric load forces your core to fight side bend. Switch sides each set. Brutal anti-lateral-flexion training.',alt:'Heavier weight makes this much harder.'},
+  front_rack_carry:{name:'Front Rack Carry',group:'full',pattern:'carry',muscles:['core','shoulder','full'],equip:['dumbbell','kettlebell'],wristSafe:true,notes:'Two DBs or KBs at shoulders, elbows up. Walk while bracing core to keep ribs down. Smashes the core and upper back.',alt:'Single-arm front rack is even harder.'},
+  sled_push:{name:'Sled Push',group:'full',pattern:'locomotion',muscles:['legs','full'],equip:['sled'],wristSafe:true,notes:'Low body angle, drive through legs. Short steps, hard push. Direct Hyrox prep.',alt:'No sled? Push a heavy box across grass, or do heavy walking lunges.'},
+  sled_pull:{name:'Sled Pull',group:'full',pattern:'locomotion',muscles:['back','legs'],equip:['sled'],wristSafe:true,notes:'Backwards drag. Engage lats and legs. Brutal but builds posterior chain.',alt:'Heavy band rows for similar pulling pattern.'},
+  wall_ball:{name:'Wall Ball',group:'full',pattern:'explosive',muscles:['legs','shoulder','core'],equip:['med-ball'],wristSafe:true,notes:'Squat with med ball at chest, explode up and throw to target ~10ft high. Catch on the way down into next squat.',alt:'Goblet squat to overhead press with DB if no med ball.'},
+  sandbag_lunge:{name:'Sandbag Lunge',group:'full',pattern:'lunge',muscles:['legs','core','full'],equip:['sandbag'],wristSafe:true,notes:'Bag on shoulders or front-rack. Walking lunges. Crushes legs and core.',alt:'Hold dumbbells or wear a weighted backpack.'},
+  burpee_broad:{name:'Burpee Broad Jump',group:'full',pattern:'explosive',muscles:['full','cardio'],equip:['bodyweight'],wristSafe:false,notes:'Burpee, then jump forward as far as you can. Repeat. Hyrox event in pure form.',alt:'Step back/up instead of jumping if joints aren\'t ready.'},
+  ski_erg:{name:'Ski Erg',group:'cardio',pattern:'machine',muscles:['back','core','cardio'],equip:['ski-erg'],wristSafe:true,notes:'Reach up, drive down using lats and abs. Full body cardio. Hyrox event.',alt:'Rower or assault bike for similar conditioning.'},
+  row_erg:{name:'Rowing Machine',group:'cardio',pattern:'machine',muscles:['legs','back','cardio'],equip:['rower'],wristSafe:true,notes:'Drive with legs first, then lean back, then pull arms. Reverse on return. 80% legs.',alt:'Bike or ski erg.'},
+  assault_bike:{name:'Assault Bike',group:'cardio',pattern:'machine',muscles:['full','cardio'],equip:['bike'],wristSafe:true,notes:'Arms AND legs both pump. Can be made unlimited difficulty by going harder. The most brutal cardio machine ever made.',alt:'Stationary bike (legs only) or any cardio you have access to.'},
+  kb_swing:{name:'Kettlebell Swing',group:'full',pattern:'hinge',muscles:['glute','hamstring','back','cardio'],equip:['kettlebell'],wristSafe:true,notes:'Hinge — not squat. KB swings between legs, then HIPS snap forward to launch it to chest height (Russian) or overhead (American). The arms are guides, not movers. The hips drive everything.',alt:'DB swing if no KB.'},
+
+  // ── CARDIO ──
+  walk:{name:'Walk',group:'cardio',pattern:'locomotion',muscles:['cardio'],equip:['none'],wristSafe:true,notes:'Brisk pace — talk but not sing. No incline initially. Land midfoot, not slamming heels.',alt:'Treadmill if weather is bad.'},
+  walk_long:{name:'Long Walk',group:'cardio',pattern:'locomotion',muscles:['cardio'],equip:['none'],wristSafe:true,notes:'Aim for the duration, not the pace. Bring water. Listen to a podcast or music. Time on feet is the goal.',alt:'Split into two shorter walks if needed.'},
+  run_walk:{name:'Run/Walk Intervals',group:'cardio',pattern:'locomotion',muscles:['cardio'],equip:['none'],wristSafe:true,notes:'Alternate running and walking. Run easy enough to hold a conversation. Walk to recover fully.',alt:'All walking is fine if knees feel sore.'},
+  easy_run:{name:'Easy Continuous Run',group:'cardio',pattern:'locomotion',muscles:['cardio'],equip:['none'],wristSafe:true,notes:'Conversational pace. If you can\'t speak in full sentences, slow down. Easy = build aerobic base.',alt:'Drop to run/walk intervals if needed.'},
+  long_run:{name:'Long Run',group:'cardio',pattern:'locomotion',muscles:['cardio'],equip:['none'],wristSafe:true,notes:'Slowest run of the week. Focus on time on feet. Walk breaks are 100% fine.',alt:'Long walk if knees are flaring up.'},
+  cardio_choice:{name:'Cardio (Your Choice)',group:'cardio',pattern:'machine',muscles:['cardio'],equip:['any'],wristSafe:true,notes:'Pick what you enjoy: bike, row, ski erg, swim. Steady moderate effort.',alt:'Walking always works.'},
+  bike_easy:{name:'Easy Bike',group:'cardio',pattern:'machine',muscles:['cardio'],equip:['bike'],wristSafe:true,notes:'Steady moderate effort. Zero impact — perfect for recovery days or extra cardio without pounding joints.',alt:'Stationary bike or outdoor cycling.'},
+  incline_walk:{name:'Incline Treadmill Walk',group:'cardio',pattern:'locomotion',muscles:['cardio','legs'],equip:['treadmill'],wristSafe:true,notes:'Treadmill at 10-12% incline, brisk walk pace. Massive heart rate without the joint impact of running. Excellent fat-burn cardio at 125kg.',alt:'Walk uphill outside if no treadmill — Cave Hill, Antrim Coast cliffs.'},
+  jump_rope:{name:'Jump Rope',group:'cardio',pattern:'locomotion',muscles:['cardio','calf'],equip:['rope'],wristSafe:true,notes:'Light bounces, soft knees, jump only just high enough to clear the rope. Wrists do most of the work, not the arms. Brutal cardio in tiny space.',alt:'Mock jump (no rope) for joint-friendlier version.'},
 };
 
-const WEIGHTED = new Set([
-  'goblet_squat','box_squat','rdl','hip_thrust','reverse_lunge','walking_lunge',
-  'step_up','leg_press','single_leg_rdl',
-  'db_bench','incline_db','ohp','lat_pulldown','seated_row','db_row','face_pull',
-  'farmer_carry','sled_push','sled_pull','wall_ball','sandbag_lunge','ab_wheel',
-  'db_floor_press','db_bentover_row','bb_bentover_row','bb_glute_bridge'
-]);
+// Auto-derive: any exercise that uses a loadable implement is "weighted"
+const WEIGHTED_EQUIP = new Set(['dumbbell','barbell','kettlebell','sled','sandbag','med-ball','cable','machine','trap-bar','ab-wheel']);
+const WEIGHTED = new Set(
+  Object.entries(EX).filter(([id,e]) => (e.equip||[]).some(eq => WEIGHTED_EQUIP.has(eq))).map(([id]) => id)
+);
 
 function parseDuration(reps){
   const s = reps.toLowerCase().replace(/,/g,' ');
@@ -338,6 +438,100 @@ function formatTime(sec){
   const m = Math.floor(sec/60);
   const s = sec % 60;
   return s === 0 ? `${m}m` : `${m}:${String(s).padStart(2,'0')}`;
+}
+
+// Group display labels and emojis
+const GROUP_LABELS = {
+  legs:{label:'Legs',emoji:'🦵',color:'#34d399'},
+  push:{label:'Push',emoji:'🤜',color:'#60a5fa'},
+  pull:{label:'Pull',emoji:'🤛',color:'#a78bfa'},
+  core:{label:'Core',emoji:'🎯',color:'#fbbf24'},
+  full:{label:'Full Body',emoji:'⚡',color:'#f97316'},
+  cardio:{label:'Cardio',emoji:'🏃',color:'#ec4899'},
+};
+
+const EQUIP_LABELS = {
+  bodyweight:'Bodyweight',
+  dumbbell:'Dumbbells',
+  barbell:'Barbell',
+  kettlebell:'Kettlebell',
+  bench:'Bench',
+  rack:'Squat Rack',
+  cable:'Cable',
+  machine:'Machine',
+  'pullup-bar':'Pull-Up Bar',
+  'dip-bar':'Dip Bars',
+  'trap-bar':'Trap Bar',
+  sled:'Sled',
+  sandbag:'Sandbag',
+  'med-ball':'Med Ball',
+  'ab-wheel':'Ab Wheel',
+  band:'Band',
+  rower:'Rower',
+  'ski-erg':'Ski Erg',
+  bike:'Bike',
+  treadmill:'Treadmill',
+  rope:'Jump Rope',
+  none:'No Equipment',
+  any:'Any Cardio',
+};
+
+// Resolve the actual exercise to use, given a base exercise from the schedule
+function resolveExercise(scheduleEx, exIdx){
+  const {phase}=getCurrentPhase();
+  const dow=new Date().getDay();
+  const swapKey=`${phase.id}-${dow}-${exIdx}`;
+  const swappedTo=S.swaps[swapKey];
+  if(swappedTo && EX[swappedTo]) return {...scheduleEx, id:swappedTo, _swapped:true, _original:scheduleEx.id, _swapKey:swapKey};
+  return scheduleEx;
+}
+
+// Score-based recommendation: same primary muscle + pattern + wrist-safe = high score
+function getRecommendations(originalId, n=4){
+  const orig = EX[originalId];
+  if (!orig) return [];
+  const candidates = Object.entries(EX)
+    .filter(([id]) => id !== originalId)
+    .map(([id, ex]) => {
+      let score = 0;
+      // Same group is essential
+      if (ex.group === orig.group) score += 50;
+      // Same pattern is great
+      if (ex.pattern === orig.pattern) score += 30;
+      // Shared muscles
+      const sharedMuscles = (ex.muscles||[]).filter(m => (orig.muscles||[]).includes(m));
+      score += sharedMuscles.length * 15;
+      // Wrist-safe bonus (user has wrist issue)
+      if (ex.wristSafe) score += 8;
+      // Penalty for needing exotic equipment if original was simple
+      if ((orig.equip||[]).includes('bodyweight') && !(ex.equip||[]).includes('bodyweight')) score -= 5;
+      return {id, ex, score};
+    })
+    .filter(c => c.score >= 50) // must share group at minimum
+    .sort((a,b) => b.score - a.score);
+  return candidates.slice(0, n);
+}
+
+// Filter exercise library by group + equipment + search term
+function filterExercises(opts){
+  const {groups=[], equips=[], search='', excludeId=null} = opts;
+  const term = search.toLowerCase().trim();
+  return Object.entries(EX)
+    .filter(([id, ex]) => {
+      if (id === excludeId) return false;
+      if (groups.length && !groups.includes(ex.group)) return false;
+      if (equips.length){
+        const exEquip = ex.equip||[];
+        const hasMatch = equips.some(e => exEquip.includes(e));
+        if (!hasMatch) return false;
+      }
+      if (term){
+        const hay = `${ex.name} ${(ex.muscles||[]).join(' ')} ${ex.pattern||''}`.toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      return true;
+    })
+    .map(([id, ex]) => ({id, ex}));
 }
 
 function getLastPerformance(exId){
@@ -547,6 +741,9 @@ const S = {
   set activeWorkout(v){v?localStorage.setItem('lrpg_active',JSON.stringify(v)):localStorage.removeItem('lrpg_active')},
   get lastWeights(){try{return JSON.parse(localStorage.getItem('lrpg_last_weights')||'{}')}catch{return{}}},
   set lastWeights(v){localStorage.setItem('lrpg_last_weights',JSON.stringify(v))},
+  // Permanent swap map: { "phaseId-day-exIndex": "newExId" }
+  get swaps(){try{return JSON.parse(localStorage.getItem('lrpg_swaps')||'{}')}catch{return{}}},
+  set swaps(v){localStorage.setItem('lrpg_swaps',JSON.stringify(v))},
 };
 
 function getCurrentPhase(){
@@ -736,13 +933,30 @@ function previewWorkout(day){
   if(!w)return;
   if(w.type==='rest'){showToast('Rest day — recovery IS the work!','#a78bfa');return;}
   if(!w.ex)return;
-  const exList=w.ex.map(e=>`<li style="margin:6px 0;color:var(--sub);font-size:13px">${EX[e.id].name} — <span style="color:var(--text)">${e.sets}×${e.reps}</span></li>`).join('');
+  const dow=new Date().getDay();
+  const isToday = day === dow;
+  const exList=w.ex.map((e,idx)=>{
+    const swapKey=`${phase.id}-${day}-${idx}`;
+    const swappedTo=S.swaps[swapKey];
+    const actualId = (swappedTo && EX[swappedTo]) ? swappedTo : e.id;
+    const wasSwapped = swappedTo && swappedTo !== e.id;
+    const meta=EX[actualId];
+    const swapNote = wasSwapped ? `<div style="font-size:10px;color:var(--purple);margin-top:2px;font-family:'Cinzel',serif;letter-spacing:1px">⇄ FROM ${EX[e.id]?.name.toUpperCase()}</div>` : '';
+    return `<li style="margin:8px 0;color:var(--sub);font-size:13px;display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--surface2);border-radius:8px${wasSwapped?';border-left:3px solid var(--purple)':''}">
+      <div style="flex:1;min-width:0">
+        ${meta.name} — <span style="color:var(--text)">${e.sets}×${e.reps}</span>
+        ${swapNote}
+      </div>
+      <button onclick="openSwapModal(${idx},'plan',${day})" style="background:var(--surface);border:1px solid var(--border);color:var(--purple);width:30px;height:30px;border-radius:6px;font-size:13px;cursor:pointer;flex-shrink:0;font-family:'Cinzel',serif">⇄</button>
+    </li>`;
+  }).join('');
   document.body.insertAdjacentHTML('beforeend',`
     <div class="modal-overlay" id="preview-modal">
       <div class="modal-box">
         <h2 style="color:var(--blue)">${w.name}</h2>
-        <p style="color:var(--muted);font-size:12px;margin-bottom:12px">${DAY_NAMES[w.day]} · +${w.xp} XP</p>
-        <ul style="list-style:none;margin-bottom:16px">${exList}</ul>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:12px">${DAY_NAMES[w.day]} · +${w.xp} XP${isToday?' · TODAY':''}</p>
+        <ul style="list-style:none;margin-bottom:16px;padding:0">${exList}</ul>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;font-style:italic;text-align:center">⇄ Tap to swap an exercise</p>
         <button class="btn alt" onclick="document.getElementById('preview-modal').remove()">Close</button>
       </div>
     </div>`);
@@ -1077,11 +1291,15 @@ function startWorkout(){
   S.activeWorkout={
     workoutKey:`${phase.id}-${w.day}`,name:w.name,type:w.type,xp:w.xp,
     started:Date.now(),
-    sets:w.ex.map(e=>({
-      id:e.id,
-      completed:Array(e.sets).fill(false),
-      weight:WEIGHTED.has(e.id)?(lastWts[e.id]||''):null,
-    })),
+    sets:w.ex.map((e,idx)=>{
+      const resolved=resolveExercise(e,idx);
+      return {
+        id:resolved.id,
+        scheduleId:e.id, // remember the original for reference
+        completed:Array(e.sets).fill(false),
+        weight:WEIGHTED.has(resolved.id)?(lastWts[resolved.id]||''):null,
+      };
+    }),
   };
   showWorkoutView();
 }
@@ -1094,13 +1312,15 @@ function showWorkoutView(){
   const doneSets=aw.sets.reduce((s,x)=>s+x.completed.filter(Boolean).length,0);
   const pct=(doneSets/totalSets)*100;
   const exHtml=w.ex.map((e,exIdx)=>{
-    const meta=EX[e.id];
     const setData=aw.sets[exIdx];
+    const actualId = setData.id; // respects swap
+    const meta=EX[actualId];
+    const wasSwapped = setData.scheduleId && setData.scheduleId !== actualId;
     const exDone=setData.completed.every(Boolean);
     const expanded=!exDone;
-    const isWeighted=WEIGHTED.has(e.id);
+    const isWeighted=WEIGHTED.has(actualId);
     const timerSec=parseDuration(e.reps);
-    const last=getLastPerformance(e.id);
+    const last=getLastPerformance(actualId);
     const lastHtml=last?`
       <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(96,165,250,.08);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:12px">
         <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--blue);letter-spacing:2px;font-weight:700">LAST</span>
@@ -1110,12 +1330,13 @@ function showWorkoutView(){
         <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px;font-weight:700">FIRST TIME</span>
         <span style="flex:1;color:var(--sub);font-size:13px">Set today's baseline</span>
       </div>`;
+    const swappedBadge = wasSwapped ? `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.4);border-radius:6px;padding:2px 7px;font-size:9px;color:var(--purple);font-family:'Cinzel',serif;letter-spacing:1px;margin-top:3px;font-weight:700">⇄ SWAPPED FROM ${EX[setData.scheduleId]?.name.toUpperCase()}</div>` : '';
     const weightHtml=isWeighted?`
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid rgba(251,191,36,.2)">
         <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px">WEIGHT</span>
-        <input type="number" step="0.5" min="0" max="500" value="${setData.weight||''}" 
-          oninput="updateWeight(${exIdx},this.value)" 
-          placeholder="--" 
+        <input type="number" step="0.5" min="0" max="500" value="${setData.weight||''}"
+          oninput="updateWeight(${exIdx},this.value)"
+          placeholder="--"
           inputmode="decimal"
           style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:15px;font-family:'Cinzel',serif;font-weight:700;outline:none;text-align:center">
         <span style="font-size:11px;color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px">KG</span>
@@ -1132,7 +1353,9 @@ function showWorkoutView(){
         <div class="ex-name-wrap">
           <div class="ex-name">${meta.name}</div>
           <div class="ex-target">${e.sets}×${e.reps}${e.rest?` · ${e.rest}s rest`:''}</div>
+          ${swappedBadge}
         </div>
+        <button class="swap-btn" onclick="event.stopPropagation();openSwapModal(${exIdx},'workout')" title="Swap exercise">⇄</button>
         <div class="ex-chev">▼</div>
       </div>
       <div class="ex-body">
@@ -1392,6 +1615,233 @@ function unmarkStretch(id){
   S.mobilityToday=done;
   S.xp=Math.max(0,S.xp-5);
   render();
+}
+
+// ════════════════════════════════════════════════
+// EXERCISE SWAP SYSTEM
+// ════════════════════════════════════════════════
+const swapState = {
+  exIdx:null,        // index in workout
+  source:null,       // 'workout' or 'plan'
+  day:null,          // for plan mode
+  originalId:null,   // exercise id being replaced
+  filterGroups:[],
+  filterEquips:[],
+  search:''
+};
+
+function openSwapModal(exIdx, source, day){
+  // Determine the exercise we're swapping FROM
+  const {phase}=getCurrentPhase();
+  const targetDay = source==='plan' ? day : new Date().getDay();
+  const dayWorkout = phase.week.find(w => w.day === targetDay);
+  if (!dayWorkout || !dayWorkout.ex) return;
+  const scheduleEx = dayWorkout.ex[exIdx];
+  if (!scheduleEx) return;
+  // The "original" for recommendation purposes is the currently-resolved exercise
+  const swapKey=`${phase.id}-${targetDay}-${exIdx}`;
+  const currentlyUsed = S.swaps[swapKey] || scheduleEx.id;
+
+  swapState.exIdx = exIdx;
+  swapState.source = source;
+  swapState.day = targetDay;
+  swapState.originalId = currentlyUsed;
+  swapState.scheduleId = scheduleEx.id;
+  swapState.swapKey = swapKey;
+  swapState.filterGroups = [];
+  swapState.filterEquips = [];
+  swapState.search = '';
+
+  renderSwapModal();
+}
+
+function closeSwapModal(){
+  const m = document.getElementById('swap-modal');
+  if (m) m.remove();
+}
+
+function renderSwapModal(){
+  const existing = document.getElementById('swap-modal');
+  if (existing) existing.remove();
+  const original = EX[swapState.originalId];
+  if (!original) return;
+
+  // Get recommendations (only show on first open / when no filters/search active)
+  const showRecs = swapState.filterGroups.length===0 && swapState.filterEquips.length===0 && !swapState.search;
+  const recs = showRecs ? getRecommendations(swapState.originalId, 4) : [];
+  const recIds = new Set(recs.map(r=>r.id));
+
+  // Get filtered alternatives (exclude recommended ones to avoid duplication)
+  const allFiltered = filterExercises({
+    groups: swapState.filterGroups,
+    equips: swapState.filterEquips,
+    search: swapState.search,
+    excludeId: swapState.originalId
+  });
+  const alternatives = allFiltered.filter(c => !recIds.has(c.id));
+
+  const groupChips = Object.entries(GROUP_LABELS).map(([gid,g])=>
+    `<button class="filter-chip ${swapState.filterGroups.includes(gid)?'active':''}" onclick="toggleSwapGroup('${gid}')">${g.emoji} ${g.label}</button>`
+  ).join('');
+
+  const popularEquips = ['bodyweight','dumbbell','barbell','kettlebell','bench','pullup-bar','cable','machine'];
+  const equipChips = popularEquips.map(eq=>
+    `<button class="filter-chip equip ${swapState.filterEquips.includes(eq)?'active':''}" onclick="toggleSwapEquip('${eq}')">${EQUIP_LABELS[eq]}</button>`
+  ).join('');
+
+  const renderCard = (item, isRec=false) => {
+    const ex = item.ex;
+    const muscleTags = (ex.muscles||[]).slice(0,3).map(m=>`<span class="swap-card-tag muscle">${m}</span>`).join('');
+    const mainEquip = (ex.equip||[]).filter(e=>e!=='none')[0];
+    const equipTag = mainEquip ? `<span class="swap-card-tag equip">${EQUIP_LABELS[mainEquip]||mainEquip}</span>` : '';
+    const wristIcon = ex.wristSafe ? '<span title="Wrist-friendly" style="color:var(--green)">🤝</span>' : '<span title="May aggravate wrist" class="swap-card-tag wrist-warn">⚠️ wrist</span>';
+    return `<div class="swap-card ${isRec?'recommended':''}" onclick="confirmSwap('${item.id}')">
+      <div class="swap-card-name">${ex.name} ${ex.wristSafe?wristIcon:''}</div>
+      <div class="swap-card-meta">${muscleTags}${equipTag}${!ex.wristSafe?wristIcon:''}</div>
+    </div>`;
+  };
+
+  const recsHtml = recs.length ? `
+    <div class="swap-section-label">⭐ Recommended Replacements</div>
+    ${recs.map(r=>renderCard(r,true)).join('')}
+  ` : '';
+
+  const altsLabel = showRecs && recs.length ? 'All Alternatives' : (allFiltered.length ? 'Results' : '');
+  const altsHtml = alternatives.length ? `
+    <div class="swap-section-label alt">${altsLabel} (${alternatives.length})</div>
+    ${alternatives.map(a=>renderCard(a)).join('')}
+  ` : (recs.length===0 ? '<div class="swap-empty">No exercises match your filters.<br><span style="color:var(--purple);font-size:12px">Try removing some filters.</span></div>' : '');
+
+  const html = `<div id="swap-modal" onclick="if(event.target.id==='swap-modal')closeSwapModal()">
+    <div class="swap-sheet">
+      <div class="swap-head">
+        <button class="swap-close" onclick="closeSwapModal()">✕</button>
+        <h3>⇄ Swap Exercise</h3>
+        <p>Replacing <strong>${original.name}</strong> · same muscle group recommended first</p>
+      </div>
+      <div class="swap-search">
+        <input type="text" placeholder="Search exercises (e.g. lunge, squat, row...)" value="${swapState.search}" oninput="updateSwapSearch(this.value)" autocomplete="off">
+      </div>
+      <div class="swap-filters">
+        ${groupChips}
+      </div>
+      <div class="swap-filters" style="border-bottom:1px solid var(--border);padding-top:0">
+        ${equipChips}
+      </div>
+      <div class="swap-results">
+        ${recsHtml}
+        ${altsHtml}
+        ${swapState.swapKey && S.swaps[swapState.swapKey] ? `
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+            <button onclick="resetSwap()" style="width:100%;background:transparent;border:1px dashed var(--muted);color:var(--muted);border-radius:10px;padding:11px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer">↻ RESET TO PLAN'S ORIGINAL (${EX[swapState.scheduleId]?.name})</button>
+          </div>` : ''}
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function toggleSwapGroup(gid){
+  const idx = swapState.filterGroups.indexOf(gid);
+  if (idx>=0) swapState.filterGroups.splice(idx,1);
+  else swapState.filterGroups.push(gid);
+  renderSwapModal();
+}
+
+function toggleSwapEquip(eq){
+  const idx = swapState.filterEquips.indexOf(eq);
+  if (idx>=0) swapState.filterEquips.splice(idx,1);
+  else swapState.filterEquips.push(eq);
+  renderSwapModal();
+}
+
+let _searchDebounce;
+function updateSwapSearch(v){
+  swapState.search = v;
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(renderSwapModal, 200);
+}
+
+function confirmSwap(newId){
+  // Show scope confirmation: just today, or permanently?
+  const newEx = EX[newId];
+  if (!newEx) return;
+  const html = `<div class="swap-confirm" id="swap-confirm" onclick="if(event.target.id==='swap-confirm')document.getElementById('swap-confirm').remove()">
+    <div class="swap-confirm-box">
+      <div style="font-size:30px;text-align:center;margin-bottom:6px">⇄</div>
+      <h3>How long should this swap last?</h3>
+      <p>Replacing with <strong>${newEx.name}</strong></p>
+      <button class="swap-confirm-btn primary" onclick="applySwap('${newId}','today')">JUST FOR TODAY<small>One-off · plan stays the same next week</small></button>
+      <button class="swap-confirm-btn primary" style="background:var(--blue);border-color:var(--blue)" onclick="applySwap('${newId}','permanent')">PERMANENT<small>Replaces this slot every week from now on</small></button>
+      <button class="swap-confirm-btn secondary" onclick="document.getElementById('swap-confirm').remove()">Cancel</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function applySwap(newId, scope){
+  const confirmEl = document.getElementById('swap-confirm');
+  if (confirmEl) confirmEl.remove();
+  const newEx = EX[newId];
+
+  if (scope === 'permanent'){
+    const swaps = S.swaps;
+    swaps[swapState.swapKey] = newId;
+    S.swaps = swaps;
+  }
+
+  // If we're inside an active workout, update the live workout state for "today"
+  if (swapState.source === 'workout' && S.activeWorkout){
+    const aw = S.activeWorkout;
+    const setData = aw.sets[swapState.exIdx];
+    if (setData){
+      const lastWts = S.lastWeights;
+      setData.id = newId;
+      setData.weight = WEIGHTED.has(newId) ? (lastWts[newId]||'') : null;
+      // Reset completion since the exercise changed
+      setData.completed = setData.completed.map(()=>false);
+      S.activeWorkout = aw;
+    }
+  }
+
+  closeSwapModal();
+  showToast(`⇄ Swapped to ${newEx.name}`, '#a78bfa');
+
+  // Re-render the appropriate view
+  if (swapState.source === 'workout') showWorkoutView();
+  else if (swapState.source === 'plan') {
+    const previewModal = document.getElementById('preview-modal');
+    if (previewModal) previewModal.remove();
+    previewWorkout(swapState.day);
+    render(); // also refresh the today card if needed
+  }
+}
+
+function resetSwap(){
+  const swaps = S.swaps;
+  delete swaps[swapState.swapKey];
+  S.swaps = swaps;
+  // If currently in workout, snap back to scheduled exercise
+  if (swapState.source === 'workout' && S.activeWorkout){
+    const aw = S.activeWorkout;
+    const setData = aw.sets[swapState.exIdx];
+    if (setData){
+      const lastWts = S.lastWeights;
+      setData.id = swapState.scheduleId;
+      setData.weight = WEIGHTED.has(swapState.scheduleId) ? (lastWts[swapState.scheduleId]||'') : null;
+      setData.completed = setData.completed.map(()=>false);
+      S.activeWorkout = aw;
+    }
+  }
+  closeSwapModal();
+  showToast(`↻ Reset to ${EX[swapState.scheduleId].name}`, '#94a3b8');
+  if (swapState.source === 'workout') showWorkoutView();
+  else if (swapState.source === 'plan') {
+    const previewModal = document.getElementById('preview-modal');
+    if (previewModal) previewModal.remove();
+    previewWorkout(swapState.day);
+    render();
+  }
 }
 
 function dismissWelcome(){
