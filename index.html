@@ -88,6 +88,40 @@
   .mob-item.expanded .mob-notes{display:block}
   .mob-item.expanded{background:#181624}
 
+  /* PROGRESS CHART */
+  .chart-wrap{margin:12px -4px 4px;position:relative}
+  .chart-wrap svg{width:100%;height:auto}
+  .chart-stats{display:flex;justify-content:space-between;margin-top:8px;padding:0 4px;font-size:11px}
+  .chart-stat{color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px}
+  .chart-stat span{color:var(--text);margin-left:4px;font-weight:700}
+
+  /* METRICS GRID */
+  .metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;position:relative}
+  .metric-lbl{font-family:'Cinzel',serif;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+  .metric-val{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--text);line-height:1}
+  .metric-unit{font-size:11px;color:var(--muted);margin-left:3px}
+  .metric-delta{font-family:'Cinzel',serif;font-size:11px;font-weight:700;margin-top:4px;letter-spacing:.5px}
+  .metric-empty{color:var(--muted);font-size:11px;margin-top:4px}
+  .metric-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px}
+
+  /* STORY CARD */
+  .story-card{border-radius:12px;padding:14px;margin-top:12px;border-left:4px solid}
+  .story-card.recomp{background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(96,165,250,.08));border-color:var(--green)}
+  .story-card.fatloss{background:rgba(52,211,153,.08);border-color:var(--green)}
+  .story-card.muscle{background:rgba(167,139,250,.08);border-color:var(--purple)}
+  .story-card.plateau{background:rgba(251,191,36,.05);border-color:var(--amber)}
+  .story-title{font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:6px}
+  .story-body{font-size:13px;color:var(--sub);line-height:1.7}
+
+  /* MEASUREMENTS MODAL INPUTS */
+  .meas-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+  .meas-row label{flex:1;font-family:'Cinzel',serif;font-size:12px;color:var(--text);letter-spacing:1px}
+  .meas-row input{width:80px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:14px;font-family:'Cinzel',serif;font-weight:700;outline:none;text-align:center;-webkit-appearance:none}
+  .meas-row input:focus{border-color:var(--purple)}
+  .meas-row .unit{font-size:11px;color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px}
+  .meas-tip{font-size:11px;color:var(--muted);margin-top:-4px;margin-bottom:10px;padding-left:12px;line-height:1.4;font-style:italic}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -461,6 +495,15 @@ const MOBILITY = [
   {id:'childs_pose',name:'Child\'s Pose + Breathing',duration:60,notes:'Kneel, sit back onto heels, fold forward with arms extended, forehead toward floor. Breathe deeply — 4 counts in through nose, 6 counts out through mouth. Downregulates the nervous system. Genuinely the most underrated recovery tool in existence.'}
 ];
 
+const METRICS = [
+  {id:'waist',label:'Waist',unit:'cm',dir:'down',color:'#34d399',tip:'Level with your navel. Relaxed belly — don\'t suck it in, we want honest numbers.'},
+  {id:'chest',label:'Chest',unit:'cm',dir:'up',color:'#60a5fa',tip:'Around nipple line, arms relaxed at sides. Don\'t flex the chest.'},
+  {id:'arm',label:'Arm',unit:'cm',dir:'up',color:'#f97316',tip:'Flexed at peak of bicep. Pick your bigger arm — use the same one every time.'},
+  {id:'thigh',label:'Thigh',unit:'cm',dir:'up',color:'#a78bfa',tip:'Widest point of upper thigh, relaxed. Stand normally, measure horizontally.'},
+  {id:'hips',label:'Hips',unit:'cm',dir:'down',color:'#fbbf24',tip:'Widest point around your butt. Feet together, relaxed.'},
+  {id:'neck',label:'Neck',unit:'cm',dir:'up',color:'#ec4899',tip:'Just below your Adam\'s apple. A subtle one, but it does track with muscle gain.'},
+];
+
 const LEVELS = [
   {xp:0,level:1,title:'Returning Hero',color:'#94a3b8'},
   {xp:300,level:2,title:'Rising Adventurer',color:'#60a5fa'},
@@ -480,6 +523,8 @@ const S = {
   set welcomed(v){localStorage.setItem('lrpg_welcomed_v2','1')},
   get weights(){try{return JSON.parse(localStorage.getItem('lrpg_weights')||'[]')}catch{return[]}},
   set weights(v){localStorage.setItem('lrpg_weights',JSON.stringify(v))},
+  get measurements(){try{return JSON.parse(localStorage.getItem('lrpg_measurements')||'[]')}catch{return[]}},
+  set measurements(v){localStorage.setItem('lrpg_measurements',JSON.stringify(v))},
   get workouts(){try{return JSON.parse(localStorage.getItem('lrpg_workouts')||'[]')}catch{return[]}},
   set workouts(v){localStorage.setItem('lrpg_workouts',JSON.stringify(v))},
   get bonusToday(){
@@ -761,29 +806,170 @@ function renderJourney(){
     </div>`;
 }
 
+function renderLineChart(data, opts){
+  opts = opts || {};
+  if (!data || data.length < 2){
+    return `<div style="color:var(--muted);font-size:12px;padding:30px 0;text-align:center;font-style:italic">Log at least 2 entries to see the trend</div>`;
+  }
+  const sorted = [...data].sort((a,b)=>a.ts-b.ts);
+  const values = sorted.map(d=>d.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const rng = Math.max(max-min, 0.5);
+  const padMin = min - rng*0.15;
+  const padMax = max + rng*0.15;
+  const padRng = padMax - padMin;
+  const w = 320, h = 140;
+  const pl = 38, pr = 10, pt = 12, pb = 22;
+  const pw = w-pl-pr, ph = h-pt-pb;
+  const pts = sorted.map((d,i)=>{
+    const x = pl + (sorted.length===1 ? pw/2 : (i/(sorted.length-1))*pw);
+    const y = pt + (1-(d.value-padMin)/padRng)*ph;
+    return {x,y,v:d.value,ts:d.ts};
+  });
+  const line = pts.map((p,i)=>(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ');
+  const area = line + ` L${pts[pts.length-1].x.toFixed(1)},${(pt+ph).toFixed(1)} L${pts[0].x.toFixed(1)},${(pt+ph).toFixed(1)} Z`;
+  const color = opts.color || '#34d399';
+  const gid = 'g-'+(opts.id||Math.random().toString(36).slice(2,7));
+  const fmt = ts => new Date(ts).toLocaleDateString('en-GB',{month:'short',day:'numeric'});
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="display:block;width:100%;height:160px">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${[0.25,0.5,0.75].map(f=>`<line x1="${pl}" y1="${(pt+f*ph).toFixed(1)}" x2="${pl+pw}" y2="${(pt+f*ph).toFixed(1)}" stroke="#1e293b" stroke-width="1" stroke-dasharray="2,4"/>`).join('')}
+    <text x="${pl-6}" y="${pt+4}" text-anchor="end" fill="#64748b" font-size="9" font-family="Cinzel,serif">${padMax.toFixed(1)}</text>
+    <text x="${pl-6}" y="${(pt+ph/2+3).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="9" font-family="Cinzel,serif">${((padMax+padMin)/2).toFixed(1)}</text>
+    <text x="${pl-6}" y="${(pt+ph+3).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="9" font-family="Cinzel,serif">${padMin.toFixed(1)}</text>
+    <path d="${area}" fill="url(#${gid})"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${pts.map((p,i)=>{const last=i===pts.length-1;return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${last?4:2}" fill="${last?color:'#0a0a0f'}" stroke="${color}" stroke-width="${last?0:1.5}"/>`;}).join('')}
+    <text x="${pl}" y="${h-4}" fill="#64748b" font-size="9" font-family="Cinzel,serif">${fmt(sorted[0].ts)}</text>
+    <text x="${pl+pw}" y="${h-4}" text-anchor="end" fill="#64748b" font-size="9" font-family="Cinzel,serif">${fmt(sorted[sorted.length-1].ts)}</text>
+  </svg>`;
+}
+
+function renderMetricCard(m){
+  const hasData = m.current != null;
+  const hasDelta = m.delta != null && Math.abs(m.delta) > 0.05;
+  let deltaColor = 'var(--muted)', arrow = '·';
+  if (hasDelta){
+    arrow = m.delta > 0 ? '↑' : '↓';
+    const goingDown = m.delta < 0;
+    const goingUp = m.delta > 0;
+    const good = (m.dir === 'down' && goingDown) || (m.dir === 'up' && goingUp);
+    deltaColor = good ? 'var(--green)' : 'var(--amber)';
+  }
+  return `<div class="metric-card">
+    <div class="metric-bar" style="background:${m.color}"></div>
+    <div class="metric-lbl">${m.label}</div>
+    ${hasData ? `<div class="metric-val">${m.current}<span class="metric-unit">${m.unit}</span></div>` : '<div class="metric-val" style="color:var(--muted)">—</div>'}
+    ${hasDelta ? `<div class="metric-delta" style="color:${deltaColor}">${arrow} ${Math.abs(m.delta).toFixed(1)}${m.unit}</div>` : hasData && m.count > 0 ? `<div class="metric-empty">baseline</div>` : '<div class="metric-empty">not logged</div>'}
+  </div>`;
+}
+
+function getStoryCard(weightDelta, measurements){
+  if (measurements.length < 2) return '';
+  const sorted = [...measurements].sort((a,b)=>a.ts-b.ts);
+  const first = sorted[0], last = sorted[sorted.length-1];
+  const d = id => (last[id]!=null && first[id]!=null) ? last[id]-first[id] : null;
+  const waist = d('waist'), chest = d('chest'), arm = d('arm'), thigh = d('thigh');
+  const fatLost = waist != null && waist <= -1.5;
+  const muscleGained = (chest != null && chest >= 1) || (arm != null && arm >= 0.7) || (thigh != null && thigh >= 1);
+  if (fatLost && muscleGained){
+    return `<div class="story-card recomp">
+      <div class="story-title" style="color:var(--green)">🎯 RECOMPOSITION HAPPENING</div>
+      <div class="story-body">Your waist is shrinking <strong style="color:var(--text)">and</strong> you're building muscle. This is the rarest, best outcome in fitness — most people only get one at a time. Don't let the scale fool you. This <strong style="color:var(--text)">is</strong> working.</div>
+    </div>`;
+  }
+  if (fatLost && weightDelta != null && Math.abs(weightDelta) < 1.5){
+    return `<div class="story-card fatloss">
+      <div class="story-title" style="color:var(--green)">📉 Pure Fat Loss</div>
+      <div class="story-body">Weight holding steady while your waist drops. That means the fat you're losing is being replaced by muscle. Keep the protein up and keep showing up.</div>
+    </div>`;
+  }
+  if (muscleGained && weightDelta != null && weightDelta > 0.5){
+    return `<div class="story-card muscle">
+      <div class="story-title" style="color:var(--purple)">💪 Muscle-Building Phase</div>
+      <div class="story-body">You're gaining mass in the right places. Monitor the waist — a small increase (≤2cm) is fine, but if it creeps up faster, ease back on calories slightly.</div>
+    </div>`;
+  }
+  if (waist != null && waist >= 0 && chest != null && chest <= 0 && arm != null && arm <= 0){
+    return `<div class="story-card plateau">
+      <div class="story-title" style="color:var(--amber)">⏸️ Plateau Signal</div>
+      <div class="story-body">Nothing's moving yet. That's normal for the first 4-6 weeks. If it's been 8+ weeks with zero change: tighten up nutrition (protein first), add one more workout per week, or check sleep is averaging 7+ hours.</div>
+    </div>`;
+  }
+  return '';
+}
+
 function renderTrack(){
   const weights=S.weights;
+  const measurements=S.measurements;
   const workouts=S.workouts;
-  const weightRows=weights.slice(0,10).map((w,i)=>{
-    const prev=weights[i+1];
-    const color=prev?(w.kg<prev.kg?'#34d399':w.kg>prev.kg?'#f87171':'var(--text)'):'var(--text)';
-    return `<div class="row-entry"><span style="color:var(--sub)">${w.date}</span><span style="font-family:'Cinzel',serif;color:${color};font-weight:700">${w.kg}kg</span></div>`;
-  }).join('');
-  const delta=weights.length>=2?`<div style="margin-top:10px;font-size:13px;color:${weights[0].kg<weights[weights.length-1].kg?'#34d399':'#f87171'}">Total: ${(weights[0].kg-weights[weights.length-1].kg).toFixed(1)}kg from first entry</div>`:'';
-  const workoutRows=workouts.slice(0,15).map(w=>{
+
+  // Weight stats
+  const weightCurrent=weights[0]?.kg??null;
+  const weightFirst=weights.length?weights[weights.length-1].kg:null;
+  const weightDelta=(weightCurrent!=null&&weightFirst!=null&&weights.length>1)?weightCurrent-weightFirst:null;
+
+  // Build metric cards
+  const metricsData=[...METRICS,{id:'weight',label:'Weight',unit:'kg',dir:'down',color:'#f97316'}].map(m=>{
+    if(m.id==='weight') return {...m,current:weightCurrent,delta:weightDelta,count:weights.length};
+    const entries=measurements.filter(e=>e[m.id]!=null).sort((a,b)=>a.ts-b.ts);
+    const cur=entries.length?entries[entries.length-1][m.id]:null;
+    const fst=entries.length?entries[0][m.id]:null;
+    const del=(cur!=null&&fst!=null&&entries.length>1)?cur-fst:null;
+    return {...m,current:cur,delta:del,count:entries.length};
+  });
+
+  const chartHtml=renderLineChart(weights.map(w=>({ts:w.ts,value:w.kg})),{color:'#f97316',id:'w'});
+  const storyHtml=getStoryCard(weightDelta,measurements);
+
+  const lastMeas=measurements[0];
+  const lastMeasDays=lastMeas?Math.floor((Date.now()-lastMeas.ts)/86400000):null;
+  const measStatus=lastMeasDays===null?'First log sets your baseline — these numbers are more honest than the scale ever will be.':lastMeasDays===0?'Logged today.':lastMeasDays===1?'Logged yesterday.':`Last logged ${lastMeasDays} day${lastMeasDays===1?'':'s'} ago${lastMeasDays>=30?' · time for new ones':' · monthly is ideal'}`;
+
+  const workoutRows=workouts.slice(0,10).map(w=>{
     const icon=w.type==='strength'?'💪':w.type==='cardio'?'🏃':w.type==='hyrox'?'⚡':'😴';
     return `<div class="row-entry"><span style="color:var(--sub)">${icon} ${w.name}</span><div style="display:flex;gap:10px;align-items:center"><span style="color:var(--green);font-family:'Cinzel',serif;font-weight:700;font-size:12px">+${w.xp}</span><span style="color:var(--muted);font-size:11px">${w.date.split(' ').slice(0,3).join(' ')}</span></div></div>`;
   }).join('');
 
-  return `<div class="track-card" style="border-color:rgba(249,115,22,.3)">
-      <div class="track-title" style="color:var(--orange)">📊 Weight Log</div>
-      <div class="track-sub">You started at 125kg. Every entry is data, not a verdict. Weigh weekly — same time, same conditions.</div>
+  return `
+    <div class="track-card" style="border-color:rgba(249,115,22,.3)">
+      <div class="track-title" style="color:var(--orange)">📈 Weight Trend</div>
+      <div class="track-sub">Consistency beats any single number. This is your story over time.</div>
+      <div class="chart-wrap">${chartHtml}</div>
+      ${weights.length>=2?`<div class="chart-stats">
+        <div class="chart-stat">START<span>${weightFirst}kg</span></div>
+        <div class="chart-stat">NOW<span>${weightCurrent}kg</span></div>
+        <div class="chart-stat">Δ<span style="color:${weightDelta<0?'var(--green)':weightDelta>0?'var(--amber)':'var(--text)'}">${weightDelta>0?'+':''}${weightDelta.toFixed(1)}kg</span></div>
+      </div>`:''}
+      ${storyHtml}
+    </div>
+
+    <div class="track-card" style="border-color:rgba(96,165,250,.3)">
+      <div class="track-title" style="color:var(--blue)">📐 Body Metrics</div>
+      <div class="track-sub">Current values and change since your first log. Waist ↓ + arm/chest ↑ = recomposition, regardless of the scale.</div>
+      <div class="metrics-grid">${metricsData.map(renderMetricCard).join('')}</div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-title">⚖️ Log Weight</div>
+      <div class="track-sub">Weigh weekly. Morning, after the toilet, before food — most consistent conditions.</div>
       <div class="weight-input-row">
-        <input type="number" id="weight-in" inputmode="decimal" placeholder="Enter kg e.g. 125" step="0.1" min="30" max="300">
+        <input type="number" id="weight-in" inputmode="decimal" placeholder="Enter kg" step="0.1" min="30" max="300">
         <button class="btn-log" onclick="logWeight()">Log</button>
       </div>
-      ${weightRows?`<div style="margin-top:14px">${weightRows}${delta}</div>`:''}
     </div>
+
+    <div class="track-card" style="border-color:rgba(167,139,250,.25)">
+      <div class="track-title" style="color:var(--purple)">📏 Log Measurements</div>
+      <div class="track-sub">${measStatus}</div>
+      <button class="btn-log" style="background:var(--purple);width:100%" onclick="openMeasurementsModal()">+ Log Measurements</button>
+      ${measurements.length?`<div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.7">💡 <em>Measure monthly, same morning each cycle. A measuring tape is ~£2 on Amazon. Track what matters — not the scale.</em></div>`:''}
+    </div>
+
     <div class="track-card">
       <div class="track-title" style="color:var(--sub)">Workout History (${workouts.length} total)</div>
       <div style="margin-top:8px">${workoutRows||'<div style="color:var(--muted);font-size:13px;padding:10px 0">No workouts yet. Hit Today and start your first one!</div>'}</div>
@@ -796,10 +982,58 @@ function logWeight(){
   if(!v||v<30||v>300){showToast('Enter a valid weight','#f87171');return}
   const w=S.weights;
   w.unshift({kg:v,date:new Date().toLocaleDateString('en-GB'),ts:Date.now()});
-  S.weights=w.slice(0,80);
+  S.weights=w.slice(0,200);
   inp.value='';
   S.xp=S.xp+15;
   showToast(`Logged ${v}kg · +15 XP`,'#f97316');
+  render();
+}
+
+function openMeasurementsModal(){
+  const last=S.measurements[0]||{};
+  const fieldsHtml=METRICS.map(m=>`
+    <div class="meas-row">
+      <label>${m.label}</label>
+      <input type="number" id="meas-${m.id}" step="0.1" min="10" max="250" inputmode="decimal" placeholder="—" value="${last[m.id]||''}">
+      <span class="unit">${m.unit}</span>
+    </div>
+    <div class="meas-tip">${m.tip}</div>
+  `).join('');
+  const html=`<div class="modal-overlay" id="meas-modal">
+    <div class="modal-box" style="border-color:rgba(167,139,250,.4);max-width:480px">
+      <div style="font-size:32px;margin-bottom:4px;text-align:center">📏</div>
+      <h2 style="color:var(--purple);text-align:center">Log Measurements</h2>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px;line-height:1.5">Measure morning, same spot each time, relaxed muscles (except arm which is flexed). Leave fields blank if you're not measuring them today — previous values are pre-filled.</p>
+      ${fieldsHtml}
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn alt" onclick="document.getElementById('meas-modal').remove()">Cancel</button>
+        <button class="btn" style="background:var(--purple)" onclick="saveMeasurements()">Save</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function saveMeasurements(){
+  const entry={ts:Date.now(),date:new Date().toLocaleDateString('en-GB')};
+  let any=false;
+  for(const m of METRICS){
+    const el=document.getElementById('meas-'+m.id);
+    const v=parseFloat(el.value);
+    if(!isNaN(v)&&v>=10&&v<=250){entry[m.id]=v;any=true;}
+  }
+  if(!any){showToast('Enter at least one measurement','#f87171');return;}
+  const ms=S.measurements;
+  // If logged within last 60 minutes, update the latest instead of creating a new entry
+  if(ms[0] && (Date.now()-ms[0].ts)<3600000){
+    Object.assign(ms[0],entry);
+  } else {
+    ms.unshift(entry);
+  }
+  S.measurements=ms.slice(0,60);
+  S.xp=S.xp+25;
+  document.getElementById('meas-modal').remove();
+  showToast('Measurements logged · +25 XP','#a78bfa');
   render();
 }
 
