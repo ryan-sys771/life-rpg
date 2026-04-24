@@ -532,7 +532,7 @@ function renderPlan(){
       const isToday=w.day===todayDay;
       const icon=w.type==='strength'?'💪':w.type==='cardio'?'🏃':w.type==='hyrox'?'⚡':'😴';
       const detail=w.type==='rest'?'Recovery & adaptation':`${w.ex?.length||0} exercises · +${w.xp} XP`;
-      return `<div class="day-card ${isToday?'today':''}" onclick="${w.type!=='rest'?`previewWorkout(${w.day})`:'showToast(\\'Rest day — no preview needed!\\',\\'#a78bfa\\')'}">
+      return `<div class="day-card ${isToday?'today':''}" onclick="previewWorkout(${w.day})">
         <div class="day-icon">${icon}</div>
         <div class="day-info">
           <div class="day-name">${DAY_NAMES[w.day]} · ${w.name}</div>
@@ -550,7 +550,9 @@ function renderPlan(){
 function previewWorkout(day){
   const {phase}=getCurrentPhase();
   const w=phase.week.find(x=>x.day===day);
-  if(!w||!w.ex)return;
+  if(!w)return;
+  if(w.type==='rest'){showToast('Rest day — recovery IS the work!','#a78bfa');return;}
+  if(!w.ex)return;
   const exList=w.ex.map(e=>`<li style="margin:6px 0;color:var(--sub);font-size:13px">${EX[e.id].name} — <span style="color:var(--text)">${e.sets}×${e.reps}</span></li>`).join('');
   document.body.insertAdjacentHTML('beforeend',`
     <div class="modal-overlay" id="preview-modal">
