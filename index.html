@@ -167,6 +167,63 @@
   .swap-confirm-btn.secondary{background:transparent;color:var(--text);border-color:var(--border)}
   .swap-confirm-btn small{display:block;font-size:10px;font-weight:400;letter-spacing:.5px;opacity:.75;margin-top:2px}
 
+  /* WEEKLY REVIEW */
+  #review-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:650;overflow-y:auto;padding:20px 12px;-webkit-overflow-scrolling:touch}
+  #review-modal::-webkit-scrollbar{display:none}
+  .review-sheet{max-width:560px;margin:auto;background:#0f1420;border:1px solid rgba(167,139,250,.35);border-radius:20px;padding:20px;padding-bottom:24px;animation:reviewIn .4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes reviewIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .review-eyebrow{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--purple);text-transform:uppercase;text-align:center;margin-bottom:4px}
+  .review-title{font-family:'Cinzel',serif;font-size:22px;text-align:center;color:var(--text);margin-bottom:4px;line-height:1.2}
+  .review-dates{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px}
+  .review-section{margin-bottom:14px}
+  .review-section-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--sub);text-transform:uppercase;margin-bottom:8px;padding-left:2px}
+
+  /* Hero workout count */
+  .review-hero{background:linear-gradient(135deg,rgba(52,211,153,.15),rgba(96,165,250,.08));border:1px solid var(--green);border-radius:14px;padding:18px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden}
+  .review-hero.zero{background:rgba(167,139,250,.06);border-color:var(--purple)}
+  .review-hero.low{background:rgba(251,191,36,.06);border-color:var(--amber)}
+  .review-hero-num{font-family:'Cinzel',serif;font-size:54px;font-weight:900;line-height:1;color:var(--green);margin-bottom:4px}
+  .review-hero.zero .review-hero-num{color:var(--purple)}
+  .review-hero.low .review-hero-num{color:var(--amber)}
+  .review-hero-label{font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase}
+  .review-hero-msg{font-size:13px;color:var(--text);margin-top:8px;line-height:1.5;font-style:italic}
+
+  /* Stat grid */
+  .review-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+  .review-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .review-stat-val{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--text);line-height:1}
+  .review-stat-lbl{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:1px;text-transform:uppercase;font-family:'Cinzel',serif}
+
+  /* Strength gain rows */
+  .gain-row{background:var(--surface);border-left:3px solid var(--green);border-radius:8px;padding:10px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+  .gain-row.pr{border-color:var(--amber);background:rgba(251,191,36,.06)}
+  .gain-name{flex:1;font-size:13px;color:var(--text);font-family:'Cinzel',serif}
+  .gain-arrow{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--green);white-space:nowrap}
+  .gain-row.pr .gain-arrow{color:var(--amber)}
+  .gain-pr-tag{font-family:'Cinzel',serif;font-size:9px;background:var(--amber);color:#000;padding:2px 6px;border-radius:99px;letter-spacing:1px;font-weight:700;margin-left:4px}
+
+  /* Body change row */
+  .body-row{background:var(--surface);border-left:3px solid var(--blue);border-radius:8px;padding:10px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+  .body-row.good{border-left-color:var(--green)}
+  .body-row.bad{border-left-color:var(--amber)}
+  .body-name{flex:1;font-size:13px;color:var(--text);font-family:'Cinzel',serif}
+  .body-delta{font-family:'Cinzel',serif;font-size:13px;font-weight:700;white-space:nowrap}
+
+  /* Reflection inputs */
+  .reflect-block{background:var(--surface);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid var(--border)}
+  .reflect-block label{display:block;font-family:'Cinzel',serif;font-size:11px;color:var(--sub);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+  .reflect-block textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:'Crimson Pro',serif;outline:none;resize:vertical;min-height:50px;-webkit-appearance:none;line-height:1.5}
+  .reflect-block textarea:focus{border-color:var(--purple)}
+
+  .review-empty{font-size:12px;color:var(--muted);font-style:italic;padding:8px 12px;line-height:1.6}
+  .review-buttons{display:flex;gap:8px;margin-top:18px}
+  .review-buttons button{flex:1;padding:13px;border-radius:10px;font-family:'Cinzel',serif;font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer;border:none}
+  .review-buttons .save{background:var(--purple);color:#000}
+  .review-buttons .later{background:transparent;color:var(--muted);border:1px solid var(--border)}
+
+  /* Story card sized for review */
+  .review-section .story-card{margin-top:0;margin-bottom:0}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -906,6 +963,12 @@ const S = {
   // Permanent swap map: { "phaseId-day-exIndex": "newExId" }
   get swaps(){try{return JSON.parse(localStorage.getItem('lrpg_swaps')||'{}')}catch{return{}}},
   set swaps(v){localStorage.setItem('lrpg_swaps',JSON.stringify(v))},
+  // Saved weekly reflections: [{ts, weekStart, weekEnd, highlight, hard}]
+  get reflections(){try{return JSON.parse(localStorage.getItem('lrpg_reflections')||'[]')}catch{return[]}},
+  set reflections(v){localStorage.setItem('lrpg_reflections',JSON.stringify(v))},
+  // Track when user last saw the auto-popup so we don't spam them
+  get lastReviewAutoSeen(){return localStorage.getItem('lrpg_review_seen')||''},
+  set lastReviewAutoSeen(v){localStorage.setItem('lrpg_review_seen',v)},
 };
 
 function getCurrentPhase(){
@@ -1041,6 +1104,7 @@ function renderToday(){
       <div class="stat-pill"><div class="stat-pill-val" style="color:var(--blue)">${S.xp.toLocaleString()}</div><div class="stat-pill-lbl">Total XP</div></div>
       <div class="stat-pill"><div class="stat-pill-val" style="color:var(--purple)">P${phase.id}</div><div class="stat-pill-lbl">Phase</div></div>
     </div>
+    <button onclick="showWeeklyReview('rolling')" style="width:100%;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(96,165,250,.06));border:1px solid rgba(167,139,250,.3);color:var(--purple);border-radius:10px;padding:9px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-bottom:12px">📊 WEEKLY REVIEW</button>
     ${heroHtml}
     <div class="prog-card">
       <div class="prog-row"><span class="prog-label">Level Progress</span><span class="prog-val" style="color:${cur.color}">${cur.title}</span></div>
@@ -1279,6 +1343,297 @@ function getStoryCard(weightDelta, measurements){
   return '';
 }
 
+// ════════════════════════════════════════════════
+// WEEKLY REVIEW
+// ════════════════════════════════════════════════
+function computeReviewData(rangeMode){
+  // rangeMode: 'sunday' (last Mon-Sun) or 'rolling' (last 7 days)
+  let weekStart, weekEnd;
+  const now = new Date();
+  if (rangeMode === 'sunday'){
+    // Find the most recent Sunday (today if Sunday, else last Sun)
+    const day = now.getDay(); // 0 = Sun
+    const sunday = new Date(now);
+    if (day !== 0) sunday.setDate(now.getDate() - day);
+    sunday.setHours(23,59,59,999);
+    const monday = new Date(sunday);
+    monday.setDate(sunday.getDate() - 6);
+    monday.setHours(0,0,0,0);
+    weekStart = monday;
+    weekEnd = sunday;
+  } else {
+    weekEnd = new Date(now);
+    weekEnd.setHours(23,59,59,999);
+    weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - 6);
+    weekStart.setHours(0,0,0,0);
+  }
+  const startTs = weekStart.getTime(), endTs = weekEnd.getTime();
+  const inRange = ts => ts >= startTs && ts <= endTs;
+
+  // Workouts this week
+  const workouts = S.workouts.filter(w => inRange(w.ts));
+  const workoutCount = workouts.length;
+  const xpEarned = workouts.reduce((s,w) => s + (w.xp||0), 0);
+
+  // Mobility days hit (any stretch counts)
+  // Note: mobility is stored per-day-of-record; we approximate by checking workout history dates
+  // A more accurate approach would be to log mobility completions in their own history.
+  // For now, use workout dates that included mobility (proxy unavailable) — fall back to 0.
+  // We DO have S.mobilityToday but only for today. So: count is unreliable historically.
+  // We'll show "X mobility flows this week" only if we can confidently report — else hide.
+
+  // Strength gains: compare ratings from this week vs prior to find weight increases
+  const ratings = S.ratings;
+  const gains = []; // {exId, name, from, to, isPR}
+  for (const exId of Object.keys(ratings)){
+    const events = ratings[exId];
+    // Find weight ratings in this week with a valid weight
+    const thisWeek = events.filter(e => inRange(e.ts) && e.weight != null);
+    if (!thisWeek.length) continue;
+    // Find best (highest) weight this week
+    const best = thisWeek.reduce((m,e) => (parseFloat(e.weight) > parseFloat(m.weight) ? e : m), thisWeek[0]);
+    // Find best weight before this week
+    const prior = events.filter(e => e.ts < startTs && e.weight != null);
+    const priorBest = prior.length
+      ? prior.reduce((m,e) => (parseFloat(e.weight) > parseFloat(m.weight) ? e : m), prior[0])
+      : null;
+    const bestW = parseFloat(best.weight);
+    if (priorBest){
+      const priorW = parseFloat(priorBest.weight);
+      if (bestW > priorW){
+        gains.push({exId, name: EX[exId]?.name||exId, from: priorW, to: bestW, isPR: true});
+      }
+    } else if (thisWeek.length){
+      // First time logging this exercise with weight = baseline, not a "gain"
+      // We could call this a "first PR" but for the review we'll skip baselines to keep signal high
+    }
+  }
+  gains.sort((a,b) => (b.to - b.from) - (a.to - a.from));
+
+  // Body weight change: compare latest weight in window to earliest weight before/at window start
+  const allWeights = S.weights;
+  const weightsThisWeek = allWeights.filter(w => inRange(w.ts)).sort((a,b)=>a.ts-b.ts);
+  const latestThisWeek = weightsThisWeek[weightsThisWeek.length-1];
+  // Reference: latest weight from BEFORE this week, or the earliest in this week if no prior
+  const priorWeights = allWeights.filter(w => w.ts < startTs).sort((a,b)=>b.ts-a.ts);
+  const referenceWeight = priorWeights[0] || weightsThisWeek[0];
+  let weightChange = null;
+  if (latestThisWeek && referenceWeight && latestThisWeek.ts !== referenceWeight.ts){
+    weightChange = {
+      from: referenceWeight.kg,
+      to: latestThisWeek.kg,
+      delta: +(latestThisWeek.kg - referenceWeight.kg).toFixed(1),
+    };
+  }
+
+  // Measurement changes
+  const allMeas = S.measurements;
+  const measThisWeek = allMeas.filter(m => inRange(m.ts)).sort((a,b)=>a.ts-b.ts);
+  const latestMeas = measThisWeek[measThisWeek.length-1];
+  const priorMeas = allMeas.filter(m => m.ts < startTs).sort((a,b)=>b.ts-a.ts)[0];
+  const measChanges = [];
+  if (latestMeas){
+    const ref = priorMeas || measThisWeek[0];
+    if (ref && ref.ts !== latestMeas.ts){
+      for (const m of METRICS){
+        if (latestMeas[m.id] != null && ref[m.id] != null){
+          const delta = +(latestMeas[m.id] - ref[m.id]).toFixed(1);
+          if (Math.abs(delta) >= 0.1){
+            const goingDown = delta < 0;
+            const goingUp = delta > 0;
+            const good = (m.dir === 'down' && goingDown) || (m.dir === 'up' && goingUp);
+            measChanges.push({
+              id: m.id, name: m.label, unit: m.unit,
+              from: ref[m.id], to: latestMeas[m.id], delta, good
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Story card based on the week's data
+  const storyHtml = (latestMeas && (priorMeas || measThisWeek.length > 1))
+    ? getStoryCard(weightChange?.delta || null, [priorMeas || measThisWeek[0], latestMeas].filter(Boolean))
+    : '';
+
+  return {
+    weekStart, weekEnd,
+    workoutCount, xpEarned, workouts,
+    gains, weightChange, measChanges, storyHtml,
+    rangeMode
+  };
+}
+
+function showWeeklyReview(rangeMode){
+  rangeMode = rangeMode || 'rolling';
+  const data = computeReviewData(rangeMode);
+  const { weekStart, weekEnd, workoutCount, xpEarned, workouts, gains, weightChange, measChanges, storyHtml } = data;
+
+  // Hero state
+  let heroClass = 'low', heroMsg = '';
+  if (workoutCount === 0){
+    heroClass = 'zero';
+    heroMsg = 'This week was hard. The streak resets, the journey doesn\'t. Show up tomorrow.';
+  } else if (workoutCount <= 2){
+    heroClass = 'low';
+    heroMsg = 'Some workouts is more than no workouts. Build on it next week.';
+  } else if (workoutCount === 3){
+    heroClass = '';
+    heroMsg = 'Solid week. Three sessions is the consistency baseline.';
+  } else if (workoutCount >= 4 && workoutCount <= 5){
+    heroClass = '';
+    heroMsg = 'Excellent week. This is the volume that builds real change.';
+  } else {
+    heroClass = '';
+    heroMsg = `${workoutCount} sessions — outstanding. Make sure tomorrow is a rest day.`;
+  }
+
+  const fmt = d => d.toLocaleDateString('en-GB', {day:'numeric',month:'short'});
+  const dateRange = `${fmt(weekStart)} → ${fmt(weekEnd)}`;
+  const eyebrow = rangeMode === 'sunday' ? 'Weekly Review' : 'Last 7 Days';
+
+  // Build sections
+  const heroHtml = `<div class="review-hero ${heroClass}">
+    <div class="review-hero-num">${workoutCount}</div>
+    <div class="review-hero-label">Workout${workoutCount===1?'':'s'} Completed</div>
+    ${heroMsg ? `<div class="review-hero-msg">${heroMsg}</div>` : ''}
+  </div>`;
+
+  // Stat strip — total XP, distinct exercise types
+  const strengthCount = workouts.filter(w => w.type === 'strength').length;
+  const cardioCount = workouts.filter(w => w.type === 'cardio').length;
+  const hyroxCount = workouts.filter(w => w.type === 'hyrox').length;
+  const restCount = workouts.filter(w => w.type === 'rest').length;
+  const statHtml = `<div class="review-stats">
+    <div class="review-stat"><div class="review-stat-val" style="color:var(--blue)">+${xpEarned.toLocaleString()}</div><div class="review-stat-lbl">XP Earned</div></div>
+    <div class="review-stat"><div class="review-stat-val" style="color:var(--green)">${strengthCount}</div><div class="review-stat-lbl">Strength</div></div>
+    <div class="review-stat"><div class="review-stat-val" style="color:var(--orange)">${cardioCount}</div><div class="review-stat-lbl">Cardio</div></div>
+    <div class="review-stat"><div class="review-stat-val" style="color:var(--purple)">${hyroxCount}</div><div class="review-stat-lbl">Hyrox</div></div>
+  </div>`;
+
+  // Strength gains section
+  const gainsHtml = gains.length
+    ? gains.slice(0,8).map(g => `<div class="gain-row pr">
+        <div class="gain-name">${g.name}</div>
+        <div class="gain-arrow">${g.from}kg → ${g.to}kg</div>
+        <span class="gain-pr-tag">PR</span>
+      </div>`).join('')
+    : `<div class="review-empty">No new heaviest weights this week. ${workoutCount > 0 ? 'Rate your workouts &quot;easy&quot; to unlock progression suggestions.' : 'New week, fresh start — log a workout to begin.'}</div>`;
+
+  // Body changes section
+  let bodyHtml = '';
+  if (weightChange){
+    const cls = weightChange.delta < 0 ? 'good' : weightChange.delta > 0 ? 'bad' : '';
+    const sign = weightChange.delta > 0 ? '+' : '';
+    const arrow = weightChange.delta < 0 ? '↓' : weightChange.delta > 0 ? '↑' : '·';
+    bodyHtml += `<div class="body-row ${cls}">
+      <div class="body-name">Body Weight</div>
+      <div class="body-delta" style="color:${weightChange.delta<0?'var(--green)':weightChange.delta>0?'var(--amber)':'var(--text)'}">${weightChange.from}kg → ${weightChange.to}kg <span style="opacity:.85">${arrow} ${sign}${weightChange.delta}kg</span></div>
+    </div>`;
+  }
+  for (const m of measChanges){
+    const sign = m.delta > 0 ? '+' : '';
+    const arrow = m.delta < 0 ? '↓' : m.delta > 0 ? '↑' : '·';
+    const color = m.good ? 'var(--green)' : 'var(--amber)';
+    const cls = m.good ? 'good' : 'bad';
+    bodyHtml += `<div class="body-row ${cls}">
+      <div class="body-name">${m.name}</div>
+      <div class="body-delta" style="color:${color}">${m.from}${m.unit} → ${m.to}${m.unit} <span style="opacity:.85">${arrow} ${sign}${m.delta}${m.unit}</span></div>
+    </div>`;
+  }
+  if (!bodyHtml){
+    bodyHtml = `<div class="review-empty">No body data logged this week. Hop on the scale Sunday morning + take measurements monthly to fill this section.</div>`;
+  }
+
+  // Reflection section — use existing if there's one for this week
+  const existingReflection = S.reflections.find(r => r.weekStart === weekStart.toDateString());
+  const reflectHtml = `
+    <div class="reflect-block">
+      <label>🎉 Highlight of the week</label>
+      <textarea id="reflect-highlight" placeholder="A PR? A run that finally felt good? Something you learned?">${existingReflection?.highlight||''}</textarea>
+    </div>
+    <div class="reflect-block">
+      <label>⛰️ What was hard</label>
+      <textarea id="reflect-hard" placeholder="What got in the way? Body, mind, life?">${existingReflection?.hard||''}</textarea>
+    </div>`;
+
+  const html = `<div id="review-modal" onclick="if(event.target.id==='review-modal')closeReview()">
+    <div class="review-sheet">
+      <div class="review-eyebrow">${eyebrow}</div>
+      <div class="review-title">Your Week</div>
+      <div class="review-dates">${dateRange}</div>
+
+      ${heroHtml}
+      ${statHtml}
+
+      ${storyHtml ? `<div class="review-section">${storyHtml}</div>` : ''}
+
+      <div class="review-section">
+        <div class="review-section-title">💪 Strength Progress</div>
+        ${gainsHtml}
+      </div>
+
+      <div class="review-section">
+        <div class="review-section-title">📐 Body Changes</div>
+        ${bodyHtml}
+      </div>
+
+      <div class="review-section">
+        <div class="review-section-title">📝 Quick Reflection (optional)</div>
+        ${reflectHtml}
+      </div>
+
+      <div class="review-buttons">
+        <button class="later" onclick="closeReview()">Close</button>
+        <button class="save" onclick="saveReflection('${weekStart.toDateString()}','${weekEnd.toDateString()}')">Save Reflection</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  S.lastReviewAutoSeen = weekStart.toDateString();
+}
+
+function closeReview(){
+  document.getElementById('review-modal')?.remove();
+}
+
+function saveReflection(weekStartStr, weekEndStr){
+  const highlight = document.getElementById('reflect-highlight')?.value.trim() || '';
+  const hard = document.getElementById('reflect-hard')?.value.trim() || '';
+  if (!highlight && !hard){
+    closeReview();
+    return;
+  }
+  const refs = S.reflections;
+  const existing = refs.findIndex(r => r.weekStart === weekStartStr);
+  const entry = {ts: Date.now(), weekStart: weekStartStr, weekEnd: weekEndStr, highlight, hard};
+  if (existing >= 0) refs[existing] = entry;
+  else refs.unshift(entry);
+  S.reflections = refs.slice(0, 100);
+  S.xp = S.xp + 25;
+  closeReview();
+  showToast('Reflection saved · +25 XP', '#a78bfa');
+  render();
+}
+
+// Should we auto-prompt the review? Only on Sunday after 6pm, once per week
+function shouldAutoShowReview(){
+  const now = new Date();
+  if (now.getDay() !== 0) return false; // not Sunday
+  if (now.getHours() < 18) return false; // not yet evening
+  // Has user been shown this week's review already?
+  const weekStartStr = (() => {
+    const d = new Date(now); d.setDate(now.getDate() - 6); d.setHours(0,0,0,0); return d.toDateString();
+  })();
+  if (S.lastReviewAutoSeen === weekStartStr) return false;
+  // Don't show if user has zero workouts AND zero weights — they're not engaged enough yet
+  const hasAnyData = S.workouts.length > 0 || S.weights.length > 0;
+  if (!hasAnyData) return false;
+  return true;
+}
+
 function renderTrack(){
   const weights=S.weights;
   const measurements=S.measurements;
@@ -1349,7 +1704,20 @@ function renderTrack(){
     <div class="track-card">
       <div class="track-title" style="color:var(--sub)">Workout History (${workouts.length} total)</div>
       <div style="margin-top:8px">${workoutRows||'<div style="color:var(--muted);font-size:13px;padding:10px 0">No workouts yet. Hit Today and start your first one!</div>'}</div>
-    </div>`;
+    </div>
+
+    ${S.reflections.length ? `<div class="track-card" style="border-color:rgba(167,139,250,.25)">
+      <div class="track-title" style="color:var(--purple)">📝 Past Reflections (${S.reflections.length})</div>
+      <div style="margin-top:8px;max-height:280px;overflow-y:auto">
+        ${S.reflections.slice(0,10).map(r => `
+          <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:4px">${new Date(r.weekStart).toLocaleDateString('en-GB',{day:'numeric',month:'short'})} → ${new Date(r.weekEnd).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+            ${r.highlight?`<div style="font-size:13px;color:var(--text);margin-bottom:4px"><span style="color:var(--green)">🎉</span> ${r.highlight}</div>`:''}
+            ${r.hard?`<div style="font-size:13px;color:var(--sub)"><span style="color:var(--amber)">⛰️</span> ${r.hard}</div>`:''}
+          </div>
+        `).join('')}
+      </div>
+    </div>` : ''}`;
 }
 
 function logWeight(){
@@ -2126,6 +2494,9 @@ window.addEventListener('load',()=>{
       if(confirm('Resume your in-progress workout?'))showWorkoutView();
       else S.activeWorkout=null;
     },500);
+  } else if (shouldAutoShowReview()){
+    // Sunday evening, gentle auto-popup
+    setTimeout(()=>showWeeklyReview('sunday'), 800);
   }
 });
 
