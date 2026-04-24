@@ -557,6 +557,162 @@ function formatDaysAgo(d){
   return `${Math.floor(d/30)}mo ago`;
 }
 
+// Determine the progression type for an exercise
+function classifyExercise(exId, repsString){
+  if (WEIGHTED.has(exId)) return 'weighted';
+  if (parseDuration(repsString)) return 'time';
+  // bodyweight reps (push-up, pull-up, dip, hanging knee, etc.)
+  if (/AMRAP|\d/.test(repsString||'')) return 'reps';
+  return 'unknown';
+}
+
+// Parse a rep string to find the upper number (e.g. "8-10" -> 10, "12" -> 12, "10 each side" -> 10)
+function parseRepCount(repsString){
+  if (!repsString) return null;
+  const m = repsString.match(/(\d+)(?:\s*[-–]\s*(\d+))?/);
+  if (!m) return null;
+  return parseInt(m[2] || m[1]);
+}
+
+// Get smart progression suggestion based on rating history
+function getProgressionSuggestion(exId, scheduleEx){
+  const ratings = S.ratings[exId] || [];
+  const lastWt = S.lastWeights[exId];
+  const bonus = S.bonusProgression[exId] || {reps:0, sec:0};
+  const type = classifyExercise(exId, scheduleEx.reps);
+
+  // Need at least one rating to make a suggestion
+  if (!ratings.length){
+    return {
+      type,
+      suggestion: null,
+      lastValue: lastWt,
+      lastRating: null,
+      isDeload: false,
+      reasoning: null
+    };
+  }
+
+  const recent = ratings.slice(0, 5);
+  const last = recent[0];
+  // Count consecutive "easy" ratings to trigger deload
+  const consecutiveEasy = (() => {
+    let c = 0;
+    for (const r of recent){ if (r.rating === 'easy') c++; else break; }
+    return c;
+  })();
+  const isDeload = consecutiveEasy >= 4;
+
+  let suggestion = null, reasoning = null;
+
+  if (type === 'weighted' && last.weight){
+    const w = parseFloat(last.weight);
+    if (isNaN(w)) return {type, suggestion:null, lastValue:lastWt, lastRating:last.rating, isDeload, reasoning:null};
+    if (isDeload){
+      suggestion = Math.round((w * 0.9) * 2) / 2; // round to nearest 0.5
+      reasoning = `4+ easy in a row — deload to ${suggestion}kg this week to consolidate, then push hard next time.`;
+    } else if (last.rating === 'easy'){
+      // Bigger jump for upper body small jump for compound? Simpler rule: ~10% or +2.5kg, whichever larger
+      const jump = Math.max(2.5, Math.round((w * 0.05) * 2) / 2);
+      suggestion = w + jump;
+      reasoning = `Last set felt easy. Try +${jump}kg today.`;
+    } else if (last.rating === 'hard'){
+      suggestion = w; // hold
+      reasoning = `Last was tough — same weight, focus on cleaner reps.`;
+    } else {
+      // 'right' — small bump
+      suggestion = w + 2.5;
+      reasoning = `Right at the edge last time. Small bump: +2.5kg.`;
+    }
+  } else if (type === 'time'){
+    const baseSec = parseDuration(scheduleEx.reps) || 30;
+    const currentSec = baseSec + bonus.sec;
+    if (isDeload){
+      suggestion = currentSec;
+      reasoning = `4+ easy in a row — hold the time, perfect the form.`;
+    } else if (last.rating === 'easy'){
+      const jump = currentSec >= 60 ? 15 : 10;
+      suggestion = currentSec + jump;
+      reasoning = `Last hold felt easy. Add ${jump}s today.`;
+    } else if (last.rating === 'hard'){
+      suggestion = Math.max(baseSec, currentSec - 10);
+      reasoning = `Last was tough — drop 10s, build back up.`;
+    } else {
+      suggestion = currentSec + 5;
+      reasoning = `Edge of capacity. Small bump: +5s.`;
+    }
+  } else if (type === 'reps'){
+    const baseReps = parseRepCount(scheduleEx.reps) || 8;
+    const currentReps = baseReps + bonus.reps;
+    if (isDeload){
+      suggestion = currentReps;
+      reasoning = `4+ easy in a row — hold the reps, focus on tempo.`;
+    } else if (last.rating === 'easy'){
+      suggestion = currentReps + 2;
+      reasoning = `Last set felt easy. Try +2 reps today.`;
+    } else if (last.rating === 'hard'){
+      suggestion = Math.max(baseReps, currentReps - 1);
+      reasoning = `Last was tough — back off 1 rep, rebuild.`;
+    } else {
+      suggestion = currentReps + 1;
+      reasoning = `Solid rep range. Small bump: +1 rep.`;
+    }
+  }
+
+  return {type, suggestion, lastValue:lastWt, lastRating:last.rating, isDeload, reasoning};
+}
+
+// Apply a rating from the post-workout flow
+function recordRating(exId, rating, scheduleEx, actualWeight){
+  // 1. Save the rating event
+  const ratings = S.ratings;
+  if (!ratings[exId]) ratings[exId] = [];
+  ratings[exId].unshift({
+    ts: Date.now(),
+    rating, // 'easy' | 'right' | 'hard'
+    weight: actualWeight || null,
+    reps: scheduleEx.reps,
+  });
+  ratings[exId] = ratings[exId].slice(0, 25); // keep recent 25
+  S.ratings = ratings;
+
+  // 2. For non-weighted exercises, also bump the bonus progression so suggestion sticks
+  const type = classifyExercise(exId, scheduleEx.reps);
+  const bonus = S.bonusProgression;
+  if (!bonus[exId]) bonus[exId] = {reps:0, sec:0};
+  if (type === 'time' && rating === 'easy'){
+    const baseSec = parseDuration(scheduleEx.reps) || 30;
+    const currentSec = baseSec + bonus[exId].sec;
+    bonus[exId].sec += currentSec >= 60 ? 15 : 10;
+  } else if (type === 'time' && rating === 'hard'){
+    bonus[exId].sec = Math.max(0, bonus[exId].sec - 10);
+  } else if (type === 'reps' && rating === 'easy'){
+    bonus[exId].reps += 2;
+  } else if (type === 'reps' && rating === 'hard'){
+    bonus[exId].reps = Math.max(0, bonus[exId].reps - 1);
+  }
+  S.bonusProgression = bonus;
+}
+
+// Get the EFFECTIVE rep/duration string accounting for bonus progression
+function getEffectiveReps(exId, originalReps){
+  const bonus = (S.bonusProgression || {})[exId];
+  if (!bonus) return originalReps;
+  const type = classifyExercise(exId, originalReps);
+  if (type === 'time' && bonus.sec){
+    const baseSec = parseDuration(originalReps) || 30;
+    const total = baseSec + bonus.sec;
+    return total >= 60 ? `${Math.floor(total/60)}:${String(total%60).padStart(2,'0')} hold` : `${total} seconds`;
+  } else if (type === 'reps' && bonus.reps){
+    const baseReps = parseRepCount(originalReps);
+    if (baseReps){
+      const newReps = baseReps + bonus.reps;
+      return originalReps.replace(/\d+(?:\s*[-–]\s*\d+)?/, newReps.toString());
+    }
+  }
+  return originalReps;
+}
+
 const PHASES = [
   {id:1,name:'Foundation',weeks:'Weeks 1–4',workoutsToUnlock:0,nextAt:12,
     desc:'Build the habit. Move daily. Establish baseline strength without pain. No running yet — joints need a few weeks of strength work first.',
@@ -741,6 +897,12 @@ const S = {
   set activeWorkout(v){v?localStorage.setItem('lrpg_active',JSON.stringify(v)):localStorage.removeItem('lrpg_active')},
   get lastWeights(){try{return JSON.parse(localStorage.getItem('lrpg_last_weights')||'{}')}catch{return{}}},
   set lastWeights(v){localStorage.setItem('lrpg_last_weights',JSON.stringify(v))},
+  // Ratings history per exercise: { exId: [{ts, rating, weight, reps, dur}] } most recent first
+  get ratings(){try{return JSON.parse(localStorage.getItem('lrpg_ratings')||'{}')}catch{return{}}},
+  set ratings(v){localStorage.setItem('lrpg_ratings',JSON.stringify(v))},
+  // Per-exercise overrides for bonus reps/seconds beyond what the schedule says
+  get bonusProgression(){try{return JSON.parse(localStorage.getItem('lrpg_bonus_prog')||'{}')}catch{return{}}},
+  set bonusProgression(v){localStorage.setItem('lrpg_bonus_prog',JSON.stringify(v))},
   // Permanent swap map: { "phaseId-day-exIndex": "newExId" }
   get swaps(){try{return JSON.parse(localStorage.getItem('lrpg_swaps')||'{}')}catch{return{}}},
   set swaps(v){localStorage.setItem('lrpg_swaps',JSON.stringify(v))},
@@ -1319,22 +1481,53 @@ function showWorkoutView(){
     const exDone=setData.completed.every(Boolean);
     const expanded=!exDone;
     const isWeighted=WEIGHTED.has(actualId);
-    const timerSec=parseDuration(e.reps);
+    const effectiveReps = getEffectiveReps(actualId, e.reps);
+    const timerSec=parseDuration(effectiveReps);
     const last=getLastPerformance(actualId);
-    const lastHtml=last?`
-      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(96,165,250,.08);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:12px">
-        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--blue);letter-spacing:2px;font-weight:700">LAST</span>
-        <span style="flex:1;color:var(--text);font-size:13px">${last.weight?`<strong style="font-family:'Cinzel',serif;color:var(--amber)">${last.weight}kg</strong> · `:''}${formatDaysAgo(last.daysAgo)}</span>
-      </div>`:`
-      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(251,191,36,.05);border-left:3px solid var(--amber);border-radius:6px;margin-bottom:12px">
-        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px;font-weight:700">FIRST TIME</span>
-        <span style="flex:1;color:var(--sub);font-size:13px">Set today's baseline</span>
-      </div>`;
+    const sug=getProgressionSuggestion(actualId, {...e, reps: effectiveReps});
+    const exType = sug.type;
+
+    // Build the smart "LAST + SUGGESTED" card
+    let smartHtml = '';
+    if (last && sug.suggestion != null){
+      const ratingEmoji = sug.lastRating==='easy'?'😅 felt easy':sug.lastRating==='right'?'✓ just right':sug.lastRating==='hard'?'💀 felt tough':'';
+      const lastDisplay = last.weight ? `<strong style="color:var(--amber)">${last.weight}kg</strong>` : 'logged';
+      const sugUnit = exType==='weighted'?'kg':exType==='time'?'s':'reps';
+      const sugDisplay = exType==='time' && sug.suggestion>=60 ? `${Math.floor(sug.suggestion/60)}:${String(Math.round(sug.suggestion%60)).padStart(2,'0')}` : sug.suggestion;
+      const sugColor = sug.isDeload ? 'var(--blue)' : 'var(--green)';
+      const sugLabel = sug.isDeload ? '🛡️ DELOAD' : '🎯 SUGGESTED';
+      smartHtml = `
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(96,165,250,.08);border-left:3px solid var(--blue);border-radius:6px">
+            <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--blue);letter-spacing:2px;font-weight:700">LAST</span>
+            <span style="flex:1;color:var(--text);font-size:13px">${lastDisplay} · ${formatDaysAgo(last.daysAgo)}${ratingEmoji?` · <span style="color:var(--muted);font-size:12px">${ratingEmoji}</span>`:''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(52,211,153,.08);border-left:3px solid ${sugColor};border-radius:6px">
+            <span style="font-family:'Cinzel',serif;font-size:10px;color:${sugColor};letter-spacing:2px;font-weight:700">${sugLabel}</span>
+            <span style="flex:1;color:var(--text);font-size:13px"><strong style="color:${sugColor}">${sugDisplay}${sugUnit==='kg'?'kg':sugUnit==='s'?'':' reps'}</strong></span>
+          </div>
+          ${sug.reasoning?`<div style="font-size:11px;color:var(--muted);font-style:italic;padding:0 4px;line-height:1.5">${sug.reasoning}</div>`:''}
+        </div>`;
+    } else if (last){
+      smartHtml = `
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(96,165,250,.08);border-left:3px solid var(--blue);border-radius:6px;margin-bottom:12px">
+          <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--blue);letter-spacing:2px;font-weight:700">LAST</span>
+          <span style="flex:1;color:var(--text);font-size:13px">${last.weight?`<strong style="color:var(--amber)">${last.weight}kg</strong> · `:''}${formatDaysAgo(last.daysAgo)}<br><span style="color:var(--muted);font-size:11px;font-style:italic">Rate this workout to unlock weight suggestions</span></span>
+        </div>`;
+    } else {
+      smartHtml = `
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(251,191,36,.05);border-left:3px solid var(--amber);border-radius:6px;margin-bottom:12px">
+          <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px;font-weight:700">FIRST TIME</span>
+          <span style="flex:1;color:var(--sub);font-size:13px">Set today's baseline. Rate it after to enable smart progression.</span>
+        </div>`;
+    }
     const swappedBadge = wasSwapped ? `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.4);border-radius:6px;padding:2px 7px;font-size:9px;color:var(--purple);font-family:'Cinzel',serif;letter-spacing:1px;margin-top:3px;font-weight:700">⇄ SWAPPED FROM ${EX[setData.scheduleId]?.name.toUpperCase()}</div>` : '';
+    // Auto-fill weight: prefer suggestion if user hasn't manually set it yet
+    const displayWeight = setData.weight || (isWeighted && sug.suggestion ? sug.suggestion : '');
     const weightHtml=isWeighted?`
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid rgba(251,191,36,.2)">
         <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--amber);letter-spacing:2px">WEIGHT</span>
-        <input type="number" step="0.5" min="0" max="500" value="${setData.weight||''}"
+        <input type="number" step="0.5" min="0" max="500" value="${displayWeight}"
           oninput="updateWeight(${exIdx},this.value)"
           placeholder="--"
           inputmode="decimal"
@@ -1352,14 +1545,14 @@ function showWorkoutView(){
         <div class="ex-num">${exDone?'✓':exIdx+1}</div>
         <div class="ex-name-wrap">
           <div class="ex-name">${meta.name}</div>
-          <div class="ex-target">${e.sets}×${e.reps}${e.rest?` · ${e.rest}s rest`:''}</div>
+          <div class="ex-target">${e.sets}×${effectiveReps}${e.rest?` · ${e.rest}s rest`:''}</div>
           ${swappedBadge}
         </div>
         <button class="swap-btn" onclick="event.stopPropagation();openSwapModal(${exIdx},'workout')" title="Swap exercise">⇄</button>
         <div class="ex-chev">▼</div>
       </div>
       <div class="ex-body">
-        ${lastHtml}
+        ${smartHtml}
         <div class="ex-notes">${meta.notes}</div>
         <div class="ex-alt"><strong>Substitution:</strong> ${meta.alt}</div>
         ${weightHtml}
@@ -1492,13 +1685,88 @@ function exitWorkout(){
 function finishWorkout(){
   const aw=S.activeWorkout;
   if(!aw)return;
+  // Launch the rating flow before completing
+  showRatingFlow(0);
+}
+
+function showRatingFlow(exIdx){
+  const aw = S.activeWorkout;
+  if (!aw) return;
+  // Skip exercises that aren't worth rating (e.g. cardio_choice, walks where the rating isn't meaningful)
+  // We'll rate everything that's a strength/hyrox-ish exercise OR has a parseable weight/duration.
+  while (exIdx < aw.sets.length){
+    const setData = aw.sets[exIdx];
+    const exDef = EX[setData.id];
+    if (exDef && exDef.group !== 'cardio') break;
+    exIdx++;
+  }
+  if (exIdx >= aw.sets.length){
+    completeAndShowSummary();
+    return;
+  }
+  const setData = aw.sets[exIdx];
+  const exDef = EX[setData.id];
+  const w = getTodayWorkout();
+  const scheduleEx = w.ex[exIdx];
+  const totalRatings = aw.sets.filter(s => EX[s.id]?.group !== 'cardio').length;
+  let ratingNum = 0;
+  for (let i=0; i<exIdx; i++){
+    if (EX[aw.sets[i].id]?.group !== 'cardio') ratingNum++;
+  }
+  ratingNum++;
+
+  const weightLine = setData.weight ? `<div style="text-align:center;color:var(--amber);font-family:'Cinzel',serif;font-size:14px;margin-bottom:8px">${setData.weight}kg used</div>` : '';
+  const html = `
+    <div class="modal-overlay" id="rating-modal" style="z-index:550">
+      <div class="modal-box" style="max-width:380px;padding:20px">
+        <div style="text-align:center;font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:3px;margin-bottom:6px">RATING ${ratingNum} OF ${totalRatings}</div>
+        <h2 style="text-align:center;color:var(--text);font-size:17px;margin-bottom:4px">${exDef.name}</h2>
+        ${weightLine}
+        <p style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:18px">How did that feel?</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button onclick="submitRating(${exIdx},'easy')" style="background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(52,211,153,.05));border:1px solid var(--green);color:var(--green);border-radius:12px;padding:14px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:1px;text-align:left;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">😅</span><span>TOO EASY<br><span style="font-size:10px;color:var(--muted);font-weight:400;letter-spacing:.5px">Could've done more · push it next time</span></span>
+          </button>
+          <button onclick="submitRating(${exIdx},'right')" style="background:linear-gradient(135deg,rgba(96,165,250,.18),rgba(96,165,250,.05));border:1px solid var(--blue);color:var(--blue);border-radius:12px;padding:14px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:1px;text-align:left;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">✓</span><span>JUST RIGHT<br><span style="font-size:10px;color:var(--muted);font-weight:400;letter-spacing:.5px">Last rep was a struggle · perfect challenge</span></span>
+          </button>
+          <button onclick="submitRating(${exIdx},'hard')" style="background:linear-gradient(135deg,rgba(248,113,113,.15),rgba(248,113,113,.05));border:1px solid var(--red);color:var(--red);border-radius:12px;padding:14px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:1px;text-align:left;display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">💀</span><span>TOO HARD<br><span style="font-size:10px;color:var(--muted);font-weight:400;letter-spacing:.5px">Form was breaking · back off next time</span></span>
+          </button>
+          <button onclick="skipRating(${exIdx})" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;padding:8px;cursor:pointer;margin-top:4px">SKIP →</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function submitRating(exIdx, rating){
+  const aw = S.activeWorkout;
+  if (!aw) return;
+  const setData = aw.sets[exIdx];
+  const w = getTodayWorkout();
+  const scheduleEx = w.ex[exIdx];
+  const effectiveReps = getEffectiveReps(setData.id, scheduleEx.reps);
+  recordRating(setData.id, rating, {...scheduleEx, reps: effectiveReps}, setData.weight);
+  document.getElementById('rating-modal')?.remove();
+  showRatingFlow(exIdx + 1);
+}
+
+function skipRating(exIdx){
+  document.getElementById('rating-modal')?.remove();
+  showRatingFlow(exIdx + 1);
+}
+
+function completeAndShowSummary(){
+  const aw=S.activeWorkout;
+  if(!aw)return;
   // Save last used weights for next session
   const lw=S.lastWeights;
   const usedWeights={};
   aw.sets.forEach(s=>{
     if(s.weight&&WEIGHTED.has(s.id)){
-      lw[s.id]=s.weight;
-      usedWeights[s.id]=s.weight;
+      lw[s.id]=parseFloat(s.weight);
+      usedWeights[s.id]=parseFloat(s.weight);
     }
   });
   S.lastWeights=lw;
