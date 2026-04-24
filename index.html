@@ -69,6 +69,25 @@
   .bonus-text{flex:1;font-size:12px;color:var(--text);line-height:1.2}
   .bonus-xp{font-family:'Cinzel',serif;font-size:10px;color:var(--amber);font-weight:700}
 
+  /* MOBILITY */
+  .mob-card{background:var(--surface);border:1px solid rgba(167,139,250,.3);border-radius:14px;padding:14px;margin-bottom:12px;margin-top:14px}
+  .mob-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .mob-title{font-family:'Cinzel',serif;font-size:12px;color:var(--purple);letter-spacing:2px;text-transform:uppercase}
+  .mob-count{font-family:'Cinzel',serif;font-size:12px;color:var(--sub);font-weight:700}
+  .mob-sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+  .mob-list{display:flex;flex-direction:column;gap:4px}
+  .mob-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:all .2s}
+  .mob-item.done{border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.05)}
+  .mob-row{display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer}
+  .mob-name{flex:1;font-size:13px;color:var(--text);line-height:1.2}
+  .mob-item.done .mob-name{color:var(--sub)}
+  .mob-dur{font-family:'Cinzel',serif;font-size:10px;color:var(--muted);letter-spacing:1px;font-weight:700}
+  .mob-btn{background:var(--purple);color:#000;border:none;border-radius:6px;width:30px;height:30px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:'Cinzel',serif}
+  .mob-btn.done{background:var(--green)}
+  .mob-notes{display:none;padding:0 10px 10px;border-top:1px solid var(--border);font-size:12px;color:var(--sub);line-height:1.65;padding-top:8px;margin-top:0}
+  .mob-item.expanded .mob-notes{display:block}
+  .mob-item.expanded{background:#181624}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -175,6 +194,7 @@
   <div id="content"></div>
 </div>
 <div id="toast"></div>
+<div id="mob-timer" style="display:none"></div>
 <div id="workout-view"></div>
 
 <div class="modal-overlay" id="welcome-modal">
@@ -216,7 +236,7 @@ const EX = {
   bb_glute_bridge:{name:'Barbell Glute Bridge',notes:'Sit on floor, roll barbell over hips — USE A PAD or folded towel or it\'ll dig in badly. Plant feet flat, knees bent. Drive heels into floor to lift hips until body is a straight line from knees to shoulders. Squeeze glutes HARD at the top for 2 seconds. Lower under control.',alt:'Bodyweight glute bridge (no weight), or dumbbells on hips instead of barbell.'},
   db_bench:{name:'Dumbbell Bench Press',notes:'Lie on bench, DBs at chest level. Press up and slightly together at the top. Lower under control until you feel a stretch.',alt:'Floor press if no bench. Push-ups if no DBs.'},
   incline_db:{name:'Incline DB Press',notes:'Bench at 30-45°. Press dumbbells up. Hits upper chest and shoulders.',alt:'Flat DB press if no incline available.'},
-  push_up:{name:'Push-Up',notes:'Hands slightly wider than shoulders. Body in straight line. Lower chest to within an inch of floor. Drop to knees if needed — still effective.',alt:'Incline push-ups (hands on bench) make it easier. Decline (feet elevated) makes it harder.'},
+  push_up:{name:'Push-Up',notes:'Hands slightly wider than shoulders. Body in straight line. Lower chest to within an inch of floor. Drop to knees if needed — still effective.',alt:'Incline push-ups (hands on bench/box) make easier. Decline harder. FOR WRIST PAIN: grip two DBs on the floor for a neutral wrist (palm faces in) — this avoids the wrist-extension that hurts loaded wrists.'},
   ohp:{name:'Overhead Press (DB)',notes:'Standing or seated. Press DBs from shoulder height to overhead. Don\'t arch lower back — brace core hard.',alt:'Seated version is easier on the spine.'},
   lat_pulldown:{name:'Lat Pulldown',notes:'Wide overhand grip. Pull bar to upper chest, drive elbows down and back. Lean back ~10°. Squeeze lats at the bottom.',alt:'Banded pulldown anchored to a high point.'},
   seated_row:{name:'Seated Cable Row',notes:'Sit tall, neutral grip. Pull handle to lower ribs, squeeze shoulder blades. Don\'t use momentum — slow control.',alt:'Bent-over DB rows or band rows.'},
@@ -429,6 +449,18 @@ const BONUS = [
   {id:'journal',label:'Note today',xp:10,icon:'📝'},
 ];
 
+const MOBILITY = [
+  {id:'cat_cow',name:'Cat-Cow',duration:60,notes:'On hands and knees. Inhale: arch back, lift chest and tailbone (cow). Exhale: round spine, tuck chin and tailbone (cat). Move slowly with breath. Warms up the entire spine.'},
+  {id:'worlds_greatest',name:'World\'s Greatest Stretch',duration:90,notes:'From a push-up position, step right foot outside right hand into a deep lunge. Left knee lowers. Drop right elbow toward the floor inside the foot, then rotate up, reaching right arm to ceiling. Hold 3 sec each position. Switch sides. Best single mobility drill for runners — opens hips, ankles, and t-spine at once.'},
+  {id:'ninety_ninety',name:'90/90 Hip Stretch',duration:90,notes:'Sit on floor. Front leg bent 90° in front, back leg bent 90° to the side. Both knees down. Keep back tall, lean forward over the front shin. 45 sec each side. Opens hip rotators — critical for running stride and reducing knee pain.'},
+  {id:'couch_stretch',name:'Couch Stretch',duration:90,notes:'Kneel facing AWAY from a couch/wall. Top of one foot on the couch, shin against it, other foot flat in front. Squeeze glute of back leg, tuck tailbone under. Stop at strong stretch — don\'t force. 45 sec each side. Undoes office-chair damage to hip flexors.'},
+  {id:'down_dog_pedal',name:'Downward Dog + Calf Pedal',duration:60,notes:'Hands shoulder-width, feet hip-width, hips pressed up and back into inverted V. Pedal your feet — push one heel toward floor while bending the other knee, swap. Continuous. Calves (shin splint prevention!) and hamstrings.'},
+  {id:'thread_needle',name:'Thread the Needle',duration:60,notes:'On hands and knees. Slide right arm under chest, palm up (only as far as painless for LEFT wrist), reach to the left. Rest right shoulder and ear on floor. Hold 30 sec. Switch sides. Unlocks thoracic spine rotation — huge for running posture and breathing.'},
+  {id:'wrist_mobility',name:'Wrist Mobility · Left Focus',duration:120,notes:'For your left wrist specifically. (1) 10 slow circles each direction, both hands. (2) Prayer stretch: palms together at chest, lower keeping palms touching — only to painless depth. Hold 20s. (3) Reverse prayer: backs of hands together, raise. Hold 20s. (4) Gentle supination: arm at side, elbow bent 90°, slowly turn palm UP until you feel the limit — STOP BEFORE PAIN. Hold 15s. Repeat 5 times, gently. Progress is measured in millimeters. If no improvement in 4 weeks, see a hand physio — a wrist that can\'t supinate often has an underlying issue (old sprain, TFCC, DRUJ) that needs assessment.'},
+  {id:'ankle_circles',name:'Ankle Mobility',duration:60,notes:'Sit with one leg crossed over the other. 15 slow ankle circles each direction. Then point and flex 10 times. Switch feet. Ankle stiffness is a hidden cause of knee and shin pain — tight ankles force the knee to absorb what the ankle should have.'},
+  {id:'childs_pose',name:'Child\'s Pose + Breathing',duration:60,notes:'Kneel, sit back onto heels, fold forward with arms extended, forehead toward floor. Breathe deeply — 4 counts in through nose, 6 counts out through mouth. Downregulates the nervous system. Genuinely the most underrated recovery tool in existence.'}
+];
+
 const LEVELS = [
   {xp:0,level:1,title:'Returning Hero',color:'#94a3b8'},
   {xp:300,level:2,title:'Rising Adventurer',color:'#60a5fa'},
@@ -457,6 +489,14 @@ const S = {
   },
   set bonusToday(done){
     localStorage.setItem('lrpg_bonus_day',JSON.stringify({date:new Date().toDateString(),done}));
+  },
+  get mobilityToday(){
+    const today=new Date().toDateString();
+    const d=JSON.parse(localStorage.getItem('lrpg_mobility_day')||'{}');
+    return d.date===today?(d.done||{}):{};
+  },
+  set mobilityToday(done){
+    localStorage.setItem('lrpg_mobility_day',JSON.stringify({date:new Date().toDateString(),done}));
   },
   get activeWorkout(){try{return JSON.parse(localStorage.getItem('lrpg_active')||'null')}catch{return null}},
   set activeWorkout(v){v?localStorage.setItem('lrpg_active',JSON.stringify(v)):localStorage.removeItem('lrpg_active')},
@@ -555,6 +595,30 @@ function renderToday(){
   }
 
   const bonusDone=S.bonusToday;
+  const mobDone=S.mobilityToday;
+  const mobCount=MOBILITY.filter(m=>mobDone[m.id]).length;
+  const totalMin=Math.round(MOBILITY.reduce((s,m)=>s+m.duration,0)/60);
+  const mobHtml=`<div class="mob-card">
+    <div class="mob-head">
+      <div class="mob-title">🧘 Mobility Flow · Daily</div>
+      <div class="mob-count">${mobCount}/${MOBILITY.length}</div>
+    </div>
+    <div class="mob-sub">Runner prep + wrist focus · ~${totalMin} min · +5 XP per stretch</div>
+    <div class="mob-list">
+      ${MOBILITY.map(m=>{
+        const isDone=!!mobDone[m.id];
+        return `<div class="mob-item ${isDone?'done':''}" id="mob-${m.id}">
+          <div class="mob-row" onclick="toggleMobInfo('${m.id}')">
+            <span class="mob-name">${isDone?'✓ ':''}${m.name}</span>
+            <span class="mob-dur">${formatTime(m.duration)}</span>
+            <button class="mob-btn ${isDone?'done':''}" onclick="event.stopPropagation();${isDone?`unmarkStretch('${m.id}')`:`startMobilityTimer('${m.id}',${m.duration})`}">${isDone?'✓':'▶'}</button>
+          </div>
+          <div class="mob-notes">${m.notes}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
   const bonusHtml=`<div class="bonus-section">
     <div class="bonus-title">Daily Bonus Quests · +Small XP</div>
     <div class="bonus-grid">
@@ -584,7 +648,8 @@ function renderToday(){
       <div class="bar-bg"><div class="bar-fill" style="width:${phasePct}%;background:linear-gradient(90deg,var(--green),var(--blue));box-shadow:0 0 10px var(--green)"></div></div>
       <div class="prog-sub">${phaseTotal?`${Math.max(0,phaseTotal-completed)} workouts to unlock "${PHASES[phase.id]?.name}"`:'You\'ve unlocked the final phase 🏆'}</div>
     </div>
-    ${bonusHtml}`;
+    ${bonusHtml}
+    ${mobHtml}`;
 }
 
 function renderPlan(){
@@ -662,14 +727,21 @@ function renderJourney(){
       </div>`;
     }).join('')}
     <div class="info-card">
-      <div class="info-title">⚠️ Knee & Shin Protection Protocol</div>
+      <div class="info-title">⚠️ Body Protection Protocol</div>
       <div class="info-body">
+        <strong style="color:var(--text)">Knees & Shins</strong><br>
         • Strength FIRST, running second — joints need to handle bodyweight before pavement<br>
         • Run/walk intervals through Phase 2 — not "cheating", scientifically optimal<br>
         • Never increase weekly run volume by more than 10%<br>
         • Pain ≠ soreness — pain means stop, soreness means continue with care<br>
         • Get gait-analysed at a running shop before buying shoes<br>
-        • Foam roll calves and quads after every run
+        • Foam roll calves and quads after every run<br><br>
+        <strong style="color:var(--text)">Left Wrist (supination limit)</strong><br>
+        • Your program is mostly wrist-neutral (DBs, pronated barbell rows, forearm planks, farmer carries) — good<br>
+        • Push-ups: use two dumbbells as handles for neutral wrist grip — removes the painful bend<br>
+        • Daily wrist mobility is non-optional — it's in the Mobility Flow every day<br>
+        • Never force supination past pain. Progress is millimeters<br>
+        • If no improvement in 4 weeks, get a hand physio to rule out TFCC / DRUJ issues
       </div>
     </div>
     <div class="info-card" style="border-left-color:var(--amber)">
@@ -1015,6 +1087,76 @@ function completeBonus(id){
   const b=BONUS.find(x=>x.id===id);
   S.xp=S.xp+b.xp;
   showToast(`+${b.xp} XP — ${b.label}`,'#fbbf24');
+  render();
+}
+
+// MOBILITY
+let mobTimer=null, mobEnd=0;
+
+function toggleMobInfo(id){
+  const el=document.getElementById('mob-'+id);
+  if(el)el.classList.toggle('expanded');
+}
+
+function startMobilityTimer(id,sec){
+  clearInterval(mobTimer);
+  clearInterval(exerciseTimer);
+  stopRest();
+  mobEnd=Date.now()+sec*1000;
+  const m=MOBILITY.find(x=>x.id===id);
+  const elem=document.getElementById('mob-timer');
+  const update=()=>{
+    const remaining=Math.max(0,Math.ceil((mobEnd-Date.now())/1000));
+    const mins=Math.floor(remaining/60);
+    const secs=remaining%60;
+    const display=mins>0?`${mins}:${String(secs).padStart(2,'0')}`:`${secs}s`;
+    elem.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--purple);letter-spacing:2px">🧘 ${m.name.toUpperCase()}</span>
+      </div>
+      <div style="font-family:'Cinzel',serif;font-size:34px;font-weight:700;color:var(--purple);letter-spacing:3px;text-align:center;line-height:1">${display}</div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button onclick="stopMobilityTimer('${id}',true)" style="flex:2;background:var(--purple);color:#000;border:none;border-radius:8px;padding:12px;font-family:'Cinzel',serif;font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px">✓ DONE</button>
+        <button onclick="stopMobilityTimer('${id}',false)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:12px;font-size:11px;font-family:'Cinzel',serif;cursor:pointer">CANCEL</button>
+      </div>`;
+    if(remaining<=0){
+      stopMobilityTimer(id,true);
+      try{navigator.vibrate?.([200,80,200])}catch{}
+    }
+  };
+  elem.style.cssText=`position:fixed;bottom:80px;left:16px;right:16px;background:var(--surface);border:2px solid var(--purple);border-radius:14px;padding:14px 16px;z-index:50;display:block;box-shadow:0 4px 30px rgba(167,139,250,.35);max-width:720px;margin:0 auto`;
+  update();
+  mobTimer=setInterval(update,500);
+}
+
+function stopMobilityTimer(id,markDone){
+  clearInterval(mobTimer);
+  const elem=document.getElementById('mob-timer');
+  if(elem)elem.style.display='none';
+  if(markDone){
+    const done=S.mobilityToday;
+    if(!done[id]){
+      done[id]=true;
+      S.mobilityToday=done;
+      S.xp=S.xp+5;
+      const doneCount=MOBILITY.filter(m=>done[m.id]).length;
+      if(doneCount===MOBILITY.length){
+        S.xp=S.xp+15;
+        showToast('🧘 Full flow complete! +20 XP','#a78bfa');
+      } else {
+        showToast(`+5 XP — ${MOBILITY.find(x=>x.id===id).name}`,'#a78bfa');
+      }
+    }
+    render();
+  }
+}
+
+function unmarkStretch(id){
+  const done=S.mobilityToday;
+  if(!done[id])return;
+  delete done[id];
+  S.mobilityToday=done;
+  S.xp=Math.max(0,S.xp-5);
   render();
 }
 
