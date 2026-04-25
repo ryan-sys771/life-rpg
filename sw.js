@@ -3,7 +3,7 @@
 //   - HTML/navigation requests: network-first (so app updates reach users immediately)
 //   - All other GETs: cache-first (fast loads, works offline)
 //   - Caches: own assets + Google Fonts + Leaflet CDN + OpenStreetMap tiles
-const CACHE = 'life-rpg-v7';
+const CACHE = 'life-rpg-v8';
 const ASSETS = [
   './',
   './index.html',

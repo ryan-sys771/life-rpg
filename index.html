@@ -337,6 +337,40 @@
   .rd-stat-lbl{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:'Cinzel',serif}
   .rd-actions{padding:12px;display:flex;gap:8px;border-top:1px solid var(--border);background:var(--bg)}
 
+  /* CALENDAR GRID */
+  .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 4px}
+  .cal-nav{background:var(--surface);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .cal-nav:disabled{opacity:.3;cursor:not-allowed}
+  .cal-month{font-family:'Cinzel',serif;font-size:13px;color:var(--text);font-weight:700;letter-spacing:1px}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px}
+  .cal-dow{text-align:center;font-family:'Cinzel',serif;font-size:9px;color:var(--muted);letter-spacing:1px;padding:4px 0}
+  .cal-day{aspect-ratio:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:11px;color:var(--muted);position:relative;cursor:pointer;transition:transform .1s}
+  .cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+  .cal-day.future{opacity:.3;cursor:default}
+  .cal-day.today{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
+  .cal-day:active:not(.empty):not(.future){transform:scale(.92)}
+  .cal-day.has-strength{background:rgba(52,211,153,.18);color:var(--green);border-color:rgba(52,211,153,.4)}
+  .cal-day.has-cardio{background:rgba(96,165,250,.18);color:var(--blue);border-color:rgba(96,165,250,.4)}
+  .cal-day.has-hyrox{background:rgba(167,139,250,.18);color:var(--purple);border-color:rgba(167,139,250,.4)}
+  .cal-day.has-rest{background:rgba(100,116,139,.12);color:var(--sub);border-color:rgba(100,116,139,.3)}
+  .cal-day.has-comeback{background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(96,165,250,.15));color:var(--purple);border-color:rgba(167,139,250,.5)}
+  .cal-day.has-multi{background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(96,165,250,.18));color:var(--text);border-color:rgba(52,211,153,.5)}
+  .cal-day .cal-num{font-weight:700;line-height:1}
+  .cal-day .cal-dot{position:absolute;bottom:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--green)}
+  .cal-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;padding:0 4px;font-size:10px;color:var(--muted)}
+  .cal-legend-item{display:flex;align-items:center;gap:4px}
+  .cal-legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .cal-summary{margin-top:8px;padding:9px 12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--sub);text-align:center}
+  .cal-summary strong{color:var(--text);font-family:'Cinzel',serif}
+
+  /* STRENGTH CHART SELECTOR */
+  .ex-selector{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;width:100%;color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%2394a3b8' d='M6 8L2 4h8z'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;outline:none}
+  .ex-selector:focus{border-color:var(--amber)}
+  .ex-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+  .ex-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
+  .ex-stat-val{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--text);line-height:1}
+  .ex-stat-lbl{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:'Cinzel',serif}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -1841,6 +1875,202 @@ function shouldAutoShowReview(){
   return true;
 }
 
+// ════════════════════════════════════════════════
+// CALENDAR GRID — month view of activity
+// ════════════════════════════════════════════════
+let calMonthOffset = 0; // 0 = current month, -1 = last month, etc.
+
+function renderCalendarGrid(){
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + calMonthOffset, 1);
+  const year = target.getFullYear();
+  const month = target.getMonth();
+  const monthName = target.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  const daysInMonth = lastDay.getDate();
+  // Monday-first week (UK convention) — 0 = Mon, 6 = Sun
+  const startDow = (firstDay.getDay() + 6) % 7;
+  const todayStr = now.toDateString();
+
+  // Build a map of date string → array of workouts
+  const dayMap = {};
+  for (const w of S.workouts){
+    if (!dayMap[w.date]) dayMap[w.date] = [];
+    dayMap[w.date].push(w);
+  }
+
+  const dows = ['M','T','W','T','F','S','S'];
+  const dowHtml = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // Empty cells before day 1
+  const emptyCells = Array(startDow).fill('<div class="cal-day empty"></div>').join('');
+
+  // Day cells
+  let strengthCount = 0, cardioCount = 0, hyroxCount = 0, restCount = 0;
+  const dayCells = [];
+  for (let day = 1; day <= daysInMonth; day++){
+    const date = new Date(year, month, day);
+    const dateStr = date.toDateString();
+    const isToday = dateStr === todayStr;
+    const isFuture = date > now && !isToday;
+    const entries = dayMap[dateStr] || [];
+    const realEntries = entries.filter(e => !e.isMarker);
+    const hasComeback = entries.some(e => e.type === 'comeback');
+    const hasStrength = realEntries.some(e => e.type === 'strength');
+    const hasCardio = realEntries.some(e => e.type === 'cardio');
+    const hasHyrox = realEntries.some(e => e.type === 'hyrox');
+    const hasRest = realEntries.some(e => e.type === 'rest');
+    if (hasStrength) strengthCount++;
+    if (hasCardio) cardioCount++;
+    if (hasHyrox) hyroxCount++;
+    if (hasRest) restCount++;
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (isFuture) cls += ' future';
+    const types = [hasStrength, hasCardio, hasHyrox, hasRest].filter(Boolean).length;
+    if (types > 1) cls += ' has-multi';
+    else if (hasStrength) cls += ' has-strength';
+    else if (hasHyrox) cls += ' has-hyrox';
+    else if (hasCardio) cls += ' has-cardio';
+    else if (hasRest) cls += ' has-rest';
+    if (hasComeback && !hasStrength && !hasCardio && !hasHyrox) cls += ' has-comeback';
+    const onclick = isFuture ? '' : `onclick="showCalendarDayDetail('${dateStr}')"`;
+    const dot = hasComeback ? '<div class="cal-dot" style="background:var(--purple)"></div>' : '';
+    dayCells.push(`<div class="${cls}" ${onclick}><span class="cal-num">${day}</span>${dot}</div>`);
+  }
+
+  // Future month nav: don't allow going past current month
+  const canGoForward = calMonthOffset < 0;
+
+  // Trailing empty cells to round out the grid
+  const totalCells = startDow + daysInMonth;
+  const trailing = (7 - (totalCells % 7)) % 7;
+  const trailingCells = Array(trailing).fill('<div class="cal-day empty"></div>').join('');
+
+  const totalActive = strengthCount + cardioCount + hyroxCount;
+  const summary = totalActive === 0 && restCount === 0
+    ? `<em>No activity logged this month.</em>`
+    : `<strong>${strengthCount}</strong> strength · <strong>${cardioCount}</strong> cardio · <strong>${hyroxCount}</strong> Hyrox · <strong>${restCount}</strong> rest`;
+
+  return `
+    <div class="cal-header">
+      <button class="cal-nav" onclick="changeCalMonth(-1)">‹</button>
+      <div class="cal-month">${monthName}</div>
+      <button class="cal-nav" onclick="changeCalMonth(1)" ${!canGoForward?'disabled':''}>›</button>
+    </div>
+    <div class="cal-grid">${dowHtml}${emptyCells}${dayCells.join('')}${trailingCells}</div>
+    <div class="cal-legend">
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:rgba(52,211,153,.4)"></span>Strength</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:rgba(96,165,250,.4)"></span>Cardio</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:rgba(167,139,250,.4)"></span>Hyrox</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:rgba(100,116,139,.4)"></span>Rest</span>
+      <span class="cal-legend-item"><span class="cal-legend-dot" style="background:linear-gradient(135deg,rgba(52,211,153,.4),rgba(96,165,250,.4))"></span>Multi</span>
+    </div>
+    <div class="cal-summary">${summary}</div>
+  `;
+}
+
+function changeCalMonth(delta){
+  const newOffset = calMonthOffset + delta;
+  if (newOffset > 0) return; // never go into future
+  calMonthOffset = newOffset;
+  render();
+}
+
+function showCalendarDayDetail(dateStr){
+  const entries = S.workouts.filter(w => w.date === dateStr);
+  const date = new Date(dateStr);
+  const niceDate = date.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'});
+  if (!entries.length){
+    showToast(`Nothing logged on ${niceDate}`, '#94a3b8');
+    return;
+  }
+  const rows = entries.map(e => {
+    if (e.type === 'comeback'){
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--purple)">${e.name}</div>
+      </div>`;
+    }
+    const icon = e.type==='strength'?'💪':e.type==='cardio'?'🏃':e.type==='hyrox'?'⚡':'😴';
+    const weights = e.weights ? Object.entries(e.weights).map(([id,w]) => `${EX[id]?.name||id}: ${w}kg`).join(' · ') : '';
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${weights?'4px':'0'}">
+        <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--text)">${icon} ${e.name}</div>
+        <div style="color:var(--green);font-family:'Cinzel',serif;font-size:12px;font-weight:700">+${e.xp}</div>
+      </div>
+      ${weights?`<div style="font-size:11px;color:var(--muted);line-height:1.5">${weights}</div>`:''}
+    </div>`;
+  }).join('');
+  const html = `<div class="modal-overlay" id="cal-day-modal" onclick="if(event.target.id==='cal-day-modal')this.remove()">
+    <div class="modal-box" style="max-width:400px">
+      <h2 style="color:var(--blue);font-size:15px;text-align:center;margin-bottom:12px">${niceDate}</h2>
+      <div style="margin-bottom:12px">${rows}</div>
+      <button class="btn alt" onclick="document.getElementById('cal-day-modal').remove()">Close</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// ════════════════════════════════════════════════
+// STRENGTH PROGRESS CHART
+// ════════════════════════════════════════════════
+let strengthChartExId = null;
+
+function getExercisesWithRatings(){
+  // Return exercises that have at least 2 weighted rating entries
+  const ratings = S.ratings;
+  const out = [];
+  for (const [exId, events] of Object.entries(ratings)){
+    if (!WEIGHTED.has(exId)) continue;
+    const weighted = events.filter(e => e.weight != null && !isNaN(parseFloat(e.weight)));
+    if (weighted.length >= 2){
+      const meta = EX[exId];
+      if (meta) out.push({id:exId, name:meta.name, count:weighted.length, latest:parseFloat(weighted[0].weight)});
+    }
+  }
+  out.sort((a,b) => b.count - a.count);
+  return out;
+}
+
+function renderStrengthChart(){
+  const exercises = getExercisesWithRatings();
+  if (!exercises.length){
+    return `<div style="color:var(--muted);font-size:12px;padding:20px 10px;text-align:center;font-style:italic;line-height:1.6">
+      Rate at least 2 weighted workouts to see your progression chart.<br>
+      <span style="font-size:11px">After each workout, tap "Too Easy / Just Right / Too Hard" — the app builds your strength curve from those ratings.</span>
+    </div>`;
+  }
+  // Default to the most-ratings exercise
+  if (!strengthChartExId || !exercises.some(e => e.id === strengthChartExId)){
+    strengthChartExId = exercises[0].id;
+  }
+  const selected = strengthChartExId;
+  const ratings = S.ratings[selected] || [];
+  const weighted = ratings.filter(e => e.weight != null && !isNaN(parseFloat(e.weight)))
+    .sort((a,b) => a.ts - b.ts);
+  // Build chart data
+  const chartData = weighted.map(e => ({ts: e.ts, value: parseFloat(e.weight)}));
+  const meta = EX[selected];
+  const first = chartData[0];
+  const latest = chartData[chartData.length-1];
+  const heaviest = chartData.reduce((m,d) => d.value > m.value ? d : m, chartData[0]);
+  const totalChange = (latest.value - first.value).toFixed(1);
+  const sign = totalChange > 0 ? '+' : '';
+  const optionsHtml = exercises.map(ex => `<option value="${ex.id}" ${ex.id===selected?'selected':''}>${ex.name} (${ex.count} sessions)</option>`).join('');
+  const chartHtml = renderLineChart(chartData, {color:'#fbbf24', id:'str-'+selected});
+  return `
+    <select class="ex-selector" onchange="strengthChartExId=this.value;render()">${optionsHtml}</select>
+    <div class="chart-wrap">${chartHtml}</div>
+    <div class="ex-stat-row">
+      <div class="ex-stat"><div class="ex-stat-val" style="color:var(--blue)">${first.value}kg</div><div class="ex-stat-lbl">Started</div></div>
+      <div class="ex-stat"><div class="ex-stat-val" style="color:var(--amber)">${heaviest.value}kg</div><div class="ex-stat-lbl">Best</div></div>
+      <div class="ex-stat"><div class="ex-stat-val" style="color:${totalChange>0?'var(--green)':totalChange<0?'var(--red)':'var(--text)'}">${sign}${totalChange}kg</div><div class="ex-stat-lbl">Total Δ</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;font-style:italic;margin-top:4px">${weighted.length} sessions logged for ${meta.name}</div>
+  `;
+}
+
 function renderTrack(){
   const weights=S.weights;
   const measurements=S.measurements;
@@ -1877,6 +2107,12 @@ function renderTrack(){
   }).join('');
 
   return `
+    <div class="track-card" style="border-color:rgba(96,165,250,.25)">
+      <div class="track-title" style="color:var(--blue)">📅 Activity Calendar</div>
+      <div class="track-sub">A month at a glance. Tap any day to see what you did. Consistency builds visible patterns.</div>
+      ${renderCalendarGrid()}
+    </div>
+
     <div class="track-card" style="border-color:rgba(249,115,22,.3)">
       <div class="track-title" style="color:var(--orange)">📈 Weight Trend</div>
       <div class="track-sub">Consistency beats any single number. This is your story over time.</div>
@@ -1887,6 +2123,12 @@ function renderTrack(){
         <div class="chart-stat">Δ<span style="color:${weightDelta<0?'var(--green)':weightDelta>0?'var(--amber)':'var(--text)'}">${weightDelta>0?'+':''}${weightDelta.toFixed(1)}kg</span></div>
       </div>`:''}
       ${storyHtml}
+    </div>
+
+    <div class="track-card" style="border-color:rgba(251,191,36,.3)">
+      <div class="track-title" style="color:var(--amber)">💪 Strength Progression</div>
+      <div class="track-sub">Pick an exercise to see your weight curve over time. Built from your post-workout ratings.</div>
+      ${renderStrengthChart()}
     </div>
 
     <div class="track-card" style="border-color:rgba(96,165,250,.3)">
