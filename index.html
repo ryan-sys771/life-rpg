@@ -11,6 +11,8 @@
 <title>Road to 42.2km</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
   :root {
     --green:#34d399; --blue:#60a5fa; --amber:#fbbf24;
@@ -251,6 +253,90 @@
   .data-tool-btn .tool-text{flex:1}
   .data-tool-btn .tool-text small{display:block;font-size:10px;opacity:.7;letter-spacing:.5px;margin-top:2px;font-weight:400}
 
+  /* GPS TRACKING */
+  #gps-overlay{position:fixed;inset:0;background:#0a0a0f;z-index:300;display:none;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+  #gps-overlay.show{display:flex}
+  .gps-header{padding:12px 16px;background:rgba(10,10,15,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;z-index:5}
+  .gps-back{background:var(--surface);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:8px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .gps-titles{flex:1;min-width:0}
+  .gps-title{font-family:'Cinzel',serif;font-size:14px;color:var(--text);line-height:1.2}
+  .gps-sub{font-size:11px;color:var(--muted);margin-top:1px}
+  .gps-status-pill{font-family:'Cinzel',serif;font-size:9px;background:var(--green);color:#000;padding:3px 8px;border-radius:99px;letter-spacing:1px;font-weight:700}
+  .gps-status-pill.searching{background:var(--amber)}
+  .gps-status-pill.poor{background:var(--orange)}
+  .gps-status-pill.lost{background:var(--red)}
+  .gps-status-pill.paused{background:var(--purple)}
+
+  #gps-map{flex:1;background:#0f1420;position:relative}
+  #gps-map .leaflet-container{background:#0f1420}
+
+  .gps-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border);padding:1px 0}
+  .gps-stat{background:var(--bg);padding:10px 6px;text-align:center}
+  .gps-stat-val{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--text);line-height:1}
+  .gps-stat-lbl{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:'Cinzel',serif}
+
+  .gps-controls{padding:12px 14px 14px;background:var(--bg);display:flex;gap:8px;border-top:1px solid var(--border)}
+  .gps-btn{flex:1;padding:14px;border-radius:12px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer;border:none}
+  .gps-btn.start{background:var(--green);color:#000}
+  .gps-btn.pause{background:var(--amber);color:#000}
+  .gps-btn.stop{background:var(--red);color:#000}
+  .gps-btn.resume{background:var(--blue);color:#000}
+  .gps-btn.secondary{background:var(--surface);color:var(--text);border:1px solid var(--border);flex:0 0 auto;padding:14px 16px}
+
+  /* Pre-start view */
+  .gps-presetup{padding:18px 16px;flex:1;overflow-y:auto}
+  .gps-presetup h3{font-family:'Cinzel',serif;color:var(--green);font-size:16px;margin-bottom:6px}
+  .gps-presetup p{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:14px}
+  .gps-presetup .info-card{background:var(--surface);border-left:3px solid var(--blue);padding:12px;border-radius:8px;margin-bottom:12px}
+  .gps-presetup .info-card-title{font-family:'Cinzel',serif;font-size:11px;color:var(--blue);letter-spacing:2px;margin-bottom:6px;font-weight:700}
+  .gps-presetup .info-card-body{font-size:12px;color:var(--sub);line-height:1.6}
+  .gps-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:10px;padding:11px 14px;margin-bottom:8px;border:1px solid var(--border)}
+  .gps-toggle-row label{font-family:'Cinzel',serif;font-size:12px;color:var(--text);letter-spacing:.5px}
+  .gps-toggle-row label small{display:block;font-size:10px;color:var(--muted);margin-top:2px;font-weight:400;letter-spacing:0;font-family:'Crimson Pro',serif;font-style:italic}
+  .gps-switch{width:46px;height:26px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;transition:all .2s}
+  .gps-switch.on{background:var(--green);border-color:var(--green)}
+  .gps-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--text);border-radius:50%;transition:transform .2s}
+  .gps-switch.on::after{transform:translateX(20px);background:#000}
+
+  /* GPS launch button on Today tab */
+  .gps-launch-row{display:flex;gap:6px;margin-bottom:12px}
+  .gps-launch{flex:1;background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(52,211,153,.05));border:1px solid rgba(96,165,250,.3);color:var(--blue);border-radius:10px;padding:11px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+
+  /* Route summary card */
+  .route-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:6px;cursor:pointer}
+  .route-card:active{transform:scale(.98)}
+  .route-row1{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .route-icon{font-size:18px;flex-shrink:0}
+  .route-title{flex:1;font-family:'Cinzel',serif;font-size:13px;color:var(--text);min-width:0}
+  .route-date{font-size:10px;color:var(--muted);font-family:'Cinzel',serif;letter-spacing:1px}
+  .route-stats{display:flex;gap:12px;font-size:11px;color:var(--sub)}
+  .route-stats span strong{color:var(--text);font-family:'Cinzel',serif}
+  .difficulty-pill{padding:2px 8px;border-radius:99px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;font-weight:700}
+  .difficulty-pill.easy{background:rgba(52,211,153,.15);color:var(--green)}
+  .difficulty-pill.moderate{background:rgba(96,165,250,.15);color:var(--blue)}
+  .difficulty-pill.hard{background:rgba(251,191,36,.15);color:var(--amber)}
+  .difficulty-pill.brutal{background:rgba(249,115,22,.15);color:var(--orange)}
+  .difficulty-pill.hell{background:rgba(248,113,113,.18);color:var(--red)}
+
+  /* Landmark modal */
+  .lm-modal-list{max-height:240px;overflow-y:auto;margin:8px 0 12px}
+  .lm-row{display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--surface2);border-radius:8px;margin-bottom:5px;cursor:pointer;border:1px solid transparent}
+  .lm-row.selected{border-color:var(--green);background:rgba(52,211,153,.06)}
+  .lm-icon{font-size:16px}
+  .lm-name{flex:1;font-size:13px;color:var(--text);font-family:'Cinzel',serif}
+  .lm-coords{font-size:10px;color:var(--muted)}
+  .lm-empty{padding:14px;color:var(--muted);text-align:center;font-style:italic;font-size:12px;line-height:1.5}
+
+  /* Route detail view */
+  #route-detail{position:fixed;inset:0;background:#0a0a0f;z-index:280;display:none;flex-direction:column;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+  #route-detail.show{display:flex}
+  #rd-map{flex:1;background:#0f1420;min-height:240px}
+  .rd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);padding:1px 0}
+  .rd-stat{background:var(--bg);padding:9px 6px;text-align:center}
+  .rd-stat-val{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--text);line-height:1}
+  .rd-stat-lbl{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px;text-transform:uppercase;font-family:'Cinzel',serif}
+  .rd-actions{padding:12px;display:flex;gap:8px;border-top:1px solid var(--border);background:var(--bg)}
+
   .day-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
   .day-card.today{border-color:var(--green);background:#0f1a2e}
   .day-icon{width:38px;height:38px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -360,6 +446,8 @@
 <div id="mob-timer" style="display:none"></div>
 <div id="workout-view"></div>
 <div id="pin-overlay" style="display:none"></div>
+<div id="gps-overlay"></div>
+<div id="route-detail"></div>
 
 <div class="modal-overlay" id="welcome-modal">
   <div class="modal-box">
@@ -1000,6 +1088,15 @@ const S = {
   // PIN lock — stores a simple hash, not the raw PIN. Empty string = no PIN set.
   get pinHash(){return localStorage.getItem('lrpg_pin_hash')||''},
   set pinHash(v){v?localStorage.setItem('lrpg_pin_hash',v):localStorage.removeItem('lrpg_pin_hash')},
+  // GPS tracked routes — { id, ts, name, type, points, gaps, distance, duration, elevGain, difficulty }
+  get routes(){try{return JSON.parse(localStorage.getItem('lrpg_routes')||'[]')}catch{return[]}},
+  set routes(v){localStorage.setItem('lrpg_routes',JSON.stringify(v))},
+  // In-progress GPS session (resumable if app crashes)
+  get activeRoute(){try{return JSON.parse(localStorage.getItem('lrpg_active_route')||'null')}catch{return null}},
+  set activeRoute(v){v?localStorage.setItem('lrpg_active_route',JSON.stringify(v)):localStorage.removeItem('lrpg_active_route')},
+  // Saved landmarks { id, name, lat, lng, radius }
+  get landmarks(){try{return JSON.parse(localStorage.getItem('lrpg_landmarks')||'[]')}catch{return[]}},
+  set landmarks(v){localStorage.setItem('lrpg_landmarks',JSON.stringify(v))},
 };
 
 function getCurrentPhase(){
@@ -1212,7 +1309,8 @@ function renderToday(){
       <div class="stat-pill"><div class="stat-pill-val" style="color:var(--blue)">${S.xp.toLocaleString()}</div><div class="stat-pill-lbl">Total XP</div></div>
       <div class="stat-pill"><div class="stat-pill-val" style="color:var(--purple)">P${phase.id}</div><div class="stat-pill-lbl">Phase</div></div>
     </div>
-    <button onclick="showWeeklyReview('rolling')" style="width:100%;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(96,165,250,.06));border:1px solid rgba(167,139,250,.3);color:var(--purple);border-radius:10px;padding:9px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-bottom:12px">📊 WEEKLY REVIEW</button>
+    <button onclick="showWeeklyReview('rolling')" style="width:100%;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(96,165,250,.06));border:1px solid rgba(167,139,250,.3);color:var(--purple);border-radius:10px;padding:9px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;font-weight:700;cursor:pointer;margin-bottom:6px">📊 WEEKLY REVIEW</button>
+    <button onclick="openGpsSetup()" class="gps-launch" style="width:100%;margin-bottom:12px">📍 TRACK OUTDOOR ACTIVITY (GPS)</button>
     ${intensityBadge}
     ${heroHtml}
     <div class="prog-card">
@@ -1797,6 +1895,30 @@ function renderTrack(){
       <div class="metrics-grid">${metricsData.map(renderMetricCard).join('')}</div>
     </div>
 
+    ${S.routes.length ? `<div class="track-card" style="border-color:rgba(52,211,153,.3)">
+      <div class="track-title" style="color:var(--green)">📍 GPS Routes (${S.routes.length})</div>
+      <div class="track-sub">Tap any route to see the map, stats, and difficulty rating.</div>
+      <div style="margin-top:8px;max-height:380px;overflow-y:auto">
+        ${S.routes.slice(0,15).map(r => {
+          const icon = r.type === 'run' ? '🏃' : '🚶';
+          const date = new Date(r.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+          return `<div class="route-card" onclick="openRouteDetail('${r.id}')">
+            <div class="route-row1">
+              <span class="route-icon">${icon}</span>
+              <span class="route-title">${r.name}</span>
+              <span class="route-date">${date}</span>
+            </div>
+            <div class="route-stats">
+              <span><strong>${(r.distance/1000).toFixed(2)}</strong>km</span>
+              <span><strong>${fmtDuration(r.duration)}</strong></span>
+              <span><strong>↑${r.elevGain}</strong>m</span>
+              <span class="difficulty-pill ${r.difficulty.cls}" style="margin-left:auto">${r.difficulty.label}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
     <div class="track-card">
       <div class="track-title">⚖️ Log Weight</div>
       <div class="track-sub">Weigh weekly. Morning, after the toilet, before food — most consistent conditions.</div>
@@ -1965,6 +2087,18 @@ function resetAll(){
 
 let restTimer=null,restRemaining=0;
 
+// GPS-eligible exercises: walks and runs that benefit from outdoor tracking
+const GPS_ELIGIBLE_EXERCISES = new Set(['walk','walk_long','run_walk','easy_run','long_run']);
+
+// Check if today's workout is purely a single GPS-eligible cardio exercise
+function isGpsWorkout(w){
+  if (!w || w.type === 'rest') return false;
+  if (!w.ex || w.ex.length === 0) return false;
+  // The first exercise must be GPS-eligible. Allow up to one supplementary exercise (e.g. core after a tempo run).
+  if (!GPS_ELIGIBLE_EXERCISES.has(w.ex[0].id)) return false;
+  return true;
+}
+
 function startWorkout(){
   const w=getTodayWorkout();
   if(!w||w.type==='rest')return;
@@ -1988,10 +2122,85 @@ function startWorkout(){
       _intensity:'tender',
       _scheduleEx:tenderEx,
     };
-    showWorkoutView();
+    // Tender = walk → offer GPS too
+    promptGpsForWorkout(w, true);
     return;
   }
 
+  // GPS prompt for outdoor cardio workouts
+  if (isGpsWorkout(w)){
+    promptGpsForWorkout(w, false);
+    return;
+  }
+
+  startWorkoutNormal();
+}
+
+// Prompt the user to choose GPS tracking or simple logging
+function promptGpsForWorkout(w, isTender){
+  const primaryEx = isTender ? {id:'walk', reps:'15 minutes'} : w.ex[0];
+  const exMeta = EX[primaryEx.id];
+  const html = `<div class="modal-overlay" id="gps-prompt" onclick="if(event.target.id==='gps-prompt')this.remove()" style="z-index:520">
+    <div class="modal-box" style="max-width:400px;border-color:rgba(52,211,153,.4)">
+      <div style="font-size:34px;text-align:center;margin-bottom:6px">${primaryEx.id.includes('run')?'🏃':'🚶'}</div>
+      <h2 style="text-align:center;color:var(--green);font-size:17px;margin-bottom:4px">This is an outdoor workout</h2>
+      <p style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:18px;line-height:1.5"><strong style="color:var(--text)">${exMeta.name}</strong> · ${primaryEx.reps}</p>
+
+      <button onclick="startGpsFromWorkout(${isTender?'true':'false'})" style="width:100%;background:linear-gradient(135deg,rgba(52,211,153,.15),rgba(52,211,153,.04));border:1px solid var(--green);color:var(--text);border-radius:12px;padding:14px;margin-bottom:8px;text-align:left;cursor:pointer;display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:24px;flex-shrink:0">📍</span>
+        <span style="flex:1">
+          <span style="font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--green);letter-spacing:1px;display:block">TRACK WITH GPS</span>
+          <span style="font-size:12px;color:var(--sub);line-height:1.5;display:block;margin-top:3px">Distance · pace · elevation · route map · auto-stop at landmark · difficulty rating</span>
+        </span>
+      </button>
+
+      <button onclick="startWorkoutNormalFromPrompt(${isTender?'true':'false'})" style="width:100%;background:linear-gradient(135deg,rgba(96,165,250,.12),rgba(96,165,250,.04));border:1px solid var(--blue);color:var(--text);border-radius:12px;padding:14px;margin-bottom:8px;text-align:left;cursor:pointer;display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:24px;flex-shrink:0">✓</span>
+        <span style="flex:1">
+          <span style="font-family:'Cinzel',serif;font-weight:700;font-size:13px;color:var(--blue);letter-spacing:1px;display:block">JUST LOG IT</span>
+          <span style="font-size:12px;color:var(--sub);line-height:1.5;display:block;margin-top:3px">Skip GPS — tap when done. For treadmill walks, dog walks, or when you don't want tracking.</span>
+        </span>
+      </button>
+
+      <button onclick="document.getElementById('gps-prompt').remove();S.activeWorkout=null" style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;padding:10px;cursor:pointer;width:100%;margin-top:6px">CANCEL</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function startWorkoutNormalFromPrompt(isTender){
+  document.getElementById('gps-prompt')?.remove();
+  if (isTender){
+    // The S.activeWorkout was already set up in tender branch, just show it
+    showWorkoutView();
+  } else {
+    startWorkoutNormal();
+  }
+}
+
+function startGpsFromWorkout(isTender){
+  document.getElementById('gps-prompt')?.remove();
+  // Clear the activeWorkout that may have been pre-set by tender mode — GPS will create its own
+  if (isTender) S.activeWorkout = null;
+  // Mark that this GPS session is fulfilling today's scheduled workout
+  const w = getTodayWorkout();
+  const {phase} = getCurrentPhase();
+  // Determine type from primary exercise
+  const primaryEx = isTender ? 'walk' : w.ex[0].id;
+  gps.type = primaryEx.includes('run') ? 'run' : 'walk';
+  gps._fulfillingWorkout = {
+    workoutKey: isTender ? `tender-${new Date().toDateString()}` : `${phase.id}-${w.day}`,
+    scheduledName: isTender ? '🪶 Tender Day · Easy Walk' : w.name,
+    scheduledXp: isTender ? Math.floor(w.xp * 0.5) : w.xp,
+    isTender,
+  };
+  showGpsPresetup();
+}
+
+function startWorkoutNormal(){
+  const w=getTodayWorkout();
+  if(!w||w.type==='rest')return;
+  const intensity = getTodayIntensity();
   const {phase}=getCurrentPhase();
   const lastWts=S.lastWeights;
   S.activeWorkout={
@@ -2957,8 +3166,10 @@ const EXPORT_KEYS = [
   'lrpg_bonus_day', 'lrpg_mobility_day', 'lrpg_active', 'lrpg_last_weights',
   'lrpg_swaps', 'lrpg_measurements', 'lrpg_ratings', 'lrpg_bonus_prog',
   'lrpg_reflections', 'lrpg_review_seen',
+  'lrpg_routes', 'lrpg_landmarks',
   // Note: lrpg_pin_hash deliberately NOT exported — would defeat the purpose if backup leaks
   // Note: lrpg_intensity_day, lrpg_comeback_muted_day deliberately NOT exported (transient)
+  // Note: lrpg_active_route deliberately NOT exported (in-progress GPS session is transient)
 ];
 
 function exportData(){
@@ -3023,13 +3234,901 @@ function importData(){
   input.click();
 }
 
+// ════════════════════════════════════════════════
+// GPS TRACKING — Outdoor Activity
+// ════════════════════════════════════════════════
+
+// Distance between two GPS points in meters (Haversine formula)
+function haversine(p1, p2){
+  const R = 6371000; // earth radius m
+  const dLat = (p2.lat - p1.lat) * Math.PI/180;
+  const dLng = (p2.lng - p1.lng) * Math.PI/180;
+  const lat1 = p1.lat * Math.PI/180;
+  const lat2 = p2.lat * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.sin(dLng/2)**2 * Math.cos(lat1) * Math.cos(lat2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Format meters → "1.42 km" or "850 m"
+function fmtDistance(m){
+  if (m == null) return '—';
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m/1000).toFixed(2)} km`;
+}
+
+// Format seconds → "1:23:45" or "23:45"
+function fmtDuration(s){
+  if (s == null) return '—';
+  s = Math.floor(s);
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+// Format pace minutes per km
+function fmtPace(distM, durS){
+  if (!distM || !durS || distM < 50) return '—';
+  const minPerKm = (durS/60) / (distM/1000);
+  if (minPerKm > 99) return '—';
+  const m = Math.floor(minPerKm);
+  const s = Math.round((minPerKm - m) * 60);
+  return `${m}:${String(s).padStart(2,'0')}/km`;
+}
+
+// Calculate cumulative stats from a points array
+function calcRouteStats(points, gaps){
+  let dist = 0;
+  let elevGain = 0;
+  let elevLoss = 0;
+  let elevs = [];
+  if (!points || points.length < 2){
+    return {distance:0, duration:0, elevGain:0, elevLoss:0, avgPace:null, elevations:[]};
+  }
+  // Smooth elevation with a 5-point rolling average to reduce GPS jitter
+  const rawElevs = points.map(p => p.alt).filter(a => a != null);
+  let smoothed = rawElevs.slice();
+  if (rawElevs.length >= 5){
+    smoothed = rawElevs.map((_, i) => {
+      const start = Math.max(0, i-2);
+      const end = Math.min(rawElevs.length, i+3);
+      const slice = rawElevs.slice(start, end);
+      return slice.reduce((s,v) => s+v, 0) / slice.length;
+    });
+  }
+  // Walk the points, sum distance and elevation gain
+  for (let i = 1; i < points.length; i++){
+    const prev = points[i-1];
+    const cur = points[i];
+    // Skip distance through gaps
+    if (gaps && gaps.some(g => g.afterIdx === i-1)) continue;
+    dist += haversine(prev, cur);
+  }
+  // Elevation gain — only count climbs > 1m to filter noise
+  for (let i = 1; i < smoothed.length; i++){
+    const diff = smoothed[i] - smoothed[i-1];
+    if (diff > 1) elevGain += diff;
+    else if (diff < -1) elevLoss += -diff;
+  }
+  const duration = (points[points.length-1].t - points[0].t) / 1000;
+  return {
+    distance: dist,
+    duration,
+    elevGain: Math.round(elevGain),
+    elevLoss: Math.round(elevLoss),
+    avgPace: fmtPace(dist, duration),
+    elevations: smoothed
+  };
+}
+
+// Difficulty rating for normal humans walking/running
+// Inputs: distance(m), duration(s), elevGain(m), avgPace label string
+function calcDifficulty(dist, dur, elevGain){
+  if (!dist || dist < 100) return {label:'—', cls:'easy', score:0};
+  const km = dist / 1000;
+  const minutes = dur / 60;
+  const paceMinPerKm = minutes / km;
+  // Distance: progressive scoring, gentler at start, harder past 10k
+  // 1km=2, 3km=6, 5km=11, 10km=22, 15km=35, 21km=50, 30km=68, 42km=92
+  let distScore;
+  if (km <= 5) distScore = km * 2.2;
+  else if (km <= 10) distScore = 11 + (km - 5) * 2.2;
+  else if (km <= 21) distScore = 22 + (km - 10) * 2.5;
+  else distScore = 49.5 + (km - 21) * 2;
+  // Pace component: walking pace ~12min/km = 0, jog 8min = 6, easy run 6min = 12, fast 5min = 18, race pace 4min = 24
+  let paceScore;
+  if (paceMinPerKm > 12) paceScore = 0;
+  else if (paceMinPerKm > 8) paceScore = (12 - paceMinPerKm) * 1.5;
+  else if (paceMinPerKm > 5) paceScore = 6 + (8 - paceMinPerKm) * 4;
+  else paceScore = 18 + (5 - paceMinPerKm) * 6;
+  paceScore = Math.max(0, Math.min(28, paceScore));
+  // Elevation: 100m=4, 300m=12, 600m=22, 1000m=32, 1500m+=40
+  let elevScore = elevGain <= 1000 ? elevGain * 0.032 : 32 + (elevGain - 1000) * 0.016;
+  elevScore = Math.min(40, elevScore);
+  const score = distScore + paceScore + elevScore;
+  // Map score to label
+  if (score < 15) return {label:'EASY', cls:'easy', score};
+  if (score < 35) return {label:'MODERATE', cls:'moderate', score};
+  if (score < 60) return {label:'HARD', cls:'hard', score};
+  if (score < 90) return {label:'BRUTAL', cls:'brutal', score};
+  return {label:'HELL', cls:'hell', score};
+}
+
+// ─── State ───
+const gps = {
+  watchId: null,
+  wakeLock: null,
+  map: null,
+  liveLine: null,
+  liveMarker: null,
+  accuracyCircle: null,
+  landmarkMarker: null,
+  landmarkCircle: null,
+  selectedLandmark: null,
+  newLandmarkMarker: null,
+  newLandmarkLatLng: null,
+  newLandmarkRadius: 30,
+  tickInterval: null,
+  lastFixTime: 0,
+  status: 'searching', // 'searching' | 'good' | 'poor' | 'lost' | 'paused'
+  paused: false,
+  type: 'walk', // 'walk' | 'run'
+  keepScreenOn: true,
+};
+
+function openGpsSetup(){
+  // Resume in-progress route?
+  if (S.activeRoute){
+    if (confirm(`You have an in-progress ${S.activeRoute.type} from ${new Date(S.activeRoute.points[0]?.t || S.activeRoute.startTs).toLocaleTimeString()}. Resume tracking?`)){
+      resumeGpsRoute();
+      return;
+    } else {
+      // Save what they have or discard
+      if (S.activeRoute.points && S.activeRoute.points.length >= 2){
+        if (confirm('Save the data collected so far before discarding?')){
+          finalizeRoute();
+        } else {
+          S.activeRoute = null;
+        }
+      } else {
+        S.activeRoute = null;
+      }
+    }
+  }
+  showGpsPresetup();
+}
+
+function showGpsPresetup(){
+  const overlay = document.getElementById('gps-overlay');
+  const fulfilling = gps._fulfillingWorkout;
+  const scheduledBanner = fulfilling ? `
+    <div style="background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(52,211,153,.04));border:1px solid var(--green);border-radius:10px;padding:11px 14px;margin-bottom:14px">
+      <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--green);letter-spacing:2px;font-weight:700;margin-bottom:2px">SCHEDULED WORKOUT</div>
+      <div style="color:var(--text);font-size:14px;font-family:'Cinzel',serif">${fulfilling.scheduledName}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Completing this fulfills today's plan · +${fulfilling.scheduledXp} XP min</div>
+    </div>` : '';
+
+  overlay.innerHTML = `
+    <div class="gps-header">
+      <button class="gps-back" onclick="closeGps()">←</button>
+      <div class="gps-titles">
+        <div class="gps-title">📍 Outdoor Activity</div>
+        <div class="gps-sub">${fulfilling ? 'Today\'s plan · GPS tracking' : 'Set up tracking'}</div>
+      </div>
+    </div>
+    <div class="gps-presetup">
+      ${scheduledBanner}
+      <h3>What are you doing?</h3>
+      <div style="display:flex;gap:8px;margin-bottom:18px">
+        <button id="gps-type-walk" onclick="selectGpsType('walk')" style="flex:1;background:${gps.type==='walk'?'var(--green)':'var(--surface)'};color:${gps.type==='walk'?'#000':'var(--text)'};border:1px solid ${gps.type==='walk'?'var(--green)':'var(--border)'};border-radius:12px;padding:14px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer">🚶 WALK</button>
+        <button id="gps-type-run" onclick="selectGpsType('run')" style="flex:1;background:${gps.type==='run'?'var(--green)':'var(--surface)'};color:${gps.type==='run'?'#000':'var(--text)'};border:1px solid ${gps.type==='run'?'var(--green)':'var(--border)'};border-radius:12px;padding:14px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:pointer">🏃 RUN</button>
+      </div>
+
+      <div class="gps-toggle-row">
+        <label>📱 Keep screen on
+          <small>Reliable tracking · uses more battery</small>
+        </label>
+        <div class="gps-switch ${gps.keepScreenOn?'on':''}" onclick="toggleScreenOn()"></div>
+      </div>
+
+      <div class="info-card" style="background:rgba(251,191,36,.06);border-left-color:var(--amber)">
+        <div class="info-card-title" style="color:var(--amber)">⚠️ HONEST WARNING</div>
+        <div class="info-card-body">If your screen turns off and the keep-screen-on toggle is off, GPS tracking <strong>will pause</strong> on Android. This is a browser limitation. For reliable tracking on long activities, keep the toggle on.</div>
+      </div>
+
+      <h3 style="margin-top:18px">🎯 Auto-stop at landmark? (optional)</h3>
+      <p>Pick a destination — the app will vibrate and stop tracking automatically when you arrive within ${gps.newLandmarkRadius}m. Saves you reaching for your phone at the end.</p>
+
+      <div id="lm-section">${renderLandmarkSection()}</div>
+
+      <button onclick="startGpsTracking()" style="width:100%;background:var(--green);color:#000;border:none;border-radius:14px;padding:16px;font-family:'Cinzel',serif;font-weight:700;font-size:14px;letter-spacing:1.5px;cursor:pointer;margin-top:18px">START TRACKING →</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+}
+
+function selectGpsType(t){
+  gps.type = t;
+  showGpsPresetup();
+}
+
+function toggleScreenOn(){
+  gps.keepScreenOn = !gps.keepScreenOn;
+  showGpsPresetup();
+}
+
+function renderLandmarkSection(){
+  const lms = S.landmarks;
+  const items = lms.length ? lms.map(lm => `
+    <div class="lm-row ${gps.selectedLandmark?.id===lm.id?'selected':''}" onclick="selectLandmark('${lm.id}')">
+      <span class="lm-icon">📍</span>
+      <span class="lm-name">${lm.name}</span>
+      <span class="lm-coords">${lm.radius}m</span>
+      <button onclick="event.stopPropagation();deleteLandmark('${lm.id}')" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:4px 6px">✕</button>
+    </div>
+  `).join('') : `<div class="lm-empty">No saved landmarks yet. Tap "Add new landmark" to drop your first pin.</div>`;
+  return `
+    <div class="lm-modal-list">${items}</div>
+    <button onclick="openAddLandmarkMap()" style="width:100%;background:var(--surface);border:1px dashed var(--border);color:var(--blue);border-radius:10px;padding:11px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;cursor:pointer;font-weight:700">+ ADD NEW LANDMARK</button>
+    ${gps.selectedLandmark ? `<button onclick="clearLandmark()" style="width:100%;background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;padding:8px;cursor:pointer;margin-top:6px">CLEAR SELECTION</button>` : ''}
+  `;
+}
+
+function selectLandmark(id){
+  const lm = S.landmarks.find(x => x.id === id);
+  if (!lm) return;
+  gps.selectedLandmark = gps.selectedLandmark?.id === id ? null : lm;
+  document.getElementById('lm-section').innerHTML = renderLandmarkSection();
+}
+
+function clearLandmark(){
+  gps.selectedLandmark = null;
+  document.getElementById('lm-section').innerHTML = renderLandmarkSection();
+}
+
+function deleteLandmark(id){
+  if (!confirm('Delete this landmark?')) return;
+  S.landmarks = S.landmarks.filter(x => x.id !== id);
+  if (gps.selectedLandmark?.id === id) gps.selectedLandmark = null;
+  document.getElementById('lm-section').innerHTML = renderLandmarkSection();
+}
+
+function openAddLandmarkMap(){
+  // Get current location to center map
+  if (!('geolocation' in navigator)){
+    alert('Your browser doesn\'t support GPS.');
+    return;
+  }
+  showToast('📍 Getting your location...', '#60a5fa');
+  navigator.geolocation.getCurrentPosition(pos => {
+    showAddLandmarkScreen(pos.coords.latitude, pos.coords.longitude);
+  }, err => {
+    alert('Couldn\'t get location: ' + err.message + '\n\nMake sure location services are enabled for your browser.');
+  }, {enableHighAccuracy: true, timeout: 10000});
+}
+
+function showAddLandmarkScreen(centerLat, centerLng){
+  const overlay = document.getElementById('gps-overlay');
+  overlay.innerHTML = `
+    <div class="gps-header">
+      <button class="gps-back" onclick="showGpsPresetup()">←</button>
+      <div class="gps-titles">
+        <div class="gps-title">📍 Add Landmark</div>
+        <div class="gps-sub">Tap the map where you want to stop</div>
+      </div>
+    </div>
+    <div id="gps-map" style="flex:1"></div>
+    <div style="padding:12px 14px;background:var(--bg);border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <input type="text" id="lm-name-input" placeholder="Landmark name (e.g. 'Carrickfergus Castle')" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'Crimson Pro',serif;outline:none">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-family:'Cinzel',serif;font-size:11px;color:var(--sub);letter-spacing:1px">RADIUS</span>
+        <input type="range" id="lm-radius-input" min="10" max="200" step="5" value="${gps.newLandmarkRadius}" oninput="updateLandmarkRadius(this.value)" style="flex:1">
+        <span id="lm-radius-display" style="font-family:'Cinzel',serif;font-size:13px;color:var(--green);font-weight:700;min-width:55px;text-align:right">${gps.newLandmarkRadius}m</span>
+      </div>
+      <button onclick="saveNewLandmark()" id="lm-save-btn" style="width:100%;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:13px;font-family:'Cinzel',serif;font-weight:700;font-size:13px;cursor:not-allowed;letter-spacing:1px" disabled>TAP MAP TO PLACE PIN</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+  // Init map after DOM is ready
+  setTimeout(() => {
+    const mapEl = document.getElementById('gps-map');
+    if (gps.map){ gps.map.remove(); gps.map = null; }
+    gps.map = L.map(mapEl).setView([centerLat, centerLng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(gps.map);
+    // Add a marker for current location
+    L.circleMarker([centerLat, centerLng], {
+      radius: 6, color:'#60a5fa', fillColor:'#60a5fa', fillOpacity:.5, weight:2
+    }).addTo(gps.map).bindTooltip('You are here');
+    gps.newLandmarkMarker = null;
+    gps.newLandmarkLatLng = null;
+    gps.map.on('click', onMapClickAddLandmark);
+  }, 100);
+}
+
+function onMapClickAddLandmark(e){
+  if (gps.newLandmarkMarker){
+    gps.map.removeLayer(gps.newLandmarkMarker);
+  }
+  gps.newLandmarkLatLng = e.latlng;
+  gps.newLandmarkMarker = L.layerGroup([
+    L.marker(e.latlng, {
+      icon: L.divIcon({className:'', html:'<div style="background:var(--green);color:#000;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.5)">📍</div>', iconSize:[30,30], iconAnchor:[15,15]})
+    }),
+    L.circle(e.latlng, {radius: gps.newLandmarkRadius, color:'#34d399', fillColor:'#34d399', fillOpacity:.15, weight:2})
+  ]).addTo(gps.map);
+  const btn = document.getElementById('lm-save-btn');
+  btn.textContent = 'SAVE LANDMARK';
+  btn.style.background = 'var(--green)';
+  btn.style.color = '#000';
+  btn.style.borderColor = 'var(--green)';
+  btn.style.cursor = 'pointer';
+  btn.disabled = false;
+}
+
+function updateLandmarkRadius(v){
+  gps.newLandmarkRadius = parseInt(v);
+  document.getElementById('lm-radius-display').textContent = v + 'm';
+  // Redraw circle if pin already placed
+  if (gps.newLandmarkLatLng && gps.newLandmarkMarker){
+    gps.map.removeLayer(gps.newLandmarkMarker);
+    onMapClickAddLandmark({latlng: gps.newLandmarkLatLng});
+  }
+}
+
+function saveNewLandmark(){
+  if (!gps.newLandmarkLatLng){
+    alert('Tap the map to place a pin first.');
+    return;
+  }
+  const name = document.getElementById('lm-name-input').value.trim();
+  if (!name){
+    alert('Give your landmark a name.');
+    return;
+  }
+  const lm = {
+    id: 'lm_' + Date.now(),
+    name,
+    lat: gps.newLandmarkLatLng.lat,
+    lng: gps.newLandmarkLatLng.lng,
+    radius: gps.newLandmarkRadius,
+    createdAt: Date.now(),
+  };
+  const lms = S.landmarks;
+  lms.unshift(lm);
+  S.landmarks = lms.slice(0, 50);
+  gps.selectedLandmark = lm;
+  showToast(`📍 ${name} saved`, '#34d399');
+  // Clean up the map then return to setup
+  if (gps.map){ gps.map.remove(); gps.map = null; }
+  showGpsPresetup();
+}
+
+// ─── Tracking session ───
+async function startGpsTracking(){
+  if (!('geolocation' in navigator)){
+    alert('Your browser doesn\'t support GPS.');
+    return;
+  }
+  // Build initial active route
+  S.activeRoute = {
+    id: 'route_' + Date.now(),
+    type: gps.type,
+    startTs: Date.now(),
+    points: [],
+    gaps: [],
+    landmarkId: gps.selectedLandmark?.id || null,
+    pausedDuration: 0,
+  };
+  gps.paused = false;
+  gps.status = 'searching';
+  // Request wake lock if user wants screen on
+  if (gps.keepScreenOn) await requestWakeLock();
+  showGpsActiveScreen();
+  // Start watching position
+  gps.watchId = navigator.geolocation.watchPosition(onGpsPosition, onGpsError, {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
+  });
+  // Tick every second to update timer + check for stale GPS
+  gps.tickInterval = setInterval(onGpsTick, 1000);
+}
+
+async function requestWakeLock(){
+  if (!('wakeLock' in navigator)) return;
+  try {
+    gps.wakeLock = await navigator.wakeLock.request('screen');
+    gps.wakeLock.addEventListener('release', () => { gps.wakeLock = null; });
+  } catch (e){
+    console.warn('Wake lock failed:', e);
+  }
+}
+
+function releaseWakeLock(){
+  if (gps.wakeLock){
+    gps.wakeLock.release().catch(()=>{});
+    gps.wakeLock = null;
+  }
+}
+
+function onGpsPosition(pos){
+  if (gps.paused) return;
+  if (!S.activeRoute) return;
+  gps.lastFixTime = Date.now();
+  const point = {
+    lat: pos.coords.latitude,
+    lng: pos.coords.longitude,
+    alt: pos.coords.altitude,
+    acc: pos.coords.accuracy,
+    t: pos.timestamp || Date.now(),
+  };
+  // Filter low accuracy fixes (>50m accuracy = throw away)
+  if (point.acc > 50){
+    gps.status = 'poor';
+    updateGpsStatusPill();
+    return;
+  }
+  const route = S.activeRoute;
+  // If long gap since last point (>10s), mark a gap
+  const lastPoint = route.points[route.points.length-1];
+  if (lastPoint && (point.t - lastPoint.t) > 10000){
+    route.gaps.push({afterIdx: route.points.length-1, durationMs: point.t - lastPoint.t});
+  }
+  route.points.push(point);
+  S.activeRoute = route;
+  gps.status = 'good';
+  updateGpsLiveStats();
+  updateGpsLiveMap(point);
+  updateGpsStatusPill();
+  // Check landmark proximity
+  if (route.landmarkId){
+    const lm = S.landmarks.find(l => l.id === route.landmarkId);
+    if (lm){
+      const distToLm = haversine(point, {lat: lm.lat, lng: lm.lng});
+      if (distToLm <= lm.radius){
+        autoStopAtLandmark(lm);
+      }
+    }
+  }
+}
+
+function onGpsError(err){
+  console.warn('GPS error:', err);
+  if (err.code === 1){ // permission denied
+    alert('Location permission denied. Tap the lock icon in your address bar to allow location.');
+    stopGpsTracking(false);
+  } else {
+    gps.status = 'lost';
+    updateGpsStatusPill();
+  }
+}
+
+function onGpsTick(){
+  if (gps.paused) return;
+  if (!S.activeRoute) return;
+  // Update timer display every second
+  updateGpsLiveStats();
+  // Check if GPS has gone stale (no fix in 8+ seconds)
+  if (gps.lastFixTime && (Date.now() - gps.lastFixTime) > 8000){
+    gps.status = 'lost';
+    updateGpsStatusPill();
+  }
+}
+
+function showGpsActiveScreen(){
+  const overlay = document.getElementById('gps-overlay');
+  const route = S.activeRoute;
+  const typeIcon = route.type === 'run' ? '🏃' : '🚶';
+  const lm = route.landmarkId ? S.landmarks.find(l => l.id === route.landmarkId) : null;
+  overlay.innerHTML = `
+    <div class="gps-header">
+      <button class="gps-back" onclick="confirmExitGps()">←</button>
+      <div class="gps-titles">
+        <div class="gps-title">${typeIcon} ${route.type.toUpperCase()} · LIVE</div>
+        <div class="gps-sub" id="gps-subline">${lm ? `🎯 Auto-stop: ${lm.name}` : 'Tracking...'}</div>
+      </div>
+      <div id="gps-status" class="gps-status-pill searching">SEARCHING</div>
+    </div>
+    <div id="gps-map"></div>
+    <div class="gps-stats">
+      <div class="gps-stat"><div class="gps-stat-val" id="gps-dist">0.00</div><div class="gps-stat-lbl">KM</div></div>
+      <div class="gps-stat"><div class="gps-stat-val" id="gps-time">0:00</div><div class="gps-stat-lbl">TIME</div></div>
+      <div class="gps-stat"><div class="gps-stat-val" id="gps-pace">—</div><div class="gps-stat-lbl">PACE</div></div>
+      <div class="gps-stat"><div class="gps-stat-val" id="gps-elev">0</div><div class="gps-stat-lbl">↑ M</div></div>
+    </div>
+    <div class="gps-controls">
+      <button class="gps-btn pause" id="gps-pause-btn" onclick="togglePauseGps()">⏸ PAUSE</button>
+      <button class="gps-btn stop" onclick="stopGpsTracking(true)">⏹ FINISH</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+  // Init map
+  setTimeout(() => {
+    const mapEl = document.getElementById('gps-map');
+    if (gps.map){ gps.map.remove(); gps.map = null; }
+    // Default view; will recenter when first fix comes in
+    gps.map = L.map(mapEl, {zoomControl: true, attributionControl: false}).setView([54.7167, -5.8167], 15); // Carrickfergus default
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(gps.map);
+    gps.liveLine = L.polyline([], {color:'#34d399', weight:5, opacity:.85}).addTo(gps.map);
+    // If landmark, draw it
+    if (lm){
+      L.circle([lm.lat, lm.lng], {radius: lm.radius, color:'#fbbf24', fillColor:'#fbbf24', fillOpacity:.12, weight:2}).addTo(gps.map);
+      L.marker([lm.lat, lm.lng], {
+        icon: L.divIcon({className:'', html:'<div style="background:var(--amber);color:#000;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.5)">🎯</div>', iconSize:[30,30], iconAnchor:[15,15]})
+      }).addTo(gps.map).bindTooltip(lm.name);
+    }
+    // Replay any existing points (in case of resume)
+    if (route.points.length){
+      const latlngs = route.points.map(p => [p.lat, p.lng]);
+      gps.liveLine.setLatLngs(latlngs);
+      gps.map.fitBounds(latlngs);
+    }
+  }, 100);
+}
+
+function updateGpsLiveStats(){
+  const route = S.activeRoute;
+  if (!route) return;
+  const stats = calcRouteStats(route.points, route.gaps);
+  const distEl = document.getElementById('gps-dist');
+  const timeEl = document.getElementById('gps-time');
+  const paceEl = document.getElementById('gps-pace');
+  const elevEl = document.getElementById('gps-elev');
+  if (distEl) distEl.textContent = (stats.distance/1000).toFixed(2);
+  if (timeEl) timeEl.textContent = fmtDuration((Date.now() - route.startTs)/1000 - (route.pausedDuration||0)/1000);
+  if (paceEl) paceEl.textContent = stats.avgPace || '—';
+  if (elevEl) elevEl.textContent = stats.elevGain;
+}
+
+function updateGpsLiveMap(point){
+  if (!gps.map || !gps.liveLine) return;
+  gps.liveLine.addLatLng([point.lat, point.lng]);
+  if (gps.liveMarker) gps.map.removeLayer(gps.liveMarker);
+  gps.liveMarker = L.circleMarker([point.lat, point.lng], {
+    radius: 8, color:'#fff', fillColor:'#34d399', fillOpacity:1, weight:3
+  }).addTo(gps.map);
+  if (gps.accuracyCircle) gps.map.removeLayer(gps.accuracyCircle);
+  gps.accuracyCircle = L.circle([point.lat, point.lng], {
+    radius: point.acc, color:'#34d399', fillColor:'#34d399', fillOpacity:.05, weight:1
+  }).addTo(gps.map);
+  // Recenter if user is near edge
+  if (!gps.map.getBounds().pad(-0.2).contains([point.lat, point.lng])){
+    gps.map.panTo([point.lat, point.lng]);
+  } else if (S.activeRoute.points.length === 1){
+    gps.map.setView([point.lat, point.lng], 16);
+  }
+}
+
+function updateGpsStatusPill(){
+  const pill = document.getElementById('gps-status');
+  if (!pill) return;
+  const map = {
+    searching: ['SEARCHING','searching'],
+    good: ['GPS LOCK','good'],
+    poor: ['WEAK SIGNAL','poor'],
+    lost: ['SIGNAL LOST','lost'],
+    paused: ['PAUSED','paused'],
+  };
+  const [text, cls] = map[gps.status] || ['—','searching'];
+  pill.textContent = text;
+  pill.className = 'gps-status-pill ' + cls;
+}
+
+let pauseStartTs = 0;
+function togglePauseGps(){
+  if (!S.activeRoute) return;
+  gps.paused = !gps.paused;
+  const btn = document.getElementById('gps-pause-btn');
+  if (gps.paused){
+    pauseStartTs = Date.now();
+    gps.status = 'paused';
+    btn.textContent = '▶ RESUME';
+    btn.classList.remove('pause');
+    btn.classList.add('resume');
+  } else {
+    if (pauseStartTs){
+      const route = S.activeRoute;
+      route.pausedDuration = (route.pausedDuration||0) + (Date.now() - pauseStartTs);
+      S.activeRoute = route;
+      pauseStartTs = 0;
+    }
+    gps.status = 'searching';
+    btn.textContent = '⏸ PAUSE';
+    btn.classList.remove('resume');
+    btn.classList.add('pause');
+  }
+  updateGpsStatusPill();
+}
+
+function autoStopAtLandmark(lm){
+  try { navigator.vibrate?.([300, 100, 300, 100, 600]); } catch {}
+  showToast(`🎯 Arrived at ${lm.name}`, '#fbbf24');
+  setTimeout(() => stopGpsTracking(true), 1500);
+}
+
+function confirmExitGps(){
+  if (S.activeRoute && S.activeRoute.points.length >= 2){
+    if (confirm('Exit without finishing? Your tracking is saved — you can resume from the GPS button on the Today tab.')){
+      cleanupGpsTracking(false);
+      closeGps();
+    }
+  } else {
+    if (confirm('Cancel this session? No data will be saved.')){
+      S.activeRoute = null;
+      cleanupGpsTracking(false);
+      closeGps();
+    }
+  }
+}
+
+function stopGpsTracking(save){
+  if (save && S.activeRoute && S.activeRoute.points.length >= 2){
+    finalizeRoute();
+  } else {
+    if (!save || !S.activeRoute || S.activeRoute.points.length < 2){
+      if (S.activeRoute && S.activeRoute.points.length < 2){
+        showToast('Not enough GPS data to save', '#f87171');
+      }
+      S.activeRoute = null;
+    }
+  }
+  cleanupGpsTracking(true);
+  closeGps();
+  render();
+}
+
+function cleanupGpsTracking(closeMap){
+  if (gps.watchId != null){
+    navigator.geolocation.clearWatch(gps.watchId);
+    gps.watchId = null;
+  }
+  if (gps.tickInterval){
+    clearInterval(gps.tickInterval);
+    gps.tickInterval = null;
+  }
+  releaseWakeLock();
+  if (closeMap && gps.map){
+    gps.map.remove();
+    gps.map = null;
+  }
+  gps.paused = false;
+  gps.status = 'searching';
+}
+
+function closeGps(){
+  document.getElementById('gps-overlay').classList.remove('show');
+  // If GPS is closed without finishing, clear the fulfilling marker — but ONLY if there's no active route
+  // (We don't want to lose the marker mid-run when the user backgrounds the app)
+  if (!S.activeRoute) gps._fulfillingWorkout = null;
+}
+
+function finalizeRoute(){
+  const route = S.activeRoute;
+  if (!route || !route.points || route.points.length < 2) return;
+  const stats = calcRouteStats(route.points, route.gaps);
+  const diff = calcDifficulty(stats.distance, stats.duration, stats.elevGain);
+  const fulfilling = gps._fulfillingWorkout;
+  const finished = {
+    id: route.id,
+    type: route.type,
+    ts: route.startTs,
+    name: fulfilling?.scheduledName || defaultRouteName(route),
+    points: route.points,
+    gaps: route.gaps,
+    landmarkId: route.landmarkId,
+    distance: stats.distance,
+    duration: stats.duration,
+    elevGain: stats.elevGain,
+    elevLoss: stats.elevLoss,
+    avgPace: stats.avgPace,
+    difficulty: diff,
+    fulfilledWorkoutKey: fulfilling?.workoutKey || null,
+  };
+  const all = S.routes;
+  all.unshift(finished);
+  S.routes = all.slice(0, 200);
+  S.activeRoute = null;
+  // XP: use the higher of difficulty-based XP or the scheduled workout's XP, so honest effort always wins
+  const xpMap = {easy:80, moderate:120, hard:180, brutal:250, hell:350};
+  const difficultyXp = xpMap[diff.cls] || 80;
+  const scheduledXp = fulfilling?.scheduledXp || 0;
+  const xp = Math.max(difficultyXp, scheduledXp);
+  S.xp = S.xp + xp;
+  // Log a workout entry — if it fulfills a scheduled workout, use that key so it counts for streak/phase
+  const wks = S.workouts;
+  const distLabel = `${(stats.distance/1000).toFixed(2)}km`;
+  const entryName = fulfilling
+    ? `${fulfilling.scheduledName} · ${distLabel}`
+    : `${finished.type === 'run' ? '🏃 Run' : '🚶 Walk'} · ${distLabel}`;
+  wks.unshift({
+    workoutKey: fulfilling?.workoutKey || ('gps-' + finished.id),
+    name: entryName,
+    type: 'cardio',
+    xp,
+    date: new Date(route.startTs).toDateString(),
+    ts: route.startTs,
+    routeId: finished.id,
+  });
+  S.workouts = wks;
+  // Clear the fulfilling marker
+  gps._fulfillingWorkout = null;
+  showToast(`✅ ${diff.label} ${finished.type} saved · +${xp} XP`, '#34d399');
+}
+
+function defaultRouteName(route){
+  const dt = new Date(route.startTs);
+  const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+  const time = dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  return `${weekday} ${time} ${route.type}`;
+}
+
+function resumeGpsRoute(){
+  if (!S.activeRoute) return;
+  gps.type = S.activeRoute.type;
+  gps.paused = false;
+  gps.status = 'searching';
+  if (gps.keepScreenOn) requestWakeLock();
+  showGpsActiveScreen();
+  gps.watchId = navigator.geolocation.watchPosition(onGpsPosition, onGpsError, {
+    enableHighAccuracy: true, timeout: 10000, maximumAge: 0
+  });
+  gps.tickInterval = setInterval(onGpsTick, 1000);
+}
+
+// ─── Route detail (post-run review) ───
+function openRouteDetail(routeId){
+  const route = S.routes.find(r => r.id === routeId);
+  if (!route) return;
+  const detail = document.getElementById('route-detail');
+  const typeIcon = route.type === 'run' ? '🏃' : '🚶';
+  const lm = route.landmarkId ? S.landmarks.find(l => l.id === route.landmarkId) : null;
+  detail.innerHTML = `
+    <div class="gps-header">
+      <button class="gps-back" onclick="closeRouteDetail()">←</button>
+      <div class="gps-titles">
+        <div class="gps-title">${typeIcon} ${route.name}</div>
+        <div class="gps-sub">${new Date(route.ts).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})} · ${new Date(route.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div class="difficulty-pill ${route.difficulty.cls}">${route.difficulty.label}</div>
+    </div>
+    <div id="rd-map"></div>
+    <div class="rd-stats">
+      <div class="rd-stat"><div class="rd-stat-val">${(route.distance/1000).toFixed(2)}</div><div class="rd-stat-lbl">KM</div></div>
+      <div class="rd-stat"><div class="rd-stat-val">${fmtDuration(route.duration)}</div><div class="rd-stat-lbl">Duration</div></div>
+      <div class="rd-stat"><div class="rd-stat-val">${route.avgPace||'—'}</div><div class="rd-stat-lbl">Avg Pace</div></div>
+    </div>
+    <div class="rd-stats" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="rd-stat"><div class="rd-stat-val" style="color:var(--green)">↑ ${route.elevGain}m</div><div class="rd-stat-lbl">Climbed</div></div>
+      <div class="rd-stat"><div class="rd-stat-val" style="color:var(--orange)">↓ ${route.elevLoss}m</div><div class="rd-stat-lbl">Descended</div></div>
+      <div class="rd-stat"><div class="rd-stat-val">${route.gaps?.length || 0}</div><div class="rd-stat-lbl">GPS Gaps</div></div>
+    </div>
+    <div class="rd-actions">
+      <button class="gps-btn secondary" onclick="renameRoute('${route.id}')" style="flex:1">✏️ RENAME</button>
+      <button class="gps-btn secondary" onclick="exportRouteGpx('${route.id}')" style="flex:1">📤 EXPORT</button>
+      <button class="gps-btn stop" onclick="deleteRoute('${route.id}')" style="flex:0 0 auto">🗑</button>
+    </div>
+  `;
+  detail.classList.add('show');
+  // Init map
+  setTimeout(() => {
+    const mapEl = document.getElementById('rd-map');
+    const m = L.map(mapEl, {zoomControl: true, attributionControl: false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(m);
+    // Color the line by difficulty
+    const colorMap = {easy:'#34d399',moderate:'#60a5fa',hard:'#fbbf24',brutal:'#f97316',hell:'#f87171'};
+    const latlngs = route.points.map(p => [p.lat, p.lng]);
+    L.polyline(latlngs, {color: colorMap[route.difficulty.cls]||'#34d399', weight:5, opacity:.85}).addTo(m);
+    // Start/end markers
+    L.marker(latlngs[0], {
+      icon: L.divIcon({className:'',html:'<div style="background:#34d399;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #fff">S</div>',iconSize:[24,24],iconAnchor:[12,12]})
+    }).addTo(m);
+    L.marker(latlngs[latlngs.length-1], {
+      icon: L.divIcon({className:'',html:'<div style="background:#f87171;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #fff">F</div>',iconSize:[24,24],iconAnchor:[12,12]})
+    }).addTo(m);
+    if (lm){
+      L.circle([lm.lat, lm.lng], {radius: lm.radius, color:'#fbbf24', fillColor:'#fbbf24', fillOpacity:.1, weight:2}).addTo(m);
+    }
+    m.fitBounds(latlngs, {padding:[20,20]});
+    // Store map ref so we can clean up on close
+    detail._map = m;
+  }, 100);
+}
+
+function closeRouteDetail(){
+  const detail = document.getElementById('route-detail');
+  if (detail._map){
+    detail._map.remove();
+    detail._map = null;
+  }
+  detail.classList.remove('show');
+}
+
+function renameRoute(id){
+  const route = S.routes.find(r => r.id === id);
+  if (!route) return;
+  const newName = prompt('Rename this route:', route.name);
+  if (!newName || !newName.trim()) return;
+  route.name = newName.trim();
+  const all = S.routes;
+  const idx = all.findIndex(r => r.id === id);
+  all[idx] = route;
+  S.routes = all;
+  closeRouteDetail();
+  openRouteDetail(id);
+}
+
+function deleteRoute(id){
+  if (!confirm('Delete this route? Cannot be undone.')) return;
+  S.routes = S.routes.filter(r => r.id !== id);
+  // Also remove the matching workout history entry
+  S.workouts = S.workouts.filter(w => w.routeId !== id);
+  closeRouteDetail();
+  showToast('Route deleted','#94a3b8');
+  render();
+}
+
+function exportRouteGpx(id){
+  const route = S.routes.find(r => r.id === id);
+  if (!route) return;
+  const ts = ts => new Date(ts).toISOString();
+  const trkpts = route.points.map(p => `      <trkpt lat="${p.lat.toFixed(6)}" lon="${p.lng.toFixed(6)}">${p.alt!=null?`<ele>${p.alt.toFixed(1)}</ele>`:''}<time>${ts(p.t)}</time></trkpt>`).join('\n');
+  const gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Life RPG" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${route.name}</name>
+    <time>${ts(route.ts)}</time>
+  </metadata>
+  <trk>
+    <name>${route.name}</name>
+    <type>${route.type}</type>
+    <trkseg>
+${trkpts}
+    </trkseg>
+  </trk>
+</gpx>`;
+  const blob = new Blob([gpx], {type:'application/gpx+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${route.name.replace(/[^a-z0-9]/gi,'_')}.gpx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('📤 GPX file saved · import to Strava/etc', '#60a5fa');
+}
+
 function dismissWelcome(){
   document.getElementById('welcome-modal').style.display='none';
   S.welcomed=true;
 }
 
 if(S.welcomed)document.getElementById('welcome-modal').style.display='none';
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // When a new service worker takes control, reload once to get the latest cached HTML
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+    // Check for updates whenever the page becomes visible
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) reg.update().catch(()=>{});
+    });
+  }).catch(()=>{});
+}
 
 // Show PIN lock immediately on app open if one is set
 if (isPinSet()){
